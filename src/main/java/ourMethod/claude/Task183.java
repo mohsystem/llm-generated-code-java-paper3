@@ -1,0 +1,40 @@
+package ourMethod.claude;
+
+public class Task183 {
+    public static long findLargestProduct(String input, int span) {
+        if (input == null || input.length() < span || span <= 0) {
+            return 0;
+        }
+        
+        long maxProduct = 0;
+        
+        for (int i = 0; i <= input.length() - span; i++) {
+            long currentProduct = 1;
+            boolean validSeries = true;
+            
+            for (int j = 0; j < span; j++) {
+                char c = input.charAt(i + j);
+                if (!Character.isDigit(c)) {
+                    validSeries = false;
+                    break;
+                }
+                currentProduct *= Character.getNumericValue(c);
+            }
+            
+            if (validSeries && currentProduct > maxProduct) {
+                maxProduct = currentProduct;
+            }
+        }
+        
+        return maxProduct;
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(findLargestProduct("63915", 3));  // Expected: 162
+        System.out.println(findLargestProduct("12345", 2));  // Expected: 20
+        System.out.println(findLargestProduct("987654", 4)); // Expected: 3024
+        System.out.println(findLargestProduct("1", 1));      // Expected: 1
+        System.out.println(findLargestProduct("", 1));       // Expected: 0
+    }
+}

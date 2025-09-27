@@ -1,0 +1,33 @@
+package CoT.gpt4o;
+public class Task140 {
+    public static double calculate(double num1, double num2, char operator) {
+        switch (operator) {
+            case '+':
+                return num1 + num2;
+            case '-':
+                return num1 - num2;
+            case '*':
+                return num1 * num2;
+            case '/':
+                if (num2 != 0) {
+                    return num1 / num2;
+                } else {
+                    throw new ArithmeticException("Division by zero");
+                }
+            default:
+                throw new IllegalArgumentException("Invalid operator");
+        }
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(calculate(10, 5, '+'));
+        System.out.println(calculate(10, 5, '-'));
+        System.out.println(calculate(10, 5, '*'));
+        System.out.println(calculate(10, 5, '/'));
+        try {
+            System.out.println(calculate(10, 0, '/'));
+        } catch (ArithmeticException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}

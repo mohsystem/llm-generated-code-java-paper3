@@ -1,0 +1,23 @@
+package ZeroShot.gpt4o;
+public class Task58 {
+    public static boolean XO(String str) {
+        int countX = 0;
+        int countO = 0;
+        for (char c : str.toCharArray()) {
+            if (Character.toLowerCase(c) == 'x') {
+                countX++;
+            } else if (Character.toLowerCase(c) == 'o') {
+                countO++;
+            }
+        }
+        return countX == countO;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(XO("ooxx")); // true
+        System.out.println(XO("xooxx")); // false
+        System.out.println(XO("ooxXm")); // true
+        System.out.println(XO("zpzpzpp")); // true
+        System.out.println(XO("zzoo")); // false
+    }
+}
