@@ -1,73 +1,88 @@
 package ourMethod.claude;
 
 import java.util.PriorityQueue;
+import java.util.Collections;
 
-class Task195 {
-    private PriorityQueue<Integer> maxHeap; // stores smaller half
-    private PriorityQueue<Integer> minHeap; // stores larger half
-    
-    public Task195() {
-        maxHeap = new PriorityQueue<>((a, b) -> b - a);
-        minHeap = new PriorityQueue<>();
-    }
-    
-    public void addNum(int num) {
-        if (maxHeap.isEmpty() || num < maxHeap.peek()) {
+public class Task195 {
+    static class MedianFinder {
+        private PriorityQueue<Integer> maxHeap; // left half - max heap
+        private PriorityQueue<Integer> minHeap; // right half - min heap
+        
+        public MedianFinder() {
+            maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+            minHeap = new PriorityQueue<>();
+        }
+        
+        public void addNum(int num) {
+            // Validate input is within constraints
+            if (num < -100000 || num > 100000) {
+                throw new IllegalArgumentException("Number out of valid range");
+            }
+            
+            // Add to max heap first
             maxHeap.offer(num);
-        } else {
-            minHeap.offer(num);
+            
+            // Balance: move largest from maxHeap to minHeap
+            if (!maxHeap.isEmpty() && !minHeap.isEmpty() && maxHeap.peek() > minHeap.peek()) {
+                minHeap.offer(maxHeap.poll());
+            }
+            
+            // Maintain size property: maxHeap size >= minHeap size
+            // and difference at most 1
+            if (maxHeap.size() > minHeap.size() + 1) {
+                minHeap.offer(maxHeap.poll());
+            } else if (minHeap.size() > maxHeap.size()) {
+                maxHeap.offer(minHeap.poll());
+            }
         }
         
-        // Balance heaps
-        if (maxHeap.size() > minHeap.size() + 1) {
-            minHeap.offer(maxHeap.poll());
-        } else if (minHeap.size() > maxHeap.size()) {
-            maxHeap.offer(minHeap.poll());
+        public double findMedian() {
+            if (maxHeap.isEmpty()) {
+                throw new IllegalStateException("No elements in data structure");
+            }
+            
+            if (maxHeap.size() == minHeap.size()) {
+                return (maxHeap.peek() + minHeap.peek()) / 2.0;
+            } else {
+                return maxHeap.peek();
+            }
         }
     }
     
-    public double findMedian() {
-        if (maxHeap.size() > minHeap.size()) {
-            return maxHeap.peek();
-        }
-        return (maxHeap.peek() + minHeap.peek()) / 2.0;
-    }
-
     public static void main(String[] args) {
-        Task195 mf = new Task195();
+        // Test case 1: Example from problem
+        MedianFinder mf1 = new MedianFinder();
+        mf1.addNum(1);
+        mf1.addNum(2);
+        System.out.println("Test 1 - Median after [1,2]: " + mf1.findMedian()); // 1.5
+        mf1.addNum(3);
+        System.out.println("Test 1 - Median after [1,2,3]: " + mf1.findMedian()); // 2.0
         
-        // Test case 1
-        mf.addNum(1);
-        mf.addNum(2);
-        System.out.println(mf.findMedian()); // 1.5
+        // Test case 2: Single element
+        MedianFinder mf2 = new MedianFinder();
+        mf2.addNum(5);
+        System.out.println("Test 2 - Median of [5]: " + mf2.findMedian()); // 5.0
         
-        // Test case 2
-        mf = new Task195();
-        mf.addNum(1);
-        System.out.println(mf.findMedian()); // 1.0
+        // Test case 3: Negative numbers
+        MedianFinder mf3 = new MedianFinder();
+        mf3.addNum(-1);
+        mf3.addNum(-2);
+        mf3.addNum(-3);
+        System.out.println("Test 3 - Median of [-1,-2,-3]: " + mf3.findMedian()); // -2.0
         
-        // Test case 3
-        mf = new Task195();
-        mf.addNum(1);
-        mf.addNum(2);
-        mf.addNum(3);
-        System.out.println(mf.findMedian()); // 2.0
+        // Test case 4: Mixed positive and negative
+        MedianFinder mf4 = new MedianFinder();
+        mf4.addNum(-5);
+        mf4.addNum(10);
+        mf4.addNum(3);
+        mf4.addNum(-2);
+        System.out.println("Test 4 - Median of [-5,10,3,-2]: " + mf4.findMedian()); // 0.5
         
-        // Test case 4
-        mf = new Task195();
-        mf.addNum(4);
-        mf.addNum(2);
-        mf.addNum(3);
-        mf.addNum(1);
-        System.out.println(mf.findMedian()); // 2.5
-        
-        // Test case 5
-        mf = new Task195();
-        mf.addNum(5);
-        mf.addNum(4);
-        mf.addNum(3);
-        mf.addNum(2);
-        mf.addNum(1);
-        System.out.println(mf.findMedian()); // 3.0
+        // Test case 5: Large sequence
+        MedianFinder mf5 = new MedianFinder();
+        for (int i = 1; i <= 10; i++) {
+            mf5.addNum(i);
+        }
+        System.out.println("Test 5 - Median of [1..10]: " + mf5.findMedian()); // 5.5
     }
 }

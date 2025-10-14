@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.security.SecureRandom;
 import java.util.Base64;
 

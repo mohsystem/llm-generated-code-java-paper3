@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task27 {
     public static int findOutlier(int[] numbers) {
         int evenCount = 0, oddCount = 0, lastEven = 0, lastOdd = 0;

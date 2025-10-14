@@ -1,41 +1,44 @@
 package Vanilla.gemini;
-import java.io.*;
-import java.net.*;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Task120 {
 
-    public static String displayInputOnWebPage(String input) {
-        String html = "<html><head><title>User Input</title></head><body><h1>User Input:</h1><p>" + input + "</p></body></html>";
-        return html;
+    /**
+     * Creates an HTML file with the given content.
+     *
+     * @param content  The user-supplied string to display on the web page.
+     * @param filename The name of the HTML file to create (e.g., "index.html").
+     */
+    public static void createWebPage(String content, String filename) {
+        String htmlContent = "<!DOCTYPE html>\n" +
+                             "<html lang=\"en\">\n" +
+                             "<head>\n" +
+                             "    <meta charset=\"UTF-8\">\n" +
+                             "    <title>User Input Display</title>\n" +
+                             "</head>\n" +
+                             "<body>\n" +
+                             "    <h1>User-Supplied Content:</h1>\n" +
+                             "    <p>" + content + "</p>\n" +
+                             "</body>\n" +
+                             "</html>";
+
+        try (PrintWriter out = new PrintWriter(new FileWriter(filename))) {
+            out.println(htmlContent);
+            System.out.println("Successfully created " + filename);
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
-        String[] testCases = {"Hello, world!", "Test case 1", "Test case 2", "Test case 3", "Test case 4"};
-        for (String testCase : testCases) {
-            System.out.println(displayInputOnWebPage(testCase));
-        }
-
-        try {
-            ServerSocket serverSocket = new ServerSocket(8080);
-            Socket socket = serverSocket.accept();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String input = reader.readLine();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-            String response = displayInputOnWebPage(input);
-            writer.write("HTTP/1.1 200 OK\r\n");
-            writer.write("Content-Type: text/html\r\n");
-            writer.write("Content-Length: " + response.length() + "\r\n");
-            writer.write("\r\n");
-            writer.write(response);
-            writer.flush();
-
-            socket.close();
-            serverSocket.close();
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // 5 Test Cases
+        createWebPage("Hello, World!", "java_test1.html");
+        createWebPage("This is a test from Java.", "java_test2.html");
+        createWebPage("12345", "java_test3.html");
+        createWebPage("Special characters: <script>alert('xss')</script>", "java_test4.html");
+        createWebPage("A longer sentence to see how it wraps inside the paragraph tag on the web page.", "java_test5.html");
     }
 }

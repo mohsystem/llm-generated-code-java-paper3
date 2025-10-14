@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task34 {
     public static boolean isNarcissistic(int number) {
         int originalNumber = number;

@@ -1,63 +1,80 @@
 package ourMethod.claude;
 
+import java.util.PriorityQueue;
+import java.util.Arrays;
+
 public class Task147 {
-    public static int findKthLargest(int[] nums, int k) {
-        if (nums == null || nums.length == 0) {
-            throw new IllegalArgumentException("Array cannot be null or empty");
+    /**
+     * Finds the kth largest element in an array using a min-heap.
+     * @param arr The input array of integers
+     * @param k The position of the largest element to find (1-indexed)
+     * @return The kth largest element
+     * @throws IllegalArgumentException if inputs are invalid
+     */
+    public static int findKthLargest(int[] arr, int k) {
+        // Input validation
+        if (arr == null) {
+            throw new IllegalArgumentException("Array cannot be null");
         }
-        if (k <= 0 || k > nums.length) {
+        if (arr.length == 0) {
+            throw new IllegalArgumentException("Array cannot be empty");
+        }
+        if (k < 1 || k > arr.length) {
             throw new IllegalArgumentException("k must be between 1 and array length");
         }
         
-        // Using QuickSelect algorithm for O(n) average time complexity
-        return quickSelect(nums, 0, nums.length - 1, nums.length - k);
-    }
-    
-    private static int quickSelect(int[] nums, int left, int right, int k) {
-        if (left == right) return nums[left];
+        // Use a min-heap of size k to track the k largest elements
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>(k);
         
-        int pivotIndex = partition(nums, left, right);
-        
-        if (pivotIndex == k) return nums[k];
-        else if (pivotIndex < k) return quickSelect(nums, pivotIndex + 1, right, k);
-        else return quickSelect(nums, left, pivotIndex - 1, k);
-    }
-    
-    private static int partition(int[] nums, int left, int right) {
-        int pivot = nums[right];
-        int i = left;
-        
-        for (int j = left; j < right; j++) {
-            if (nums[j] <= pivot) {
-                swap(nums, i, j);
-                i++;
+        for (int num : arr) {
+            minHeap.offer(num);
+            if (minHeap.size() > k) {
+                minHeap.poll();
             }
         }
-        swap(nums, i, right);
-        return i;
-    }
-    
-    private static void swap(int[] nums, int i, int j) {
-        int temp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = temp;
+        
+        // The root of the min-heap is the kth largest element
+        Integer result = minHeap.peek();
+        if (result == null) {
+            throw new IllegalStateException("Unexpected null result");
+        }
+        return result;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        int[] test1 = {3, 2, 1, 5, 6, 4};
-        System.out.println(findKthLargest(test1, 2));  // Expected: 5
-        
-        int[] test2 = {3, 2, 3, 1, 2, 4, 5, 5, 6};
-        System.out.println(findKthLargest(test2, 4));  // Expected: 4
-        
-        int[] test3 = {1};
-        System.out.println(findKthLargest(test3, 1));  // Expected: 1
-        
-        int[] test4 = {1, 2, 3, 4, 5};
-        System.out.println(findKthLargest(test4, 1));  // Expected: 5
-        
-        int[] test5 = {5, 5, 5, 5, 5};
-        System.out.println(findKthLargest(test5, 2));  // Expected: 5
+        try {
+            // Test case 1: Normal case
+            int[] arr1 = {3, 2, 1, 5, 6, 4};
+            int k1 = 2;
+            System.out.println("Test 1: arr=" + Arrays.toString(arr1) + ", k=" + k1 + 
+                             " => " + findKthLargest(arr1, k1));
+            
+            // Test case 2: k=1 (largest element)
+            int[] arr2 = {3, 2, 3, 1, 2, 4, 5, 5, 6};
+            int k2 = 1;
+            System.out.println("Test 2: arr=" + Arrays.toString(arr2) + ", k=" + k2 + 
+                             " => " + findKthLargest(arr2, k2));
+            
+            // Test case 3: k equals array length (smallest element)
+            int[] arr3 = {7, 10, 4, 3, 20, 15};
+            int k3 = 6;
+            System.out.println("Test 3: arr=" + Arrays.toString(arr3) + ", k=" + k3 + 
+                             " => " + findKthLargest(arr3, k3));
+            
+            // Test case 4: Array with duplicates
+            int[] arr4 = {1, 1, 1, 1, 1};
+            int k4 = 3;
+            System.out.println("Test 4: arr=" + Arrays.toString(arr4) + ", k=" + k4 + 
+                             " => " + findKthLargest(arr4, k4));
+            
+            // Test case 5: Single element array
+            int[] arr5 = {42};
+            int k5 = 1;
+            System.out.println("Test 5: arr=" + Arrays.toString(arr5) + ", k=" + k5 + 
+                             " => " + findKthLargest(arr5, k5));
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
 }

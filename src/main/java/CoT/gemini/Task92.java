@@ -1,72 +1,112 @@
 package CoT.gemini;
+
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-class Task92 {
-    private int currentCounter = 0;
-    private int maxCounter;
-    private ReentrantLock lock = new ReentrantLock();
+public class Task92 {
+    private static int currentCounter = 0;
+    private static int maxCounter = 20;
+    private static final Lock lock = new ReentrantLock();
 
-    public Task92(int maxCounter) {
-        this.maxCounter = maxCounter;
-    }
-
-    public void incrementCounter(int threadId) {
-        if (currentCounter <= maxCounter) {
+    // The function to be executed by each thread
+    public static void accessResource() {
+        while (true) {
             lock.lock();
             try {
-                if (currentCounter <= maxCounter) { // Double-checked locking
+                if (currentCounter < maxCounter) {
                     currentCounter++;
-                    System.out.println("Thread " + threadId + " accessed counter: " + currentCounter);
+                    System.out.println("Thread " + Thread.currentThread().getId() + " is accessing counter: " + currentCounter);
+                } else {
+                    // Exit the loop if the counter has reached its max
+                    break;
                 }
             } finally {
                 lock.unlock();
+            }
+            // Small sleep to allow other threads to run, making the interleaving more visible
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
 
     public static void main(String[] args) {
-        Task92 counter = new Task92(5);
+        int numThreads = 5; // Test case: 5 threads
+        Thread[] threads = new Thread[numThreads];
 
-        Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                counter.incrementCounter(1);
+        // Create and start threads
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(Task92::accessResource);
+            threads[i].start();
+        }
+
+        // Wait for all threads to complete
+        for (int i = 0; i < numThreads; i++) {
+            try {
+                threads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
+        }
 
-        Thread t2 = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                counter.incrementCounter(2);
+        System.out.println("All threads have finished. Final counter value: " + currentCounter);
 
-            }
-        });
-
-        Thread t3 = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                counter.incrementCounter(3);
-
-            }
-        });
-        Thread t4 = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                counter.incrementCounter(4);
-
-            }
-        });
-        Thread t5 = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                counter.incrementCounter(5);
-
-            }
-        });
+        // Reset for next test case (if any)
+        // Test Case 2
+        System.out.println("\n--- Test Case 2: 3 threads, maxCounter 10 ---");
+        currentCounter = 0;
+        maxCounter = 10;
+        numThreads = 3;
+        threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(Task92::accessResource);
+            threads[i].start();
+        }
+        for (Thread t : threads) { try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); } }
+        System.out.println("Final counter value: " + currentCounter);
 
 
+        // Test Case 3
+        System.out.println("\n--- Test Case 3: 8 threads, maxCounter 50 ---");
+        currentCounter = 0;
+        maxCounter = 50;
+        numThreads = 8;
+        threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(Task92::accessResource);
+            threads[i].start();
+        }
+        for (Thread t : threads) { try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); } }
+        System.out.println("Final counter value: " + currentCounter);
 
-        t1.start();
-        t2.start();
-        t3.start();
-        t4.start();
-        t5.start();
+
+        // Test Case 4
+        System.out.println("\n--- Test Case 4: 2 threads, maxCounter 5 ---");
+        currentCounter = 0;
+        maxCounter = 5;
+        numThreads = 2;
+        threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(Task92::accessResource);
+            threads[i].start();
+        }
+        for (Thread t : threads) { try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); } }
+        System.out.println("Final counter value: " + currentCounter);
 
 
+        // Test Case 5
+        System.out.println("\n--- Test Case 5: 10 threads, maxCounter 10 ---");
+        currentCounter = 0;
+        maxCounter = 10;
+        numThreads = 10;
+        threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(Task92::accessResource);
+            threads[i].start();
+        }
+        for (Thread t : threads) { try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); } }
+        System.out.println("Final counter value: " + currentCounter);
     }
 }

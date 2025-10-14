@@ -1,26 +1,43 @@
 package CoT.claude;
 
+import java.util.Scanner;
+
 public class Task142 {
-    public static int findGCD(int a, int b) {
-        // Handle negative numbers by converting to positive
+    // Function to find GCD using Euclidean algorithm
+    public static long findGCD(long a, long b) {
+        // Input validation - convert negative numbers to positive
         a = Math.abs(a);
         b = Math.abs(b);
         
-        // Using Euclidean algorithm to find GCD
+        // Handle edge case where both numbers are 0
+        if (a == 0 && b == 0) {
+            throw new IllegalArgumentException("GCD is undefined for both numbers being zero");
+        }
+        
+        // Euclidean algorithm
         while (b != 0) {
-            int temp = b;
+            long temp = b;
             b = a % b;
             a = temp;
         }
+        
         return a;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(findGCD(48, 36));  // Should print 12
-        System.out.println(findGCD(54, 24));  // Should print 6
-        System.out.println(findGCD(7, 13));   // Should print 1
-        System.out.println(findGCD(48, -36)); // Should print 12
-        System.out.println(findGCD(0, 5));    // Should print 5
+        // Test case 1: Normal positive numbers
+        System.out.println("Test 1 - GCD(48, 18): " + findGCD(48, 18));
+        
+        // Test case 2: One number is 0
+        System.out.println("Test 2 - GCD(0, 5): " + findGCD(0, 5));
+        
+        // Test case 3: Same numbers
+        System.out.println("Test 3 - GCD(100, 100): " + findGCD(100, 100));
+        
+        // Test case 4: Prime numbers (coprime)
+        System.out.println("Test 4 - GCD(17, 19): " + findGCD(17, 19));
+        
+        // Test case 5: Large numbers with negative input
+        System.out.println("Test 5 - GCD(-270, 192): " + findGCD(-270, 192));
     }
 }

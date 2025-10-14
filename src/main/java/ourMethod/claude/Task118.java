@@ -1,57 +1,74 @@
 package ourMethod.claude;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 public class Task118 {
-    public static boolean validateIPAddress(String ipAddress) {
-        if (ipAddress == null || ipAddress.isEmpty()) {
+    private static final Pattern IPV4_PATTERN = Pattern.compile(
+        "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+    );
+    
+    private static final Pattern IPV6_PATTERN = Pattern.compile(
+        "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|" +
+        "^::([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){1}:([0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){2}:([0-9a-fA-F]{1,4}:){0,4}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){3}:([0-9a-fA-F]{1,4}:){0,3}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){4}:([0-9a-fA-F]{1,4}:){0,2}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){5}:([0-9a-fA-F]{1,4}:){0,1}[0-9a-fA-F]{1,4}$|" +
+        "^([0-9a-fA-F]{1,4}:){6}:[0-9a-fA-F]{1,4}$|" +
+        "^::$"
+    );
+    
+    public static boolean isValidIPv4(String ip) {
+        if (ip == null || ip.isEmpty() || ip.length() > 15) {
             return false;
         }
-
-        // Split IP address into octets
-        String[] octets = ipAddress.split("\\\\.");
+        return IPV4_PATTERN.matcher(ip).matches();
+    }
+    
+    public static boolean isValidIPv6(String ip) {
+        if (ip == null || ip.isEmpty() || ip.length() > 39) {
+            return false;
+        }
+        return IPV6_PATTERN.matcher(ip).matches();
+    }
+    
+    public static String validateIP(String ip) {
+        if (ip == null) {
+            return "Invalid: null input";
+        }
         
-        // Check if exactly 4 octets
-        if (octets.length != 4) {
-            return false;
+        if (ip.isEmpty()) {
+            return "Invalid: empty input";
         }
-
-        try {
-            // Validate each octet
-            for (String octet : octets) {
-                // Check for empty octets
-                if (octet.isEmpty() || octet.length() > 3) {
-                    return false;
-                }
-                
-                // Check for leading zeros
-                if (octet.length() > 1 && octet.startsWith("0")) {
-                    return false;
-                }
-
-                // Parse and validate range
-                int value = Integer.parseInt(octet);
-                if (value < 0 || value > 255) {
-                    return false; 
-                }
-            }
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+        
+        if (ip.length() > 100) {
+            return "Invalid: input too long";
+        }
+        
+        String trimmed = ip.trim();
+        
+        if (isValidIPv4(trimmed)) {
+            return "Valid IPv4: " + trimmed;
+        } else if (isValidIPv6(trimmed)) {
+            return "Valid IPv6: " + trimmed;
+        } else {
+            return "Invalid IP address: " + trimmed;
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] testIPs = {
-            "192.168.1.1",     // valid
-            "256.1.2.3",       // invalid - first octet > 255
-            "1.2.3.4.5",       // invalid - too many octets
-            "192.168.001.1",   // invalid - leading zeros
-            "192.168.1.1.",    // invalid - trailing dot
+        String[] testCases = {
+            "192.168.1.1",
+            "256.1.1.1",
+            "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+            "::1",
+            "invalid.ip.address"
         };
-
-        for (String ip : testIPs) {
-            System.out.println("IP: " + ip + " is " + 
-                (validateIPAddress(ip) ? "valid" : "invalid"));
+        
+        for (String testCase : testCases) {
+            System.out.println("Input: \"" + testCase + "\" -> " + validateIP(testCase));
         }
     }
 }

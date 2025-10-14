@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task103 {
     public static boolean checkPasswordStrength(String password) {
         if (password.length() < 8) return false;

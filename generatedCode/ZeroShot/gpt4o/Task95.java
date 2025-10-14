@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 

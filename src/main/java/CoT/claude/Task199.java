@@ -1,66 +1,72 @@
 package CoT.claude;
 
 public class Task199 {
-    static class Clock {
-        private int hours;
-        private int minutes;
-        
-        public Clock(int hours, int minutes) {
-            setTime(hours, minutes);
+    private int hours;
+    private int minutes;
+    
+    public Task199(int hours, int minutes) {
+        if (hours < 0 || minutes < 0) {
+            throw new IllegalArgumentException("Hours and minutes cannot be negative");
         }
-        
-        private void setTime(int hours, int minutes) {
-            int totalMinutes = ((hours * 60 + minutes) % (24 * 60));
-            if (totalMinutes < 0) {
-                totalMinutes += 24 * 60;
-            }
-            this.hours = (totalMinutes / 60) % 24;
-            this.minutes = totalMinutes % 60;
+        this.minutes = (hours * 60 + minutes) % (24 * 60);
+        if (this.minutes < 0) {
+            this.minutes += 24 * 60;
         }
-        
-        public void addMinutes(int minutes) {
-            setTime(hours, this.minutes + minutes);
+        this.hours = this.minutes / 60;
+        this.minutes = this.minutes % 60;
+    }
+    
+    public Task199 addMinutes(int minutesToAdd) {
+        int totalMinutes = this.hours * 60 + this.minutes + minutesToAdd;
+        totalMinutes = totalMinutes % (24 * 60);
+        if (totalMinutes < 0) {
+            totalMinutes += 24 * 60;
         }
-        
-        public void subtractMinutes(int minutes) {
-            addMinutes(-minutes);
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Clock)) return false;
-            Clock other = (Clock) obj;
-            return hours == other.hours && minutes == other.minutes;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("%02d:%02d", hours, minutes);
-        }
+        return new Task199(0, totalMinutes);
+    }
+    
+    public Task199 subtractMinutes(int minutesToSubtract) {
+        return addMinutes(-minutesToSubtract);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Task199 clock = (Task199) obj;
+        return hours == clock.hours && minutes == clock.minutes;
+    }
+    
+    @Override
+    public int hashCode() {
+        return 31 * hours + minutes;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("%02d:%02d", hours, minutes);
     }
     
     public static void main(String[] args) {
         // Test case 1: Basic clock creation
-        Clock clock1 = new Clock(8, 0);
-        System.out.println("Test 1: " + clock1); // Should print 08:00
+        Task199 clock1 = new Task199(10, 30);
+        System.out.println("Test 1 - Clock1: " + clock1);
         
         // Test case 2: Adding minutes
-        Clock clock2 = new Clock(11, 9);
-        clock2.addMinutes(200);
-        System.out.println("Test 2: " + clock2); // Should print 14:29
+        Task199 clock2 = clock1.addMinutes(45);
+        System.out.println("Test 2 - Clock1 + 45 minutes: " + clock2);
         
         // Test case 3: Subtracting minutes
-        Clock clock3 = new Clock(10, 30);
-        clock3.subtractMinutes(90);
-        System.out.println("Test 3: " + clock3); // Should print 09:00
+        Task199 clock3 = clock2.subtractMinutes(90);
+        System.out.println("Test 3 - Clock2 - 90 minutes: " + clock3);
         
-        // Test case 4: Equality test
-        Clock clock4a = new Clock(23, 59);
-        Clock clock4b = new Clock(23, 59);
-        System.out.println("Test 4: " + clock4a.equals(clock4b)); // Should print true
+        // Test case 4: Equality check
+        Task199 clock4 = new Task199(10, 30);
+        System.out.println("Test 4 - Clock1 equals Clock4: " + clock1.equals(clock4));
         
-        // Test case 5: Handling negative values
-        Clock clock5 = new Clock(-1, -40);
-        System.out.println("Test 5: " + clock5); // Should print 22:20
+        // Test case 5: Wrap around midnight
+        Task199 clock5 = new Task199(23, 45);
+        Task199 clock6 = clock5.addMinutes(30);
+        System.out.println("Test 5 - 23:45 + 30 minutes: " + clock6);
     }
 }

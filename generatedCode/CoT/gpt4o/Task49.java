@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 // Java code to simulate storing user data (e.g., name and email) in a database.
 // Due to the complexity of an actual database connection, this code will simulate the storage.
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 // Java code for managing user sessions securely
 import java.util.HashMap;
 import java.util.UUID;

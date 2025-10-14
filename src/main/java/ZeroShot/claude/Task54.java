@@ -2,63 +2,115 @@ package ZeroShot.claude;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Task54 {
-    private static HashMap<String, String> users = new HashMap<>();
-    private static HashMap<String, String> otpStore = new HashMap<>();
+    private static final Map<String, String> userDatabase = new HashMap<>();
+    private static final Map<String, String> otpStorage = new HashMap<>();
+    private static final Map<String, Long> otpExpiry = new HashMap<>();
+    private static final int OTP_LENGTH = 6;
+    private static final long OTP_VALIDITY = 300000; // 5 minutes in milliseconds
     private static final SecureRandom secureRandom = new SecureRandom();
-    
+
     public static String generateOTP() {
         StringBuilder otp = new StringBuilder();
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < OTP_LENGTH; i++) {
             otp.append(secureRandom.nextInt(10));
         }
         return otp.toString();
     }
-    
+
     public static boolean registerUser(String username, String password) {
-        if(!users.containsKey(username)) {
-            users.put(username, password);
-            return true;
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            return false;
         }
-        return false;
+        if (userDatabase.containsKey(username)) {
+            return false;
+        }
+        userDatabase.put(username, password);
+        return true;
     }
-    
-    public static boolean login(String username, String password, String otp) {
-        if(users.containsKey(username) && users.get(username).equals(password)) {
-            if(otpStore.containsKey(username) && otpStore.get(username).equals(otp)) {
-                otpStore.remove(username); // OTP can be used only once
-                return true;
-            }
+
+    public static String authenticateAndGenerateOTP(String username, String password) {
+        if (username == null || password == null) {
+            return null;
         }
-        return false;
+        if (!userDatabase.containsKey(username)) {
+            return null;
+        }
+        if (!userDatabase.get(username).equals(password)) {
+            return null;
+        }
+        String otp = generateOTP();
+        otpStorage.put(username, otp);
+        otpExpiry.put(username, System.currentTimeMillis() + OTP_VALIDITY);
+        return otp;
     }
-    
-    public static String sendOTP(String username) {
-        if(users.containsKey(username)) {
-            String otp = generateOTP();
-            otpStore.put(username, otp);
-            return otp;
+
+    public static boolean verifyOTP(String username, String otp) {
+        if (username == null || otp == null) {
+            return false;
         }
-        return null;
+        if (!otpStorage.containsKey(username)) {
+            return false;
+        }
+        if (System.currentTimeMillis() > otpExpiry.get(username)) {
+            otpStorage.remove(username);
+            otpExpiry.remove(username);
+            return false;
+        }
+        boolean isValid = otpStorage.get(username).equals(otp);
+        if (isValid) {
+            otpStorage.remove(username);
+            otpExpiry.remove(username);
+        }
+        return isValid;
     }
 
     public static void main(String[] args) {
-        // Test Case 1: Successful registration
-        System.out.println("Test 1: " + registerUser("user1", "pass123"));
-        
-        // Test Case 2: Registration with existing username
-        System.out.println("Test 2: " + registerUser("user1", "pass456"));
-        
-        // Test Case 3: Generate and verify OTP
-        String otp = sendOTP("user1");
-        System.out.println("Test 3: " + login("user1", "pass123", otp));
-        
-        // Test Case 4: Login with wrong OTP
-        System.out.println("Test 4: " + login("user1", "pass123", "000000"));
-        
-        // Test Case 5: Login with expired/used OTP
-        System.out.println("Test 5: " + login("user1", "pass123", otp));
+        System.out.println("=== Two-Factor Authentication Test Cases ===\\n");
+
+        // Test Case 1: Register and successful 2FA
+        System.out.println("Test Case 1: Successful Registration and 2FA");
+        registerUser("user1", "password123");
+        String otp1 = authenticateAndGenerateOTP("user1", "password123");
+        System.out.println("Generated OTP: " + otp1);
+        boolean result1 = verifyOTP("user1", otp1);
+        System.out.println("2FA Result: " + (result1 ? "SUCCESS" : "FAILED"));
+        System.out.println();
+
+        // Test Case 2: Invalid password
+        System.out.println("Test Case 2: Invalid Password");
+        registerUser("user2", "securepass");
+        String otp2 = authenticateAndGenerateOTP("user2", "wrongpass");
+        System.out.println("OTP Generation: " + (otp2 == null ? "FAILED (Invalid credentials)" : "SUCCESS"));
+        System.out.println();
+
+        // Test Case 3: Wrong OTP
+        System.out.println("Test Case 3: Wrong OTP");
+        registerUser("user3", "mypassword");
+        String otp3 = authenticateAndGenerateOTP("user3", "mypassword");
+        System.out.println("Generated OTP: " + otp3);
+        boolean result3 = verifyOTP("user3", "000000");
+        System.out.println("2FA with wrong OTP: " + (result3 ? "SUCCESS" : "FAILED"));
+        System.out.println();
+
+        // Test Case 4: Reusing OTP
+        System.out.println("Test Case 4: Reusing OTP");
+        registerUser("user4", "pass456");
+        String otp4 = authenticateAndGenerateOTP("user4", "pass456");
+        System.out.println("Generated OTP: " + otp4);
+        boolean result4a = verifyOTP("user4", otp4);
+        System.out.println("First verification: " + (result4a ? "SUCCESS" : "FAILED"));
+        boolean result4b = verifyOTP("user4", otp4);
+        System.out.println("Second verification (reuse): " + (result4b ? "SUCCESS" : "FAILED"));
+        System.out.println();
+
+        // Test Case 5: Non-existent user
+        System.out.println("Test Case 5: Non-existent User");
+        String otp5 = authenticateAndGenerateOTP("nonexistent", "password");
+        System.out.println("OTP Generation for non-existent user: " + (otp5 == null ? "FAILED (User not found)" : "SUCCESS"));
+        System.out.println();
     }
 }

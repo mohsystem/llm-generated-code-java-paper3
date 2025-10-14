@@ -1,63 +1,94 @@
 package CoT.gemini;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class Task158 {
 
-    public static String executeCommand(String userInput) {
+    /**
+     * Validates that the input contains only characters that are safe for a hostname or IP address.
+     * This is a critical defense-in-depth measure that uses an "allow-list" approach
+     * to prevent characters that could be used for command injection (e.g., ';', '|', '&', '$').
+     *
+     * @param input The string to validate.
+     * @return true if the input is valid, false otherwise.
+     */
+    private static boolean isValidInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return false;
+        }
+        // Allow alphanumeric characters, dots, and hyphens.
+        return Pattern.matches("^[a-zA-Z0-9.-]+$", input);
+    }
+
+    /**
+     * Executes an OS command (ping) securely using user-provided input.
+     * It uses ProcessBuilder to pass arguments safely, which prevents command injection.
+     *
+     * @param userInput The destination (hostname or IP) to be pinged.
+     */
+    public static void secureOsCommand(String userInput) {
+        System.out.println("--- Executing command for input: '" + userInput + "' ---");
+
+        if (!isValidInput(userInput)) {
+            System.out.println("Invalid input format. Aborting command execution.");
+            System.out.println("-------------------------------------------------");
+            return;
+        }
+
         try {
-            // Sanitize user input to prevent command injection vulnerabilities
-            String sanitizedInput = userInput.replace(";", "").replace("&", "").replace("|", "").replace("<", "").replace(">", "");
+            List<String> command = new ArrayList<>();
+            String os = System.getProperty("os.name").toLowerCase();
 
+            command.add("ping");
+            // Platform-specific arguments for ping count to prevent flooding
+            if (os.contains("win")) {
+                command.add("-n");
+            } else {
+                command.add("-c");
+            }
+            command.add("4");
+            // The user input is added as a separate, single argument.
+            // ProcessBuilder ensures it is treated as a literal string and not interpreted by a shell.
+            command.add(userInput);
 
-            ProcessBuilder pb = new ProcessBuilder(new String[]{"/bin/sh", "-c", sanitizedInput});
-            Process p = pb.start();
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true); // Combine stdout and stderr for easier reading
+            Process process = pb.start();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+            // Read the output from the command
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
             }
 
-            int exitCode = p.waitFor();
-            if (exitCode != 0) {
-                return "Command execution failed with exit code: " + exitCode;
-            }
-
-            return output.toString();
+            int exitCode = process.waitFor();
+            System.out.println("\nExited with code: " + exitCode);
 
         } catch (IOException | InterruptedException e) {
-            return "Error executing command: " + e.getMessage();
+            System.err.println("An error occurred during command execution: " + e.getMessage());
+        } finally {
+            System.out.println("-------------------------------------------------");
         }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        String[] testCases = {
+            "127.0.0.1",              // Valid IP address
+            "google.com",             // Valid hostname
+            "invalid-hostname!",      // Invalid character, should be rejected by validation
+            "127.0.0.1; ls",          // Classic command injection, should be rejected by validation
+            "$(reboot)"               // Command substitution, should be rejected by validation
+        };
 
-        System.out.println("Test case 1: Enter command (e.g., ls -l):");
-        String input1 = scanner.nextLine();
-        System.out.println(executeCommand(input1));
-
-        System.out.println("Test case 2: Enter command:");
-        String input2 = scanner.nextLine();
-        System.out.println(executeCommand(input2));
-
-        System.out.println("Test case 3: Enter command:");
-        String input3 = scanner.nextLine();
-        System.out.println(executeCommand(input3));
-
-        System.out.println("Test case 4: Enter command:");
-        String input4 = scanner.nextLine();
-        System.out.println(executeCommand(input4));
-
-        System.out.println("Test case 5: Enter command:");
-        String input5 = scanner.nextLine();
-        System.out.println(executeCommand(input5));
-
-
-        scanner.close();
+        for (String testCase : testCases) {
+            secureOsCommand(testCase);
+        }
     }
 }

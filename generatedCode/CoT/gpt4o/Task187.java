@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 

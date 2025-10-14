@@ -2,96 +2,154 @@ package ourMethod.claude;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
+import java.net.URL;
+import java.security.cert.*;
+import java.util.*;
 
 public class Task105 {
-    private SSLSocket sslSocket;
-    private final String host;
-    private final int port;
+    private static final int CONNECT_TIMEOUT_MS = 10000;
+    private static final int READ_TIMEOUT_MS = 10000;
+    private static final Set<String> ALLOWED_PROTOCOLS = new HashSet<>(Arrays.asList("TLSv1.2", "TLSv1.3"));
     
-    public Task105(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-    
-    public void establishSecureConnection() throws Exception {
+    public static String connectSecurely(String urlString) {
+        if (urlString == null || urlString.trim().isEmpty()) {
+            throw new IllegalArgumentException("URL cannot be null or empty");
+        }
+        
+        if (!urlString.startsWith("https://")) {
+            throw new IllegalArgumentException("Only HTTPS URLs are allowed");
+        }
+        
+        StringBuilder response = new StringBuilder();
+        HttpsURLConnection conn = null;
+        
         try {
-            // Create SSL context with TLS
+            URL url = new URL(urlString);
+            
             SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, null, null);
             
-            // Create trust manager that validates certificate chains
-            TrustManager[] trustManagers = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() { return null; }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        try {
-                            for(X509Certificate cert : certs) {
-                                cert.checkValidity(); // Verify certificate is currently valid
-                            }
-                        } catch(Exception e) {
-                            throw new RuntimeException("Certificate validation failed", e);
-                        }
-                    }
+            conn = (HttpsURLConnection) url.openConnection();
+            conn.setSSLSocketFactory(sslContext.getSocketFactory());
+            conn.setHostnameVerifier(new StrictHostnameVerifier());
+            conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            conn.setReadTimeout(READ_TIMEOUT_MS);
+            conn.setRequestMethod("GET");
+            conn.setInstanceFollowRedirects(false);
+            
+            Optional<SSLSession> session = conn.getSSLSession();
+            if (session.isEmpty() || !session.get().isValid()) {
+                throw new SSLException("Invalid SSL session");
+            }
+            
+            Certificate[] serverCerts = session.get().getPeerCertificates();
+            if (serverCerts == null || serverCerts.length == 0) {
+                throw new SSLException("No server certificates found");
+            }
+            
+            for (Certificate cert : serverCerts) {
+                if (cert instanceof X509Certificate) {
+                    X509Certificate x509 = (X509Certificate) cert;
+                    x509.checkValidity();
                 }
-            };
+            }
             
-            sslContext.init(null, trustManagers, null);
+            int responseCode = conn.getResponseCode();
             
-            // Create SSL socket factory
-            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+                String line;
+                int maxLines = 100;
+                int lineCount = 0;
+                while ((line = reader.readLine()) != null && lineCount < maxLines) {
+                    response.append(line).append("\\n");
+                    lineCount++;
+                }
+            }
             
-            // Create SSL socket
-            sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, port);
+            return "Response Code: " + responseCode + "\\n" + response.toString();
             
-            // Enable only secure protocols
-            sslSocket.setEnabledProtocols(new String[] {"TLSv1.2", "TLSv1.3"});
-            
-            // Enable session creation
-            sslSocket.setEnableSessionCreation(true);
-            
-            // Require client authentication
-            sslSocket.setNeedClientAuth(true);
-            
-            // Start SSL handshake
-            sslSocket.startHandshake();
-            
-            System.out.println("Secure connection established successfully");
         } catch (Exception e) {
-            throw new Exception("Failed to establish secure connection: " + e.getMessage());
+            throw new RuntimeException("Secure connection failed: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
     
-    public void closeConnection() {
-        try {
-            if(sslSocket != null && !sslSocket.isClosed()) {
-                sslSocket.close();
+    private static class StrictHostnameVerifier implements HostnameVerifier {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            if (hostname == null || hostname.trim().isEmpty()) {
+                return false;
             }
-        } catch (IOException e) {
-            System.err.println("Error closing connection: " + e.getMessage());
+            
+            try {
+                Certificate[] certs = session.getPeerCertificates();
+                if (certs == null || certs.length == 0) {
+                    return false;
+                }
+                
+                X509Certificate x509 = (X509Certificate) certs[0];
+                
+                Collection<List<?>> subjectAltNames = x509.getSubjectAlternativeNames();
+                if (subjectAltNames != null) {
+                    for (List<?> entry : subjectAltNames) {
+                        if (entry.size() >= 2) {
+                            Integer type = (Integer) entry.get(0);
+                            if (type == 2) {
+                                String dnsName = (String) entry.get(1);
+                                if (hostname.equalsIgnoreCase(dnsName)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                String dn = x509.getSubjectX500Principal().getName();
+                String cn = extractCN(dn);
+                if (cn != null && hostname.equalsIgnoreCase(cn)) {
+                    return true;
+                }
+                
+            } catch (Exception e) {
+                return false;
+            }
+            
+            return false;
+        }
+        
+        private String extractCN(String dn) {
+            if (dn == null) return null;
+            String[] parts = dn.split(",");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (trimmed.startsWith("CN=")) {
+                    return trimmed.substring(3);
+                }
+            }
+            return null;
         }
     }
     
     public static void main(String[] args) {
-        // Test cases
-        String[][] testCases = {
-            {"localhost", "8443"},
-            {"example.com", "443"},
-            {"securetestserver.com", "443"},
-            {"localhost", "9443"},
-            {"testssl.com", "443"}
+        String[] testUrls = {
+            "https://www.google.com",
+            "https://www.github.com",
+            "https://www.wikipedia.org",
+            "https://www.cloudflare.com",
+            "https://www.mozilla.org"
         };
         
-        for(String[] test : testCases) {
-            Task105 client = new Task105(test[0], Integer.parseInt(test[1]));
+        for (String url : testUrls) {
             try {
-                client.establishSecureConnection();
-                System.out.println("Test successful for " + test[0] + ":" + test[1]);
+                System.out.println("Testing connection to: " + url);
+                String result = connectSecurely(url);
+                System.out.println("Success: " + result.substring(0, Math.min(100, result.length())) + "...\\n");
             } catch (Exception e) {
-                System.err.println("Test failed for " + test[0] + ":" + test[1] + " - " + e.getMessage());
-            } finally {
-                client.closeConnection();
+                System.out.println("Failed: " + e.getMessage() + "\\n");
             }
         }
     }

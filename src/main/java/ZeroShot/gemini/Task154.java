@@ -1,74 +1,108 @@
 package ZeroShot.gemini;
+
 import java.util.*;
 
-class Task154 {
-    private Map<Integer, List<Integer>> graph;
+public class Task154 {
 
-    public Task154(Map<Integer, List<Integer>> graph) {
-        this.graph = graph;
-    }
+    /**
+     * Performs an iterative Depth-First Search (DFS) on a graph.
+     *
+     * @param V         The number of vertices in the graph.
+     * @param adj       The adjacency list representation of the graph.
+     * @param startNode The node to start the search from.
+     * @return A list of integers representing the DFS traversal order.
+     */
+    public List<Integer> dfs(int V, List<List<Integer>> adj, int startNode) {
+        // --- Security: Input Validation ---
+        if (V <= 0 || startNode < 0 || startNode >= V || adj == null || adj.size() != V) {
+            // Return an empty list for invalid input to prevent exceptions.
+            return new ArrayList<>();
+        }
 
-    public List<Integer> depthFirstSearch(int startNode) {
-        List<Integer> visited = new ArrayList<>();
-        Stack<Integer> stack = new Stack<>();
+        List<Integer> result = new ArrayList<>();
+        boolean[] visited = new boolean[V];
+        
+        // Using ArrayDeque as a Stack is generally preferred over the legacy Stack class.
+        Deque<Integer> stack = new ArrayDeque<>();
 
         stack.push(startNode);
 
         while (!stack.isEmpty()) {
-            int currentNode = stack.pop();
+            int u = stack.pop();
 
-            if (!visited.contains(currentNode)) {
-                visited.add(currentNode);
+            if (!visited[u]) {
+                visited[u] = true;
+                result.add(u);
 
-                if (graph.containsKey(currentNode)) {
-                    for (int neighbor : graph.get(currentNode)) {
-                        if (!visited.contains(neighbor)) {
-                            stack.push(neighbor);
+                // Get all adjacent vertices of the popped vertex u.
+                // We iterate in reverse to approximate the order of a recursive DFS.
+                List<Integer> neighbors = adj.get(u);
+                if (neighbors != null) {
+                    for (int i = neighbors.size() - 1; i >= 0; i--) {
+                        int v = neighbors.get(i);
+                        // --- Security: Check neighbor validity ---
+                        if (v >= 0 && v < V && !visited[v]) {
+                            stack.push(v);
                         }
                     }
                 }
             }
         }
-        return visited;
+        return result;
+    }
+    
+    // Helper function to add an edge to the graph
+    private static void addEdge(List<List<Integer>> adj, int u, int v) {
+        if (u >= 0 && u < adj.size() && v >= 0 && v < adj.size()) {
+            adj.get(u).add(v);
+        }
     }
 
     public static void main(String[] args) {
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        Task154 dfs1 = new Task154(graph1);
-        System.out.println(dfs1.depthFirstSearch(2));
+        Task154 solution = new Task154();
+        
+        // --- Test Cases ---
+        System.out.println("--- 5 Test Cases for DFS ---");
 
+        // Test Case 1: Connected Graph, Start 0
+        int V1 = 7;
+        List<List<Integer>> adj1 = new ArrayList<>(V1);
+        for (int i = 0; i < V1; i++) adj1.add(new ArrayList<>());
+        addEdge(adj1, 0, 1); addEdge(adj1, 0, 3);
+        addEdge(adj1, 1, 2); addEdge(adj1, 1, 4);
+        addEdge(adj1, 2, 1);
+        addEdge(adj1, 3, 0); addEdge(adj1, 3, 4); addEdge(adj1, 3, 5);
+        addEdge(adj1, 4, 1); addEdge(adj1, 4, 3);
+        addEdge(adj1, 5, 3); addEdge(adj1, 5, 6);
+        addEdge(adj1, 6, 5);
+        System.out.println("Test Case 1 (Connected Graph, Start 0): " + solution.dfs(V1, adj1, 0));
 
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(0, Arrays.asList(1, 2));
-        graph2.put(1, Arrays.asList(0, 3, 4));
-        graph2.put(2, Arrays.asList(0));
-        graph2.put(3, Arrays.asList(1));
-        graph2.put(4, Arrays.asList(1));
-        Task154 dfs2 = new Task154(graph2);
-        System.out.println(dfs2.depthFirstSearch(0));
+        // Test Case 2: Connected Graph, Start 4
+        System.out.println("Test Case 2 (Connected Graph, Start 4): " + solution.dfs(V1, adj1, 4));
 
-        Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        Task154 dfs3 = new Task154(graph3);
-        System.out.println(dfs3.depthFirstSearch(0));
+        // Test Case 3: Disconnected Graph, Start 0
+        int V3 = 5;
+        List<List<Integer>> adj3 = new ArrayList<>(V3);
+        for (int i = 0; i < V3; i++) adj3.add(new ArrayList<>());
+        addEdge(adj3, 0, 1); addEdge(adj3, 1, 0); addEdge(adj3, 1, 2); addEdge(adj3, 2, 1); // Component 1
+        addEdge(adj3, 3, 4); addEdge(adj3, 4, 3); // Component 2
+        System.out.println("Test Case 3 (Disconnected Graph, Start 0): " + solution.dfs(V3, adj3, 0));
 
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(0, Arrays.asList());
-        Task154 dfs4 = new Task154(graph4);
-        System.out.println(dfs4.depthFirstSearch(0));
+        // Test Case 4: Line Graph, Start 2
+        int V4 = 5;
+        List<List<Integer>> adj4 = new ArrayList<>(V4);
+        for (int i = 0; i < V4; i++) adj4.add(new ArrayList<>());
+        addEdge(adj4, 0, 1);
+        addEdge(adj4, 1, 0); addEdge(adj4, 1, 2);
+        addEdge(adj4, 2, 1); addEdge(adj4, 2, 3);
+        addEdge(adj4, 3, 2); addEdge(adj4, 3, 4);
+        addEdge(adj4, 4, 3);
+        System.out.println("Test Case 4 (Line Graph, Start 2): " + solution.dfs(V4, adj4, 2));
 
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(0, Arrays.asList(1, 2, 3));
-        graph5.put(1, Arrays.asList(0, 4));
-        graph5.put(2, Arrays.asList(0, 5));
-        graph5.put(3, Arrays.asList(0, 6));
-        graph5.put(4, Arrays.asList(1));
-        graph5.put(5, Arrays.asList(2));
-        graph5.put(6, Arrays.asList(3));
-        Task154 dfs5 = new Task154(graph5);
-        System.out.println(dfs5.depthFirstSearch(0));
+        // Test Case 5: Single Node Graph, Start 0
+        int V5 = 1;
+        List<List<Integer>> adj5 = new ArrayList<>(V5);
+        adj5.add(new ArrayList<>());
+        System.out.println("Test Case 5 (Single Node Graph, Start 0): " + solution.dfs(V5, adj5, 0));
     }
 }

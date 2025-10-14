@@ -1,41 +1,54 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+
 public class Task31 {
-    public static String makeComplement(String dna) {
-        if (dna == null || dna.isEmpty()) {
-            return "";
+    public static String getDNAComplement(String dna) {
+        if (dna == null) {
+            throw new IllegalArgumentException("DNA string cannot be null");
         }
         
-        StringBuilder result = new StringBuilder(dna.length());
+        if (dna.isEmpty()) {
+            throw new IllegalArgumentException("DNA string cannot be empty");
+        }
         
-        for (char c : dna.toCharArray()) {
-            switch (c) {
+        if (dna.length() > 1000000) {
+            throw new IllegalArgumentException("DNA string too long");
+        }
+        
+        StringBuilder complement = new StringBuilder(dna.length());
+        
+        for (int i = 0; i < dna.length(); i++) {
+            char nucleotide = dna.charAt(i);
+            switch (nucleotide) {
                 case 'A':
-                    result.append('T');
+                    complement.append('T');
                     break;
                 case 'T':
-                    result.append('A');
+                    complement.append('A');
                     break;
                 case 'C':
-                    result.append('G');
+                    complement.append('G');
                     break;
                 case 'G':
-                    result.append('C');
+                    complement.append('C');
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid DNA string");
+                    throw new IllegalArgumentException("Invalid nucleotide: " + nucleotide);
             }
         }
         
-        return result.toString();
+        return complement.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(makeComplement("ATTGC")); // Expected: TAACG
-        System.out.println(makeComplement("GTAT")); // Expected: CATA
-        System.out.println(makeComplement("AAAA")); // Expected: TTTT
-        System.out.println(makeComplement("GCGC")); // Expected: CGCG
-        System.out.println(makeComplement("ATCG")); // Expected: TAGC
+        String[] testCases = {"ATTGC", "GTAT", "AAAA", "CGCG", "ATCGATCG"};
+        String[] expected = {"TAACG", "CATA", "TTTT", "GCGC", "TAGCTAGC"};
+        
+        for (int i = 0; i < testCases.length; i++) {
+            String result = getDNAComplement(testCases[i]);
+            System.out.println("Input: " + testCases[i] + " -> Output: " + result + 
+                             " (Expected: " + expected[i] + ", Pass: " + result.equals(expected[i]) + ")");
+        }
     }
 }

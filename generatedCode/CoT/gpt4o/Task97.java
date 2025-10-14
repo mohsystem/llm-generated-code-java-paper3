@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.xpath.XPath;

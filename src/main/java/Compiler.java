@@ -18,7 +18,7 @@ public class Compiler {
 
     public static void main(String[] args) {
         // Set the source and output directories
-        String sourceDirectory = "generatedCode/CoT/claude"; // Update this path
+        String sourceDirectory = "generatedCode/ourMethodv2/gpt4o"; // Update this path
         String outputDirectory = "out"; // Update this path
 
         try {

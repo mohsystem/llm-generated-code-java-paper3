@@ -1,2 +1,2 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 // Java code omitted for security reasons

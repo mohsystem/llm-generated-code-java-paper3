@@ -1,32 +1,55 @@
 package CoT.gemini;
-import java.util.HashSet;
-import java.util.Set;
 
-class Task4 {
+import java.util.Arrays;
+
+public class Task4 {
+
+    /**
+     * Determines whether a string is an isogram (has no repeating letters, ignoring case).
+     *
+     * @param str The input string, assumed to contain only letters.
+     * @return true if the string is an isogram, false otherwise.
+     */
     public static boolean isIsogram(String str) {
+        // An empty string is considered an isogram. A null check is good practice.
         if (str == null || str.isEmpty()) {
             return true;
         }
 
-        str = str.toLowerCase();
-        Set<Character> seen = new HashSet<>();
+        // Convert the string to a single case to make comparisons case-insensitive.
+        String lowerCaseStr = str.toLowerCase();
 
-        for (char c : str.toCharArray()) {
-            if (seen.contains(c)) {
+        // Use a boolean array to track seen characters.
+        // The size is 26 for the English alphabet (a-z).
+        boolean[] seen = new boolean[26];
+        Arrays.fill(seen, false);
+
+        // Iterate through each character of the string.
+        for (int i = 0; i < lowerCaseStr.length(); i++) {
+            char c = lowerCaseStr.charAt(i);
+            int index = c - 'a';
+
+            // If the character has been seen before, it's not an isogram.
+            if (seen[index]) {
                 return false;
             }
-            seen.add(c);
+
+            // Mark the character as seen.
+            seen[index] = true;
         }
 
+        // If the loop completes, no repeating characters were found.
         return true;
     }
 
     public static void main(String[] args) {
-        System.out.println(isIsogram("Dermatoglyphics")); // true
-        System.out.println(isIsogram("aba")); // false
-        System.out.println(isIsogram("moOse")); // false
-        System.out.println(isIsogram("")); // true
-        System.out.println(isIsogram("isogram")); // true
+        // Test cases
+        String[] testCases = {"Dermatoglyphics", "aba", "moOse", "isIsogram", ""};
+        boolean[] expectedResults = {true, false, false, false, true};
 
+        for (int i = 0; i < testCases.length; i++) {
+            boolean result = isIsogram(testCases[i]);
+            System.out.println("Input: \"" + testCases[i] + "\" -> Output: " + result + " | Expected: " + expectedResults[i]);
+        }
     }
 }

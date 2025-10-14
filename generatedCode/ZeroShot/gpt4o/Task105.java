@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import javax.net.ssl.*;
 import java.io.*;
 import java.security.KeyManagementException;

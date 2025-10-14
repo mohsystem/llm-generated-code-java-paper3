@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task35 {
     public static int remainingPassengers(int[][] stops) {
         int passengers = 0;

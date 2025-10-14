@@ -1,68 +1,88 @@
 package CoT.claude;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Task66 {
-    private static final List<String> ALLOWED_COMMANDS = Arrays.asList("ls", "pwd", "date", "whoami", "echo");
-    
-    public static String executeCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            return "Invalid command: Command cannot be empty";
+    private static final Set<String> ALLOWED_COMMANDS = new HashSet<>(Arrays.asList(
+            "ls", "pwd", "date", "whoami", "echo"
+    ));
+
+    private static final int TIMEOUT_SECONDS = 5;
+    private static final int MAX_OUTPUT_LENGTH = 10000;
+
+    public static String executeCommand(String userInput) {
+        if (userInput == null || userInput.trim().isEmpty()) {
+            return "Error: Command cannot be empty";
         }
 
-        // Validate command format
-        String[] cmdParts = command.trim().split("\\\\s+");
-        String baseCmd = cmdParts[0].toLowerCase();
-        
-        // Security check - only allow specific commands
-        if (!ALLOWED_COMMANDS.contains(baseCmd)) {
-            return "Command not allowed for security reasons";
+        userInput = userInput.trim();
+
+        // Validate: no dangerous characters
+        if (userInput.contains(";") || userInput.contains("&") ||
+                userInput.contains("|") || userInput.contains(">") ||
+                userInput.contains("<") || userInput.contains("`") ||
+                userInput.contains("$") || userInput.contains("\\") || userInput.contains("\\") || userInput.contains("\\r")) {
+            return "Error: Command contains forbidden characters";
         }
-        
-        StringBuilder output = new StringBuilder();
+        // Parse command and arguments
+        String[] parts = userInput.split("\\\\s+");
+        String command = parts[0];
+        // Whitelist validation
+        if (!ALLOWED_COMMANDS.contains(command)) {
+            return "Error: Command '" + command + "' is not in the allowed list";
+        }
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command(cmdParts);
-            Process process = processBuilder.start();
-            
-            // Read the output
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\\n");
+            ProcessBuilder pb = new ProcessBuilder();
+            List<String> cmdList = new ArrayList<>();
+            cmdList.addAll(Arrays.asList(parts));
+            pb.command(cmdList);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            // Execute with timeout
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<String> future = executor.submit(() -> {
+                StringBuilder output = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (output.length() + line.length() > MAX_OUTPUT_LENGTH) {
+                            return output.toString() + "[Output truncated]";
+                        }
+                        output.append(line).append("\\");
+                    }
+                }
+                return output.toString();
+            });
+            String result;
+            try {
+                result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                process.destroyForcibly();
+                future.cancel(true);
+                return "Error: Command execution timeout";
+            } finally {
+                executor.shutdownNow();
             }
-            
-            // Wait for process to complete and check exit value
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                return "Command execution failed with exit code: " + exitCode;
-            }
-            
-        } catch (IOException | InterruptedException e) {
-            return "Error executing command: " + e.getMessage();
+            return result.isEmpty() ? "Command executed successfully (no output)" : result;
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
-        
-        return output.toString();
     }
 
     public static void main(String[] args) {
-        // Test cases
-        String[] testCommands = {
-            "ls",
-            "pwd",
-            "date",
-            "whoami",
-            "rm -rf /" // should be rejected
+        System.out.println("=== Secure Command Executor Test Cases ===\\");
+        String[] testCases = {"ls", "pwd", "echo Hello World", "ls; rm -rf /",
+                // Malicious attempt
+                // "cat /etc/passwd"  // Unauthorized command
         };
-
-        for (String cmd : testCommands) {
-            System.out.println("Executing: " + cmd);
-            System.out.println("Result: " + executeCommand(cmd));
-            System.out.println("------------------------");
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ": " + testCases[i]);
+            System.out.println("Result: " + executeCommand(testCases[i]));
+            System.out.println("---");
         }
     }
 }

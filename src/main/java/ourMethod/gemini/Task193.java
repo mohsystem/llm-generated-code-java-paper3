@@ -1,27 +1,38 @@
 package ourMethod.gemini;
+
 import java.util.Arrays;
 
-class Task193 {
+public class Task193 {
+
     public boolean xorGame(int[] nums) {
-        int xor = 0;
+        int xorSum = 0;
         for (int num : nums) {
-            xor ^= num;
+            xorSum ^= num;
         }
-        return xor == 0 || nums.length % 2 == 0;
+        return xorSum == 0 || nums.length % 2 == 0;
     }
 
     public static void main(String[] args) {
-        Task193 task = new Task193();
-        int[] test1 = {1, 1, 2};
-        int[] test2 = {0, 1};
-        int[] test3 = {1, 2, 3};
-        int[] test4 = {1, 1};
-        int[] test5 = {0};
+        Task193 solver = new Task193();
 
-        System.out.println(task.xorGame(test1)); // false
-        System.out.println(task.xorGame(test2)); // true
-        System.out.println(task.xorGame(test3)); // true
-        System.out.println(task.xorGame(test4)); // false
-        System.out.println(task.xorGame(test5)); // true
+        // Test Case 1
+        int[] nums1 = {1, 1, 2};
+        System.out.println("Test Case 1: nums = " + Arrays.toString(nums1) + ", Result: " + solver.xorGame(nums1));
+
+        // Test Case 2
+        int[] nums2 = {0, 1};
+        System.out.println("Test Case 2: nums = " + Arrays.toString(nums2) + ", Result: " + solver.xorGame(nums2));
+        
+        // Test Case 3
+        int[] nums3 = {1, 2, 3};
+        System.out.println("Test Case 3: nums = " + Arrays.toString(nums3) + ", Result: " + solver.xorGame(nums3));
+        
+        // Test Case 4
+        int[] nums4 = {1, 1};
+        System.out.println("Test Case 4: nums = " + Arrays.toString(nums4) + ", Result: " + solver.xorGame(nums4));
+
+        // Test Case 5
+        int[] nums5 = {1, 2, 3, 4, 5, 6, 7};
+        System.out.println("Test Case 5: nums = " + Arrays.toString(nums5) + ", Result: " + solver.xorGame(nums5));
     }
 }

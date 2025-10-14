@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 // Java code to handle CSRF protection in a web application
 public class Task40 {
     public static String updateUserSettings(String csrfToken, String providedToken, String settings) {

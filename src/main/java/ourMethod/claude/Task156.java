@@ -1,80 +1,113 @@
 package ourMethod.claude;
 
+import java.util.*;
+
 public class Task156 {
-    static class Node {
-        int data;
-        Node left, right;
+    static class TreeNode {
+        int value;
+        TreeNode left;
+        TreeNode right;
         
-        Node(int item) {
-            data = item;
-            left = right = null;
+        TreeNode(int value) {
+            this.value = value;
+            this.left = null;
+            this.right = null;
         }
     }
     
-    public static void preorder(Node root) {
-        if (root == null) return;
-        
-        System.out.print(root.data + " ");
-        preorder(root.left);
-        preorder(root.right);
+    public static List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) {
+            return result;
+        }
+        preorderHelper(root, result);
+        return result;
     }
     
-    public static void inorder(Node root) {
-        if (root == null) return;
-        
-        inorder(root.left);
-        System.out.print(root.data + " ");
-        inorder(root.right);
+    private static void preorderHelper(TreeNode node, List<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        result.add(node.value);
+        preorderHelper(node.left, result);
+        preorderHelper(node.right, result);
     }
     
-    public static void postorder(Node root) {
-        if (root == null) return;
-        
-        postorder(root.left);
-        postorder(root.right);
-        System.out.print(root.data + " ");
+    public static List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) {
+            return result;
+        }
+        inorderHelper(root, result);
+        return result;
+    }
+    
+    private static void inorderHelper(TreeNode node, List<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        inorderHelper(node.left, result);
+        result.add(node.value);
+        inorderHelper(node.right, result);
+    }
+    
+    public static List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) {
+            return result;
+        }
+        postorderHelper(root, result);
+        return result;
+    }
+    
+    private static void postorderHelper(TreeNode node, List<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        postorderHelper(node.left, result);
+        postorderHelper(node.right, result);
+        result.add(node.value);
     }
     
     public static void main(String[] args) {
-        // Test Case 1: Single node
-        Node root1 = new Node(1);
-        System.out.println("Test Case 1:");
-        System.out.print("Preorder: "); preorder(root1); System.out.println();
-        System.out.print("Inorder: "); inorder(root1); System.out.println();
-        System.out.print("Postorder: "); postorder(root1); System.out.println();
+        // Test case 1: Single node tree
+        TreeNode tree1 = new TreeNode(1);
+        System.out.println("Test 1 - Preorder: " + preorderTraversal(tree1));
+        System.out.println("Test 1 - Inorder: " + inorderTraversal(tree1));
+        System.out.println("Test 1 - Postorder: " + postorderTraversal(tree1));
         
-        // Test Case 2: Complete binary tree
-        Node root2 = new Node(1);
-        root2.left = new Node(2);
-        root2.right = new Node(3);
-        System.out.println("\\nTest Case 2:");
-        System.out.print("Preorder: "); preorder(root2); System.out.println();
-        System.out.print("Inorder: "); inorder(root2); System.out.println();
-        System.out.print("Postorder: "); postorder(root2); System.out.println();
+        // Test case 2: Empty tree
+        TreeNode tree2 = null;
+        System.out.println("Test 2 - Preorder: " + preorderTraversal(tree2));
+        System.out.println("Test 2 - Inorder: " + inorderTraversal(tree2));
+        System.out.println("Test 2 - Postorder: " + postorderTraversal(tree2));
         
-        // Test Case 3: Left skewed tree
-        Node root3 = new Node(1);
-        root3.left = new Node(2);
-        root3.left.left = new Node(3);
-        System.out.println("\\nTest Case 3:");
-        System.out.print("Preorder: "); preorder(root3); System.out.println();
-        System.out.print("Inorder: "); inorder(root3); System.out.println();
-        System.out.print("Postorder: "); postorder(root3); System.out.println();
+        // Test case 3: Left-skewed tree
+        TreeNode tree3 = new TreeNode(1);
+        tree3.left = new TreeNode(2);
+        tree3.left.left = new TreeNode(3);
+        System.out.println("Test 3 - Preorder: " + preorderTraversal(tree3));
+        System.out.println("Test 3 - Inorder: " + inorderTraversal(tree3));
+        System.out.println("Test 3 - Postorder: " + postorderTraversal(tree3));
         
-        // Test Case 4: Right skewed tree
-        Node root4 = new Node(1);
-        root4.right = new Node(2);
-        root4.right.right = new Node(3);
-        System.out.println("\\nTest Case 4:");
-        System.out.print("Preorder: "); preorder(root4); System.out.println();
-        System.out.print("Inorder: "); inorder(root4); System.out.println();
-        System.out.print("Postorder: "); postorder(root4); System.out.println();
+        // Test case 4: Right-skewed tree
+        TreeNode tree4 = new TreeNode(1);
+        tree4.right = new TreeNode(2);
+        tree4.right.right = new TreeNode(3);
+        System.out.println("Test 4 - Preorder: " + preorderTraversal(tree4));
+        System.out.println("Test 4 - Inorder: " + inorderTraversal(tree4));
+        System.out.println("Test 4 - Postorder: " + postorderTraversal(tree4));
         
-        // Test Case 5: Empty tree
-        Node root5 = null;
-        System.out.println("\\nTest Case 5:");
-        System.out.print("Preorder: "); preorder(root5); System.out.println();
-        System.out.print("Inorder: "); inorder(root5); System.out.println();
-        System.out.print("Postorder: "); postorder(root5); System.out.println();
+        // Test case 5: Balanced tree
+        TreeNode tree5 = new TreeNode(1);
+        tree5.left = new TreeNode(2);
+        tree5.right = new TreeNode(3);
+        tree5.left.left = new TreeNode(4);
+        tree5.left.right = new TreeNode(5);
+        tree5.right.left = new TreeNode(6);
+        tree5.right.right = new TreeNode(7);
+        System.out.println("Test 5 - Preorder: " + preorderTraversal(tree5));
+        System.out.println("Test 5 - Inorder: " + inorderTraversal(tree5));
+        System.out.println("Test 5 - Postorder: " + postorderTraversal(tree5));
     }
 }

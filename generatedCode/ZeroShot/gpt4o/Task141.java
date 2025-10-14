@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task141 {
     public static String reverseString(String input) {
         if (input == null) {

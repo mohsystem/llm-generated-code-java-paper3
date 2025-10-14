@@ -7,7 +7,7 @@ public class Task158 {
 
     public static String executeSafeCommand(String userInput) throws IOException {
         // Sanitize user input to prevent command injection vulnerabilities
-        String sanitizedInput = userInput.replace(";", "").replace("&", "").replace("|", "").replace("`", "").replace("$", "").replace("\\", "").replace("(", "").replace(")", "");
+        String sanitizedInput = userInput.replace(";", "").replace("&", "").replace("|", "").replace("`", "").replace("$", "").replace("\", "").replace("(", "").replace(")", "");
 
 
         // Use ProcessBuilder for better security and control

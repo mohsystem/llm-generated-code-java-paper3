@@ -2,65 +2,69 @@ package CoT.claude;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.regex.Pattern;
+import java.util.Base64;
 
 public class Task102 {
-    private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\\\S+$).{8,}$";
     
-    public static boolean updatePassword(String username, String newPassword) {
-        if (username == null || username.trim().isEmpty() || newPassword == null) {
-            return false;
-        }
-
-        // Validate password strength
-        if (!Pattern.matches(PASSWORD_PATTERN, newPassword)) {
-            return false;
-        }
-
+    public static String hashPassword(String password) {
         try {
-            // Hash password using SHA-256
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[16];
+            random.nextBytes(salt);
+            
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedPassword = md.digest(newPassword.getBytes());
+            md.update(salt);
+            byte[] hashedPassword = md.digest(password.getBytes());
             
-            // Convert byte array to hex string
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedPassword) {
-                hexString.append(String.format("%02x", b));
-            }
+            byte[] combined = new byte[salt.length + hashedPassword.length];
+            System.arraycopy(salt, 0, combined, 0, salt.length);
+            System.arraycopy(hashedPassword, 0, combined, salt.length, hashedPassword.length);
             
-            // Update password in database using prepared statement
-            String sql = "UPDATE users SET password = ? WHERE username = ?";
-            try (Connection conn = DatabaseConnection.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                
-                pstmt.setString(1, hexString.toString());
-                pstmt.setString(2, username);
-                
-                int rowsAffected = pstmt.executeUpdate();
-                return rowsAffected > 0;
-            }
+            return Base64.getEncoder().encodeToString(combined);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
+        }
+    }
+    
+    public static boolean updateUserPassword(String username, String newPassword) {
+        if (username == null || username.trim().isEmpty() || 
+            newPassword == null || newPassword.trim().isEmpty()) {
+            return false;
+        }
+        
+        if (username.length() > 255 || newPassword.length() > 255) {
+            return false;
+        }
+        
+        String hashedPassword = hashPassword(newPassword);
+        
+        String url = "jdbc:sqlite:users.db";
+        String sql = "UPDATE users SET password = ? WHERE username = ?";
+        
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-        } catch (NoSuchAlgorithmException | SQLException e) {
-            e.printStackTrace();
+            pstmt.setString(1, hashedPassword);
+            pstmt.setString(2, username);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (Exception e) {
+            System.err.println("Error updating password");
             return false;
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println("Test 1: " + updatePassword("john_doe", "Password123@")); // Valid
-        System.out.println("Test 2: " + updatePassword("jane_doe", "weak")); // Invalid - too short
-        System.out.println("Test 3: " + updatePassword("", "Password123@")); // Invalid - empty username
-        System.out.println("Test 4: " + updatePassword("bob", "NoSpecialChar1")); // Invalid - no special char
-        System.out.println("Test 5: " + updatePassword("alice", "Pass word@1")); // Invalid - contains space
-    }
-
-    private static class DatabaseConnection {
-        public static Connection getConnection() {
-            return null;
-        }
+        System.out.println("Test Case 1: " + updateUserPassword("user1", "SecurePass123!"));
+        System.out.println("Test Case 2: " + updateUserPassword("user2", "AnotherP@ssw0rd"));
+        System.out.println("Test Case 3: " + updateUserPassword("admin", "AdminSecure#456"));
+        System.out.println("Test Case 4: " + updateUserPassword("", "password"));
+        System.out.println("Test Case 5: " + updateUserPassword("user3", ""));
     }
 }

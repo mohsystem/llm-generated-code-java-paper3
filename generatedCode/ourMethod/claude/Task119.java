@@ -75,7 +75,7 @@ public class Task119 {
             
             // Test case 2: CSV with quoted values
             String csv2 = "test2.csv";
-            Files.write(Paths.get(csv2), "\\"hello,world\\",test".getBytes());
+            Files.write(Paths.get(csv2), "\"hello,world\",test".getBytes());
             System.out.println("Test 2: " + parseCSV(csv2));
             
             // Test case 3: Empty file
@@ -90,7 +90,7 @@ public class Task119 {
             
             // Test case 5: CSV with escaped quotes
             String csv5 = "test5.csv";
-            Files.write(Paths.get(csv5), "\\"\\"\\"quoted\\"\\"\\",value".getBytes());
+            Files.write(Paths.get(csv5), "\"\"\"quoted\"\"\",value".getBytes());
             System.out.println("Test 5: " + parseCSV(csv5));
             
         } catch (IOException e) {

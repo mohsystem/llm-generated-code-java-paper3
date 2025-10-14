@@ -1,24 +1,59 @@
 package ZeroShot.gemini;
-import java.lang.Math;
 
-class Task34 {
-    public static boolean isNarcissistic(int number) {
-        String numStr = String.valueOf(number);
-        int power = numStr.length();
-        int sum = 0;
-        for (char c : numStr.toCharArray()) {
-            int digit = Character.getNumericValue(c);
-            sum += Math.pow(digit, power);
+public class Task34 {
+
+    /**
+     * Helper function to calculate integer power.
+     * This avoids floating-point inaccuracies of Math.pow().
+     */
+    private static long power(int base, int exp) {
+        long result = 1;
+        for (int i = 0; i < exp; i++) {
+            result *= base;
         }
-        return sum == number;
+        return result;
+    }
+
+    /**
+     * Checks if a number is a Narcissistic Number.
+     * A Narcissistic Number is a positive number which is the sum of its own digits,
+     * each raised to the power of the number of digits.
+     * @param value The positive integer to check.
+     * @return true if the number is narcissistic, false otherwise.
+     */
+    public static boolean isNarcissistic(int value) {
+        if (value <= 0) {
+            return false;
+        }
+
+        // Count the number of digits
+        int temp = value;
+        int numDigits = 0;
+        while (temp > 0) {
+            temp /= 10;
+            numDigits++;
+        }
+
+        // Calculate the sum of powers of digits
+        long sum = 0;
+        temp = value;
+        while (temp > 0) {
+            int digit = temp % 10;
+            sum += power(digit, numDigits);
+            // Early exit if sum exceeds value, as it can only increase
+            if (sum > value) {
+                return false;
+            }
+            temp /= 10;
+        }
+
+        return sum == value;
     }
 
     public static void main(String[] args) {
-        System.out.println(isNarcissistic(153)); // true
-        System.out.println(isNarcissistic(1652)); // false
-        System.out.println(isNarcissistic(7)); // true
-        System.out.println(isNarcissistic(371)); // true
-        System.out.println(isNarcissistic(4887)); // false
-
+        int[] testCases = {153, 1652, 7, 371, 9474};
+        for (int testCase : testCases) {
+            System.out.println("isNarcissistic(" + testCase + ") -> " + isNarcissistic(testCase));
+        }
     }
 }

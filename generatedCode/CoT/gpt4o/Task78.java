@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task161 {
     public static int knapsack(int capacity, int[] weights, int[] values) {
         int n = weights.length;

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task24 {
     public static boolean isValidPIN(String pin) {
         if (pin == null) {

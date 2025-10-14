@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task11 {
     public static int nbYear(int p0, double percent, int aug, int p) {
         int years = 0;

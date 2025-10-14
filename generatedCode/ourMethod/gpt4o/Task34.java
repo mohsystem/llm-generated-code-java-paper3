@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task34 {
     public static boolean isNarcissistic(int number) {
         int numDigits = String.valueOf(number).length();

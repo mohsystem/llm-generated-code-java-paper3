@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task20 {
     public static int findFunnyNumber(int n, int p) {
         String numStr = Integer.toString(n);

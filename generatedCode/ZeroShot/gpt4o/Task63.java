@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.util.Base64;
 import org.json.JSONObject;
 import org.json.XML;

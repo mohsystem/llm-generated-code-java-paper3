@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import org.apache.xmlrpc.WebServer;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.server.PropertyHandlerMapping;

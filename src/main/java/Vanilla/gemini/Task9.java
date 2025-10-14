@@ -1,37 +1,45 @@
 package Vanilla.gemini;
-import java.util.Arrays;
-import java.util.List;
 
-class Task9 {
-    public String oddOrEven(List<Integer> array) {
-        int sum = 0;
-        if (array == null || array.isEmpty()) {
-            sum = 0;
+import java.util.Arrays;
+
+public class Task9 {
+
+    /**
+     * Given a list of integers, determine whether the sum of its elements is odd or even.
+     * @param array The input array of integers.
+     * @return "even" or "odd".
+     */
+    public static String oddOrEven(int[] array) {
+        // The sum of an empty array is 0, which is even.
+        // We can use Java Streams for a concise solution.
+        int sum = Arrays.stream(array).sum();
+        
+        if (sum % 2 == 0) {
+            return "even";
         } else {
-            for (int num : array) {
-                sum += num;
-            }
+            return "odd";
         }
-        return (sum % 2 == 0) ? "even" : "odd";
     }
 
     public static void main(String[] args) {
-        Task9 task9 = new Task9();
+        // Test Case 1
+        int[] arr1 = {0};
+        System.out.println("Input: " + Arrays.toString(arr1) + ", Output: " + oddOrEven(arr1));
 
-        List<Integer> test1 = Arrays.asList(0);
-        System.out.println(task9.oddOrEven(test1)); // Output: even
+        // Test Case 2
+        int[] arr2 = {0, 1, 4};
+        System.out.println("Input: " + Arrays.toString(arr2) + ", Output: " + oddOrEven(arr2));
 
-        List<Integer> test2 = Arrays.asList(0, 1, 4);
-        System.out.println(task9.oddOrEven(test2)); // Output: odd
+        // Test Case 3
+        int[] arr3 = {0, -1, -5};
+        System.out.println("Input: " + Arrays.toString(arr3) + ", Output: " + oddOrEven(arr3));
 
-        List<Integer> test3 = Arrays.asList(0, -1, -5);
-        System.out.println(task9.oddOrEven(test3)); // Output: even
-
-        List<Integer> test4 = null;
-        System.out.println(task9.oddOrEven(test4)); // Output: even
-
-        List<Integer> test5 = Arrays.asList();
-        System.out.println(task9.oddOrEven(test5)); // Output: even
-
+        // Test Case 4: Empty array
+        int[] arr4 = {};
+        System.out.println("Input: " + Arrays.toString(arr4) + ", Output: " + oddOrEven(arr4));
+        
+        // Test Case 5
+        int[] arr5 = {1, 2, 3, 4, 5};
+        System.out.println("Input: " + Arrays.toString(arr5) + ", Output: " + oddOrEven(arr5));
     }
 }

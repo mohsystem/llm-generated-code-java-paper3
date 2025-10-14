@@ -3,76 +3,97 @@ package ourMethod.claude;
 import java.util.*;
 
 public class Task154 {
-    private int vertices;
-    private List<List<Integer>> adjacencyList;
+    private static final int MAX_NODES = 10000;
+    private static final int MAX_EDGES = 100000;
     
-    public Task154(int v) {
-        this.vertices = v;
-        adjacencyList = new ArrayList<>(vertices);
-        for(int i = 0; i < vertices; i++) {
-            adjacencyList.add(new ArrayList<>());
-        }
-    }
-    
-    public void addEdge(int v, int w) {
-        if(v >= 0 && v < vertices && w >= 0 && w < vertices) {
-            adjacencyList.get(v).add(w);
-        }
-    }
-    
-    public List<Integer> dfs(int startVertex) {
-        if(startVertex < 0 || startVertex >= vertices) {
-            return new ArrayList<>();
+    public static List<Integer> depthFirstSearch(Map<Integer, List<Integer>> graph, int startNode) {
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph cannot be null");
         }
         
-        boolean[] visited = new boolean[vertices];
+        if (!graph.containsKey(startNode)) {
+            throw new IllegalArgumentException("Start node not found in graph");
+        }
+        
+        if (graph.size() > MAX_NODES) {
+            throw new IllegalArgumentException("Graph exceeds maximum node limit");
+        }
+        
+        int edgeCount = 0;
+        for (List<Integer> neighbors : graph.values()) {
+            if (neighbors != null) {
+                edgeCount += neighbors.size();
+            }
+        }
+        if (edgeCount > MAX_EDGES) {
+            throw new IllegalArgumentException("Graph exceeds maximum edge limit");
+        }
+        
         List<Integer> result = new ArrayList<>();
-        dfsUtil(startVertex, visited, result);
+        Set<Integer> visited = new HashSet<>();
+        dfsHelper(graph, startNode, visited, result);
         return result;
     }
     
-    private void dfsUtil(int vertex, boolean[] visited, List<Integer> result) {
-        visited[vertex] = true;
-        result.add(vertex);
+    private static void dfsHelper(Map<Integer, List<Integer>> graph, int node, 
+                                   Set<Integer> visited, List<Integer> result) {
+        if (visited.contains(node)) {
+            return;
+        }
         
-        for(Integer adjacent : adjacencyList.get(vertex)) {
-            if(!visited[adjacent]) {
-                dfsUtil(adjacent, visited, result);
+        visited.add(node);
+        result.add(node);
+        
+        List<Integer> neighbors = graph.get(node);
+        if (neighbors != null) {
+            for (Integer neighbor : neighbors) {
+                if (neighbor == null) {
+                    continue;
+                }
+                if (!graph.containsKey(neighbor)) {
+                    continue;
+                }
+                dfsHelper(graph, neighbor, visited, result);
             }
         }
     }
     
     public static void main(String[] args) {
-        // Test case 1: Simple graph
-        Task154 g1 = new Task154(4);
-        g1.addEdge(0, 1);
-        g1.addEdge(0, 2);
-        g1.addEdge(1, 2);
-        g1.addEdge(2, 0);
-        g1.addEdge(2, 3);
-        g1.addEdge(3, 3);
-        System.out.println("DFS from vertex 2: " + g1.dfs(2));
+        // Test case 1: Simple linear graph
+        Map<Integer, List<Integer>> graph1 = new HashMap<>();
+        graph1.put(1, Arrays.asList(2));
+        graph1.put(2, Arrays.asList(3));
+        graph1.put(3, new ArrayList<>());
+        System.out.println("Test 1: " + depthFirstSearch(graph1, 1));
         
-        // Test case 2: Single node
-        Task154 g2 = new Task154(1);
-        System.out.println("DFS from vertex 0: " + g2.dfs(0));
+        // Test case 2: Graph with branches
+        Map<Integer, List<Integer>> graph2 = new HashMap<>();
+        graph2.put(1, Arrays.asList(2, 3));
+        graph2.put(2, Arrays.asList(4));
+        graph2.put(3, Arrays.asList(5));
+        graph2.put(4, new ArrayList<>());
+        graph2.put(5, new ArrayList<>());
+        System.out.println("Test 2: " + depthFirstSearch(graph2, 1));
         
-        // Test case 3: Disconnected graph
-        Task154 g3 = new Task154(4);
-        g3.addEdge(0, 1);
-        g3.addEdge(2, 3);
-        System.out.println("DFS from vertex 0: " + g3.dfs(0));
+        // Test case 3: Graph with cycle
+        Map<Integer, List<Integer>> graph3 = new HashMap<>();
+        graph3.put(1, Arrays.asList(2));
+        graph3.put(2, Arrays.asList(3));
+        graph3.put(3, Arrays.asList(1, 4));
+        graph3.put(4, new ArrayList<>());
+        System.out.println("Test 3: " + depthFirstSearch(graph3, 1));
         
-        // Test case 4: Linear graph
-        Task154 g4 = new Task154(4);
-        g4.addEdge(0, 1);
-        g4.addEdge(1, 2);
-        g4.addEdge(2, 3);
-        System.out.println("DFS from vertex 0: " + g4.dfs(0));
+        // Test case 4: Single node
+        Map<Integer, List<Integer>> graph4 = new HashMap<>();
+        graph4.put(1, new ArrayList<>());
+        System.out.println("Test 4: " + depthFirstSearch(graph4, 1));
         
-        // Test case 5: Invalid input
-        Task154 g5 = new Task154(4);
-        g5.addEdge(0, 1);
-        System.out.println("DFS from invalid vertex: " + g5.dfs(-1));
+        // Test case 5: Disconnected components
+        Map<Integer, List<Integer>> graph5 = new HashMap<>();
+        graph5.put(1, Arrays.asList(2));
+        graph5.put(2, new ArrayList<>());
+        graph5.put(3, Arrays.asList(4));
+        graph5.put(4, new ArrayList<>());
+        System.out.println("Test 5: " + depthFirstSearch(graph5, 1));
     }
 }

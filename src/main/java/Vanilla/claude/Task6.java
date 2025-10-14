@@ -2,23 +2,39 @@ package Vanilla.claude;
 
 public class Task6 {
     public static double findUniq(double[] arr) {
-        if(arr[0] != arr[1] && arr[0] != arr[2]) return arr[0];
-        if(arr[1] != arr[0] && arr[1] != arr[2]) return arr[1];
-        
-        double commonNum = arr[0] == arr[1] ? arr[0] : arr[2];
-        
-        for(int i = 2; i < arr.length; i++) {
-            if(arr[i] != commonNum) return arr[i];
+        // Compare first three elements to determine which is unique
+        if (arr[0] == arr[1]) {
+            // arr[0] is the common element
+            double common = arr[0];
+            for (double num : arr) {
+                if (num != common) {
+                    return num;
+                }
+            }
+        } else if (arr[0] == arr[2]) {
+            // arr[0] is the common element, arr[1] is unique
+            return arr[1];
+        } else {
+            // arr[1] or arr[2] is the common element, arr[0] is unique
+            return arr[0];
         }
-        return commonNum;
+        return arr[0]; // Should not reach here
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(findUniq(new double[]{1, 1, 1, 2, 1, 1})); // 2.0
-        System.out.println(findUniq(new double[]{0, 0, 0.55, 0, 0})); // 0.55
-        System.out.println(findUniq(new double[]{3, 3, 3, 3, 1})); // 1.0
-        System.out.println(findUniq(new double[]{8, 8, 8, 7, 8})); // 7.0
-        System.out.println(findUniq(new double[]{2, 1, 2, 2, 2})); // 1.0
+        // Test case 1
+        System.out.println(findUniq(new double[]{1, 1, 1, 2, 1, 1})); // => 2.0
+        
+        // Test case 2
+        System.out.println(findUniq(new double[]{0, 0, 0.55, 0, 0})); // => 0.55
+        
+        // Test case 3
+        System.out.println(findUniq(new double[]{3, 3, 3, 3, 5})); // => 5.0
+        
+        // Test case 4
+        System.out.println(findUniq(new double[]{10, 9, 9, 9, 9})); // => 10.0
+        
+        // Test case 5
+        System.out.println(findUniq(new double[]{7.5, 7.5, 8.5, 7.5})); // => 8.5
     }
 }

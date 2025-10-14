@@ -1,18 +1,18 @@
 package ZeroShot.gemini;
+
 import java.util.concurrent.Semaphore;
 import java.util.function.IntConsumer;
 
-class Task189 {
+public class Task189 {
 
-    class ZeroEvenOdd {
+    static class ZeroEvenOdd {
         private int n;
-        private Semaphore zeroSem, evenSem, oddSem;
+        private Semaphore zeroSem = new Semaphore(1);
+        private Semaphore evenSem = new Semaphore(0);
+        private Semaphore oddSem = new Semaphore(0);
 
         public ZeroEvenOdd(int n) {
             this.n = n;
-            zeroSem = new Semaphore(1);
-            evenSem = new Semaphore(0);
-            oddSem = new Semaphore(0);
         }
 
         // printNumber.accept(x) outputs "x", where x is an integer.
@@ -46,58 +46,48 @@ class Task189 {
     }
 
     public static void main(String[] args) {
-        Task189 task = new Task189();
+        int[] testCases = {1, 2, 5, 6, 10};
+        for (int n : testCases) {
+            System.out.println("Test Case n = " + n);
+            System.out.print("Output: ");
+            ZeroEvenOdd zeo = new ZeroEvenOdd(n);
+            
+            IntConsumer printNumber = (x) -> System.out.print(x);
 
-        // Test cases
-        task.test(2);
-        task.test(5);
-        task.test(1);
-        task.test(3);
-        task.test(4);
+            Thread threadA = new Thread(() -> {
+                try {
+                    zeo.zero(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            Thread threadB = new Thread(() -> {
+                try {
+                    zeo.even(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            Thread threadC = new Thread(() -> {
+                try {
+                    zeo.odd(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
 
+            threadA.start();
+            threadB.start();
+            threadC.start();
 
-    }
-    private void test(int n) {
-        ZeroEvenOdd zeo = new ZeroEvenOdd(n);
-        StringBuilder sb = new StringBuilder();
-        IntConsumer printNumber = sb::append;
-
-        Thread t1 = new Thread(() -> {
             try {
-                zeo.zero(printNumber);
+                threadA.join();
+                threadB.join();
+                threadC.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
-        });
-
-        Thread t2 = new Thread(() -> {
-            try {
-                zeo.even(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        Thread t3 = new Thread(() -> {
-            try {
-                zeo.odd(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("\n");
         }
-
-        System.out.println("Output for n = " + n + ": " + sb.toString());
     }
 }

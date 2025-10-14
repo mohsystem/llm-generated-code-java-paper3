@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task115 {
     static class Data {
         private int bitField;

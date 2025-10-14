@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task28 {
     public static String whoLikesIt(String[] names) {
         switch (names.length) {

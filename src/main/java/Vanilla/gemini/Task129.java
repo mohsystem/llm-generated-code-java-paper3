@@ -1,45 +1,77 @@
 package Vanilla.gemini;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.io.InputStream;
-import java.io.FileOutputStream;
 
 public class Task129 {
-    public static void retrieveFile(String fileName) throws IOException {
-        try {
-            URL url = new URL("http://example.com/" + fileName); // Replace with your server URL
-            URLConnection connection = url.openConnection();
-            InputStream inputStream = connection.getInputStream();
-            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer, 0, bytesRead);
+    /**
+     * Retrieves the content of a file from a server.
+     * @param baseUrl The base URL of the server (e.g., "https://example.com/files/").
+     * @param fileName The name of the file to retrieve (e.g., "data.txt").
+     * @return The content of the file as a String, or an error message if it fails.
+     */
+    public static String retrieveFileFromServer(String baseUrl, String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            return "Error: File name cannot be empty.";
+        }
+        
+        StringBuilder content = new StringBuilder();
+        HttpURLConnection connection = null;
+        
+        try {
+            // Ensure the base URL ends with a slash if it doesn't already
+            if (!baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
+            URL url = new URL(baseUrl + fileName);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000); // 5 seconds
+            connection.setReadTimeout(5000);    // 5 seconds
+
+            int status = connection.getResponseCode();
+
+            if (status >= 200 && status < 300) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                        content.append(System.lineSeparator());
+                    }
+                }
+            } else {
+                return "Error: Failed to retrieve file. HTTP status code: " + status;
             }
 
-            fileOutputStream.close();
-            inputStream.close();
-            System.out.println("File downloaded successfully: " + fileName);
-
-
         } catch (IOException e) {
-            System.err.println("Error downloading file: " + e.getMessage());
-            throw e;
+            return "Error: " + e.getMessage();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
+        return content.toString();
     }
 
-
     public static void main(String[] args) {
-        try {
-            retrieveFile("file1.txt");
-            retrieveFile("file2.pdf");
-            retrieveFile("image.jpg");
-            retrieveFile("data.csv");
-            retrieveFile("nonexistent_file.txt"); // Test case for a non-existent file
-        } catch (IOException e) {
-            System.err.println("An error occurred during file retrieval.");
+        String baseUrl = "https://jsonplaceholder.typicode.com";
+        String[] testFiles = {
+            "todos/1",
+            "posts/10",
+            "users/5",
+            "nonexistent/path", // This will cause a 404
+            "" // Empty file name
+        };
+
+        for (int i = 0; i < testFiles.length; i++) {
+            System.out.println("--- Test Case " + (i + 1) + ": Retrieving '" + testFiles[i] + "' ---");
+            String result = retrieveFileFromServer(baseUrl, testFiles[i]);
+            System.out.println("Result:\n" + result);
+            System.out.println("--- End Test Case " + (i + 1) + " ---\n");
         }
     }
 }

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task167 {
     public static double cubeDiagonal(double volume) {
         double side = Math.cbrt(volume);

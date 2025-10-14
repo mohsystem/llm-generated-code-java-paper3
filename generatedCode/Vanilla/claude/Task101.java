@@ -10,7 +10,7 @@ public class Task101 {
             // Create file
             File scriptFile = new File("script.sh");
             FileWriter writer = new FileWriter(scriptFile);
-            writer.write("#!/bin/bash\\necho \\"Hello from script\\"");
+            writer.write("#!/bin/bash\\necho \"Hello from script\"");
             writer.close();
             
             // Make executable

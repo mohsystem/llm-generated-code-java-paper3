@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task20 {
     public static int digPow(int n, int p) {
         String digits = Integer.toString(n);

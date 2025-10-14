@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task31 {
     public static String complementDNA(String dna) {
         StringBuilder complement = new StringBuilder();

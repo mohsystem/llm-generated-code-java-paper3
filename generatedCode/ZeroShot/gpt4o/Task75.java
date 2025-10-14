@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;

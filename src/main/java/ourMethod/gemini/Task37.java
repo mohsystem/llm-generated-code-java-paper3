@@ -1,75 +1,119 @@
 package ourMethod.gemini;
-import java.sql.*;
-import java.util.Scanner;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.regex.Pattern;
 
 public class Task37 {
 
-    public static ResultSet getUserInfo(String username, String connectionUrl, String user, String password) throws SQLException {
-        if (username == null || username.isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty.");
-        }
+    private static final String DB_URL = "jdbc:sqlite::memory:";
+    // A simple regex to validate a username: 3-16 alphanumeric characters.
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,16}$");
 
-        try (Connection connection = DriverManager.getConnection(connectionUrl, user, password)) {
-            String query = "SELECT * FROM users WHERE username = ?"; // Parameterized query to prevent SQL injection
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, username);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    return resultSet;
-                }
-            }
+    // Initializes the database with a users table and some sample data
+    public static void initializeDatabase(Connection conn) throws SQLException {
+        String createTableSql = "CREATE TABLE IF NOT EXISTS users ("
+                            + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                            + "username TEXT NOT NULL UNIQUE,"
+                            + "email TEXT NOT NULL,"
+                            + "full_name TEXT NOT NULL);";
+
+        String insertDataSql1 = "INSERT INTO users(username, email, full_name) VALUES('alice', 'alice@example.com', 'Alice Smith');";
+        String insertDataSql2 = "INSERT INTO users(username, email, full_name) VALUES('bob', 'bob@example.com', 'Bob Johnson');";
+
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(createTableSql);
+            stmt.execute(insertDataSql1);
+            stmt.execute(insertDataSql2);
         }
     }
 
+    // Validates the username format to ensure it meets requirements before being used.
+    public static boolean isValidUsername(String username) {
+        if (username == null) {
+            return false;
+        }
+        return USERNAME_PATTERN.matcher(username).matches();
+    }
 
-    public static void main(String[] args) {
-        String connectionUrl = "jdbc:sqlserver://your_server_name;databaseName=your_database_name;encrypt=true;trustServerCertificate=true;";
-        String user = "your_username";
-        String password = "your_password";
-
-        Scanner scanner = new Scanner(System.in);
-
-
-        try {
-            System.out.print("Enter username 1: ");
-            String username1 = scanner.nextLine();
-            ResultSet rs1 = getUserInfo(username1, connectionUrl, user, password);
-            while (rs1.next()) {
-                System.out.println(rs1.getString("username") + " " + rs1.getString("email"));
-            }
-
-            System.out.print("Enter username 2: ");
-            String username2 = scanner.nextLine();
-            ResultSet rs2 = getUserInfo(username2, connectionUrl, user, password);
-            while (rs2.next()) {
-                System.out.println(rs2.getString("username") + " " + rs2.getString("email"));
-            }
-
-            System.out.print("Enter username 3: ");
-            String username3 = scanner.nextLine();
-            ResultSet rs3 = getUserInfo(username3, connectionUrl, user, password);
-            while (rs3.next()) {
-                System.out.println(rs3.getString("username") + " " + rs3.getString("email"));
-            }
-
-            System.out.print("Enter username 4: ");
-            String username4 = scanner.nextLine();
-            ResultSet rs4 = getUserInfo(username4, connectionUrl, user, password);
-            while (rs4.next()) {
-                System.out.println(rs4.getString("username") + " " + rs4.getString("email"));
-            }
-
-            System.out.print("Enter username 5: ");
-            String username5 = scanner.nextLine();
-            ResultSet rs5 = getUserInfo(username5, connectionUrl, user, password);
-            while (rs5.next()) {
-                System.out.println(rs5.getString("username") + " " + rs5.getString("email"));
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Error connecting to database: " + e.getMessage());
+    // Retrieves user information for a given username using a PreparedStatement to prevent SQL injection.
+    public static String getUserInfo(Connection conn, String username) {
+        if (!isValidUsername(username)) {
+            return "Invalid username format.";
         }
 
+        String sql = "SELECT id, username, email, full_name FROM users WHERE username = ?";
+        StringBuilder result = new StringBuilder();
 
+        // Use try-with-resources for PreparedStatement and ResultSet to ensure they are closed.
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    result.append("User Found:\n");
+                    result.append("  ID: ").append(rs.getInt("id")).append("\n");
+                    result.append("  Username: ").append(rs.getString("username")).append("\n");
+                    result.append("  Email: ").append(rs.getString("email")).append("\n");
+                    result.append("  Full Name: ").append(rs.getString("full_name"));
+                } else {
+                    result.append("User not found: ").append(username);
+                }
+            }
+        } catch (SQLException e) {
+            // In a real application, log this error to a secure logging system.
+            System.err.println("Database query failed: " + e.getMessage());
+            return "Error executing query.";
+        }
+        return result.toString();
+    }
 
+    public static void main(String[] args) {
+        // NOTE: To compile and run this file, you need the SQLite JDBC driver.
+        // Download it and include it in your classpath.
+        // Example:
+        // javac Task37.java
+        // java -cp .:sqlite-jdbc-3.41.2.2.jar Task37
+        
+        // Use try-with-resources for the Connection to ensure it's always closed.
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            if (conn != null) {
+                initializeDatabase(conn);
+                
+                System.out.println("--- Test Cases ---");
+                
+                // Test Case 1: Valid, existing user
+                System.out.println("Test 1: Searching for 'alice'");
+                System.out.println(getUserInfo(conn, "alice"));
+                System.out.println("--------------------");
+
+                // Test Case 2: Another valid, existing user
+                System.out.println("Test 2: Searching for 'bob'");
+                System.out.println(getUserInfo(conn, "bob"));
+                System.out.println("--------------------");
+
+                // Test Case 3: Valid, but non-existent user
+                System.out.println("Test 3: Searching for 'charlie'");
+                System.out.println(getUserInfo(conn, "charlie"));
+                System.out.println("--------------------");
+
+                // Test Case 4: Invalid username format (too short)
+                System.out.println("Test 4: Searching for 'ad'");
+                System.out.println(getUserInfo(conn, "ad"));
+                System.out.println("--------------------");
+
+                // Test Case 5: Classic SQL injection attempt.
+                // This is safely handled by the PreparedStatement.
+                System.out.println("Test 5: Searching for 'admin' OR '1'='1'");
+                System.out.println(getUserInfo(conn, "admin' OR '1'='1'"));
+                System.out.println("--------------------");
+            }
+        } catch (SQLException e) {
+            System.err.println("Database connection failed: " + e.getMessage());
+        }
     }
 }

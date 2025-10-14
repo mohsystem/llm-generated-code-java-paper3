@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task32 {
     public static int calculateYears(double principal, double interest, double tax, double desired) {
         int years = 0;

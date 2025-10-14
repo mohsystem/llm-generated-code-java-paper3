@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;

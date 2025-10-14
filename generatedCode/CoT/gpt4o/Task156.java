@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task156 {
     static class TreeNode {
         int value;

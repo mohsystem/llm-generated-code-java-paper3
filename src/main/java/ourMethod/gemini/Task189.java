@@ -1,26 +1,27 @@
 package ourMethod.gemini;
+
 import java.util.concurrent.Semaphore;
 import java.util.function.IntConsumer;
 
-class Task189 {
+class ZeroEvenOdd {
     private int n;
-    private Semaphore zeroSem, evenSem, oddSem;
-    private int current;
+    private Semaphore zeroSem = new Semaphore(1);
+    private Semaphore evenSem = new Semaphore(0);
+    private Semaphore oddSem = new Semaphore(0);
 
-    public Task189(int n) {
+    public ZeroEvenOdd(int n) {
+        if (n < 1 || n > 1000) {
+            throw new IllegalArgumentException("n must be between 1 and 1000");
+        }
         this.n = n;
-        zeroSem = new Semaphore(1);
-        evenSem = new Semaphore(0);
-        oddSem = new Semaphore(0);
-        current = 1;
     }
 
-    // printNumber.accept(x) outputs "x", where x is an integer.
+    // printNumber.accept(x) outputs x to the console.
     public void zero(IntConsumer printNumber) throws InterruptedException {
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             zeroSem.acquire();
             printNumber.accept(0);
-            if (current % 2 == 1) {
+            if (i % 2 == 1) {
                 oddSem.release();
             } else {
                 evenSem.release();
@@ -33,7 +34,6 @@ class Task189 {
             evenSem.acquire();
             printNumber.accept(i);
             zeroSem.release();
-            current++;
         }
     }
 
@@ -42,57 +42,58 @@ class Task189 {
             oddSem.acquire();
             printNumber.accept(i);
             zeroSem.release();
-            current++;
+        }
+    }
+}
+
+public class Task189 {
+    public static void main(String[] args) {
+        int[] testCases = {1, 2, 5, 6, 10};
+        for (int n : testCases) {
+            System.out.println("Test case n = " + n);
+            runTest(n);
+            System.out.println("\n");
         }
     }
 
-    public static void main(String[] args) {
-        test(2);
-        test(5);
-        test(1);
-        test(3);
-        test(10);
-    }
+    private static void runTest(int n) {
+        ZeroEvenOdd zeo = new ZeroEvenOdd(n);
+        IntConsumer printNumber = System.out::print;
 
-    private static void test(int n) {
-        Task189 zeo = new Task189(n);
-
-        Thread t1 = new Thread(() -> {
+        Thread threadA = new Thread(() -> {
             try {
-                zeo.zero(System.out::print);
+                zeo.zero(printNumber);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
 
-        Thread t2 = new Thread(() -> {
+        Thread threadB = new Thread(() -> {
             try {
-                zeo.even(System.out::print);
+                zeo.even(printNumber);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
 
-        Thread t3 = new Thread(() -> {
+        Thread threadC = new Thread(() -> {
             try {
-                zeo.odd(System.out::print);
+                zeo.odd(printNumber);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
 
-        t1.start();
-        t2.start();
-        t3.start();
+        threadA.start();
+        threadB.start();
+        threadC.start();
 
         try {
-            t1.join();
-            t2.join();
-            t3.join();
+            threadA.join();
+            threadB.join();
+            threadC.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
-
-        System.out.println(); // Add newline after each test case
     }
 }

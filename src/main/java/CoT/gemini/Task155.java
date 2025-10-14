@@ -1,68 +1,87 @@
 package CoT.gemini;
+
 import java.util.Arrays;
 
 public class Task155 {
 
-    public static void heapSort(int[] arr) {
-        int n = arr.length;
+    /**
+     * To heapify a subtree rooted with node i which is an index in arr[].
+     * n is the size of the heap.
+     * @param arr The array representing the heap.
+     * @param n The size of the heap.
+     * @param i The index of the root of the subtree to heapify.
+     */
+    void heapify(int arr[], int n, int i) {
+        int largest = i; // Initialize largest as root
+        int l = 2 * i + 1; // left = 2*i + 1
+        int r = 2 * i + 2; // right = 2*i + 2
 
-        // Build max heap
-        for (int i = n / 2 - 1; i >= 0; i--) {
-            heapify(arr, n, i);
+        // If left child is larger than root
+        if (l < n && arr[l] > arr[largest]) {
+            largest = l;
         }
 
-        // Heap sort
-        for (int i = n - 1; i >= 0; i--) {
-            int temp = arr[0];
-            arr[0] = arr[i];
-            arr[i] = temp;
-
-            heapify(arr, i, 0);
-        }
-    }
-
-    static void heapify(int[] arr, int n, int i) {
-        int largest = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
-
-        if (left < n && arr[left] > arr[largest]) {
-            largest = left;
+        // If right child is larger than largest so far
+        if (r < n && arr[r] > arr[largest]) {
+            largest = r;
         }
 
-        if (right < n && arr[right] > arr[largest]) {
-            largest = right;
-        }
-
+        // If largest is not root
         if (largest != i) {
             int swap = arr[i];
             arr[i] = arr[largest];
             arr[largest] = swap;
 
+            // Recursively heapify the affected sub-tree
             heapify(arr, n, largest);
         }
     }
 
+    /**
+     * The main function to sort an array of given size using Heap Sort.
+     * @param arr The array to be sorted.
+     */
+    public void heapSort(int arr[]) {
+        if (arr == null || arr.length == 0) {
+            return;
+        }
+        int n = arr.length;
+
+        // Build a max heap
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(arr, n, i);
+        }
+
+        // One by one extract an element from the heap
+        for (int i = n - 1; i > 0; i--) {
+            // Move current root to end
+            int temp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = temp;
+
+            // call max heapify on the reduced heap
+            heapify(arr, i, 0);
+        }
+    }
+
     public static void main(String[] args) {
-        int[] arr1 = {5, 1, 4, 2, 8};
-        heapSort(arr1);
-        System.out.println(Arrays.toString(arr1)); // Expected: [1, 2, 4, 5, 8]
+        Task155 sorter = new Task155();
 
-        int[] arr2 = {3, 7, 9, 1, 5};
-        heapSort(arr2);
-        System.out.println(Arrays.toString(arr2)); // Expected: [1, 3, 5, 7, 9]
+        int[][] testCases = {
+            {12, 11, 13, 5, 6, 7},
+            {5, 4, 3, 2, 1},
+            {1, 2, 3, 4, 5},
+            {-5, 8, -2, 0, 9, 1, -10},
+            {42}
+        };
 
-        int[] arr3 = {12, 11, 13, 5, 6, 7};
-        heapSort(arr3);
-        System.out.println(Arrays.toString(arr3)); // Expected: [5, 6, 7, 11, 12, 13]
-
-        int[] arr4 = {};
-        heapSort(arr4);
-        System.out.println(Arrays.toString(arr4)); // Expected: []
-
-        int[] arr5 = {5};
-        heapSort(arr5);
-        System.out.println(Arrays.toString(arr5)); // Expected: [5]
-
+        for (int i = 0; i < testCases.length; i++) {
+            int[] arr = testCases[i];
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Original array: " + Arrays.toString(arr));
+            sorter.heapSort(arr);
+            System.out.println("Sorted array: " + Arrays.toString(arr));
+            System.out.println();
+        }
     }
 }

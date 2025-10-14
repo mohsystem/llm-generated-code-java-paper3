@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task15 {
     public static String[] buildTower(int floors) {
         String[] tower = new String[floors];

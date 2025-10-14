@@ -1,86 +1,55 @@
 package ZeroShot.claude;
 
-import java.util.ArrayList;
-import java.util.List;
-
-class XMLNode {
-    String name;
-    List<XMLNode> children;
-    
-    XMLNode(String name) {
-        this.name = name;
-        this.children = new ArrayList<>();
-    }
-}
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class Task61 {
-    private static int index = 0;
-    
-    public static XMLNode parseXML(String xml) {
-        if (xml == null || xml.isEmpty()) {
-            return null;
+    public static String parseAndGetRootElement(String xmlString) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            
+            // Security configurations
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            factory.setXIncludeAware(false);
+            factory.setExpandEntityReferences(false);
+            
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            ByteArrayInputStream input = new ByteArrayInputStream(
+                xmlString.getBytes(StandardCharsets.UTF_8));
+            Document doc = builder.parse(input);
+            Element root = doc.getDocumentElement();
+            return root.getNodeName();
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
-        
-        xml = xml.trim();
-        index = 0;
-        return parseElement(xml);
     }
     
-    private static XMLNode parseElement(String xml) {
-        if (index >= xml.length()) return null;
-        
-        // Skip whitespace
-        while (index < xml.length() && Character.isWhitespace(xml.charAt(index))) {
-            index++;
-        }
-        
-        // Check for opening tag
-        if (xml.charAt(index) != '<') return null;
-        index++;
-        
-        // Get tag name
-        StringBuilder tagName = new StringBuilder();
-        while (index < xml.length() && xml.charAt(index) != '>') {
-            tagName.append(xml.charAt(index));
-            index++;
-        }
-        index++; // Skip '>'
-        
-        XMLNode node = new XMLNode(tagName.toString());
-        
-        // Parse children until closing tag
-        while (index < xml.length()) {
-            if (xml.charAt(index) == '<' && xml.charAt(index + 1) == '/') {
-                // Found closing tag
-                index = xml.indexOf('>', index) + 1;
-                break;
-            }
-            XMLNode child = parseElement(xml);
-            if (child != null) {
-                node.children.add(child);
-            } else {
-                index++;
-            }
-        }
-        
-        return node;
-    }
-
     public static void main(String[] args) {
-        // Test cases
-        String[] testCases = {
-            "<root><child1/><child2/></root>",
-            "<document><header>Title</header><body>Content</body></document>",
-            "<single/>",
-            "<parent><child><grandchild/></child></parent>",
-            "<root></root>"
-        };
+        // Test case 1: Simple XML
+        String test1 = "<?xml version=\"1.0\"?><root><child>value</child></root>";
+        System.out.println("Test 1 - Root element: " + parseAndGetRootElement(test1));
         
-        for (String test : testCases) {
-            XMLNode root = parseXML(test);
-            System.out.println("Root element: " + root.name);
-            System.out.println("Number of children: " + root.children.size());
-            System.out.println("---");
-        }
+        // Test case 2: XML with attributes
+        String test2 = "<?xml version=\"1.0\"?><books><book id=\"1\">Java</book></books>";
+        System.out.println("Test 2 - Root element: " + parseAndGetRootElement(test2));
+        
+        // Test case 3: Complex XML
+        String test3 = "<?xml version=\"1.0\"?><company><employee><name>John</name></employee></company>";
+        System.out.println("Test 3 - Root element: " + parseAndGetRootElement(test3));
+        
+        // Test case 4: XML with namespaces
+        String test4 = "<?xml version=\"1.0\"?><ns:document xmlns:ns=\"http://example.com\"><ns:data>test</ns:data></ns:document>";
+        System.out.println("Test 4 - Root element: " + parseAndGetRootElement(test4));
+        
+        // Test case 5: Single element XML
+        String test5 = "<?xml version=\"1.0\"?><message/>";
+        System.out.println("Test 5 - Root element: " + parseAndGetRootElement(test5));
     }
 }

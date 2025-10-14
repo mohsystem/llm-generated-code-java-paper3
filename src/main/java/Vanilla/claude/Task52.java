@@ -1,69 +1,133 @@
 package Vanilla.claude;
 
 import java.io.*;
-import java.nio.file.*;
+import java.util.*;
 
 public class Task52 {
-    public static byte[] encrypt(byte[] data, byte key) {
-        byte[] encrypted = new byte[data.length];
-        for(int i = 0; i < data.length; i++) {
-            encrypted[i] = (byte)(data[i] ^ key);
+    private static final int KEY = 123;
+    
+    // XOR-based encryption/decryption
+    public static byte[] encryptDecrypt(byte[] data, int key) {
+        byte[] result = new byte[data.length];
+        for (int i = 0; i < data.length; i++) {
+            result[i] = (byte) (data[i] ^ key);
         }
-        return encrypted;
+        return result;
     }
     
-    public static byte[] decrypt(byte[] data, byte key) {
-        return encrypt(data, key); // XOR encryption is reversible
+    public static void encryptFile(String inputFile, String outputFile, int key) throws IOException {
+        FileInputStream fis = new FileInputStream(inputFile);
+        byte[] data = fis.readAllBytes();
+        fis.close();
+        
+        byte[] encrypted = encryptDecrypt(data, key);
+        
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        fos.write(encrypted);
+        fos.close();
     }
-
+    
+    public static void decryptFile(String inputFile, String outputFile, int key) throws IOException {
+        FileInputStream fis = new FileInputStream(inputFile);
+        byte[] data = fis.readAllBytes();
+        fis.close();
+        
+        byte[] decrypted = encryptDecrypt(data, key);
+        
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        fos.write(decrypted);
+        fos.close();
+    }
+    
+    public static String encryptString(String plaintext, int key) {
+        byte[] encrypted = encryptDecrypt(plaintext.getBytes(), key);
+        return Base64.getEncoder().encodeToString(encrypted);
+    }
+    
+    public static String decryptString(String encrypted, int key) {
+        byte[] encryptedBytes = Base64.getDecoder().decode(encrypted);
+        byte[] decrypted = encryptDecrypt(encryptedBytes, key);
+        return new String(decrypted);
+    }
+    
     public static void main(String[] args) {
+        System.out.println("File Encryption/Decryption Program");
+        System.out.println("===================================\\n");
+        
+        // Test Case 1: Encrypt and decrypt a simple string
+        System.out.println("Test Case 1: Simple String Encryption");
+        String text1 = "Hello World!";
+        String encrypted1 = encryptString(text1, KEY);
+        String decrypted1 = decryptString(encrypted1, KEY);
+        System.out.println("Original: " + text1);
+        System.out.println("Encrypted: " + encrypted1);
+        System.out.println("Decrypted: " + decrypted1);
+        System.out.println("Match: " + text1.equals(decrypted1) + "\\n");
+        
+        // Test Case 2: Encrypt and decrypt a longer text
+        System.out.println("Test Case 2: Longer Text Encryption");
+        String text2 = "This is a test message with numbers 12345 and symbols @#$%";
+        String encrypted2 = encryptString(text2, KEY);
+        String decrypted2 = decryptString(encrypted2, KEY);
+        System.out.println("Original: " + text2);
+        System.out.println("Encrypted: " + encrypted2);
+        System.out.println("Decrypted: " + decrypted2);
+        System.out.println("Match: " + text2.equals(decrypted2) + "\\n");
+        
+        // Test Case 3: Encrypt and decrypt with different key
+        System.out.println("Test Case 3: Different Key");
+        String text3 = "Secret Message";
+        int customKey = 255;
+        String encrypted3 = encryptString(text3, customKey);
+        String decrypted3 = decryptString(encrypted3, customKey);
+        System.out.println("Original: " + text3);
+        System.out.println("Encrypted: " + encrypted3);
+        System.out.println("Decrypted: " + decrypted3);
+        System.out.println("Match: " + text3.equals(decrypted3) + "\\n");
+        
+        // Test Case 4: Empty string
+        System.out.println("Test Case 4: Empty String");
+        String text4 = "";
+        String encrypted4 = encryptString(text4, KEY);
+        String decrypted4 = decryptString(encrypted4, KEY);
+        System.out.println("Original: '" + text4 + "'");
+        System.out.println("Encrypted: '" + encrypted4 + "'");
+        System.out.println("Decrypted: '" + decrypted4 + "'");
+        System.out.println("Match: " + text4.equals(decrypted4) + "\\n");
+        
+        // Test Case 5: File encryption/decryption
+        System.out.println("Test Case 5: File Encryption/Decryption");
         try {
-            // Test case 1: Simple text file
-            String content1 = "Hello World";
-            Files.write(Paths.get("test1.txt"), content1.getBytes());
-            byte[] data1 = Files.readAllBytes(Paths.get("test1.txt"));
-            byte[] encrypted1 = encrypt(data1, (byte)0x0F);
-            Files.write(Paths.get("encrypted1.txt"), encrypted1);
-            byte[] decrypted1 = decrypt(encrypted1, (byte)0x0F);
-            System.out.println("Test 1: " + new String(decrypted1));
-
-            // Test case 2: Empty file
-            Files.write(Paths.get("test2.txt"), new byte[0]);
-            byte[] data2 = Files.readAllBytes(Paths.get("test2.txt"));
-            byte[] encrypted2 = encrypt(data2, (byte)0x0F);
-            Files.write(Paths.get("encrypted2.txt"), encrypted2);
-            byte[] decrypted2 = decrypt(encrypted2, (byte)0x0F);
-            System.out.println("Test 2: " + new String(decrypted2));
-
-            // Test case 3: Special characters
-            String content3 = "!@#$%^&*()";
-            Files.write(Paths.get("test3.txt"), content3.getBytes());
-            byte[] data3 = Files.readAllBytes(Paths.get("test3.txt"));
-            byte[] encrypted3 = encrypt(data3, (byte)0x0F);
-            Files.write(Paths.get("encrypted3.txt"), encrypted3);
-            byte[] decrypted3 = decrypt(encrypted3, (byte)0x0F);
-            System.out.println("Test 3: " + new String(decrypted3));
-
-            // Test case 4: Numbers
-            String content4 = "12345";
-            Files.write(Paths.get("test4.txt"), content4.getBytes());
-            byte[] data4 = Files.readAllBytes(Paths.get("test4.txt"));
-            byte[] encrypted4 = encrypt(data4, (byte)0x0F);
-            Files.write(Paths.get("encrypted4.txt"), encrypted4);
-            byte[] decrypted4 = decrypt(encrypted4, (byte)0x0F);
-            System.out.println("Test 4: " + new String(decrypted4));
-
-            // Test case 5: Long text
-            String content5 = "This is a longer text to test encryption and decryption";
-            Files.write(Paths.get("test5.txt"), content5.getBytes());
-            byte[] data5 = Files.readAllBytes(Paths.get("test5.txt"));
-            byte[] encrypted5 = encrypt(data5, (byte)0x0F);
-            Files.write(Paths.get("encrypted5.txt"), encrypted5);
-            byte[] decrypted5 = decrypt(encrypted5, (byte)0x0F);
-            System.out.println("Test 5: " + new String(decrypted5));
-
-        } catch(IOException e) {
-            e.printStackTrace();
+            String originalFile = "test_input.txt";
+            String encryptedFile = "test_encrypted.bin";
+            String decryptedFile = "test_decrypted.txt";
+            
+            // Create a test file
+            FileWriter fw = new FileWriter(originalFile);
+            fw.write("This is a test file content.\\nLine 2 with more data.");
+            fw.close();
+            
+            // Encrypt file
+            encryptFile(originalFile, encryptedFile, KEY);
+            System.out.println("File encrypted: " + encryptedFile);
+            
+            // Decrypt file
+            decryptFile(encryptedFile, decryptedFile, KEY);
+            System.out.println("File decrypted: " + decryptedFile);
+            
+            // Verify content
+            FileReader fr = new FileReader(decryptedFile);
+            BufferedReader br = new BufferedReader(fr);
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                content.append(line).append("\\n");
+            }
+            br.close();
+            System.out.println("Decrypted content: " + content.toString().trim());
+            
+        } catch (IOException e) {
+            System.out.println("File operation: " + e.getMessage());
         }
     }
 }

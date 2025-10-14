@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task167 {
     public static double cubeDiagonal(double volume) {
         double sideLength = Math.cbrt(volume);

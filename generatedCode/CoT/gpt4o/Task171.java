@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task171 {
     public static int reversePairs(int[] nums) {
         if (nums == null || nums.length == 0) return 0;

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Base64;

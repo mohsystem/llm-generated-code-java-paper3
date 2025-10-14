@@ -1,49 +1,54 @@
 package ZeroShot.claude;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 public class Task79 {
     public static String encrypt(String message, String secretKey) {
         try {
-            // Create cipher instance
+            // Create a SecretKey from the provided key
+            byte[] keyBytes = new byte[16];
+            byte[] paramBytes = secretKey.getBytes("UTF-8");
+            System.arraycopy(paramBytes, 0, keyBytes, 0, Math.min(paramBytes.length, keyBytes.length));
+            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+            
+            // Create cipher for encryption
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            
-            // Create secret key
-            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes("UTF-8"), "AES");
-            
-            // Initialize cipher for encryption
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             
             // Encrypt the message
-            byte[] encryptedBytes = cipher.doFinal(message.getBytes());
+            byte[] encryptedBytes = cipher.doFinal(message.getBytes("UTF-8"));
             
-            // Encode to base64 string
+            // Return Base64 encoded string
             return Base64.getEncoder().encodeToString(encryptedBytes);
-            
-        } catch(Exception e) {
-            return "Error encrypting message";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
-
+    
     public static void main(String[] args) {
-        String key = "1234567890123456"; // 16 byte key for AES-128
+        // Test case 1
+        String result1 = encrypt("Hello World", "mySecretKey12345");
+        System.out.println("Test 1 - Encrypted: " + result1);
         
-        // Test cases
-        String[] messages = {
-            "Hello World",
-            "Secret Message 123",
-            "Confidential Data",
-            "Test Message",
-            "Encryption Test"
-        };
+        // Test case 2
+        String result2 = encrypt("Secure Message", "password1234567");
+        System.out.println("Test 2 - Encrypted: " + result2);
         
-        for(int i = 0; i < messages.length; i++) {
-            System.out.println("Test case " + (i+1) + ":");
-            System.out.println("Original: " + messages[i]);
-            System.out.println("Encrypted: " + encrypt(messages[i], key));
-            System.out.println();
-        }
+        // Test case 3
+        String result3 = encrypt("Testing 123", "key123456789012");
+        System.out.println("Test 3 - Encrypted: " + result3);
+        
+        // Test case 4
+        String result4 = encrypt("Encryption Test", "secretKey098765");
+        System.out.println("Test 4 - Encrypted: " + result4);
+        
+        // Test case 5
+        String result5 = encrypt("Java Crypto", "myKey1234567890");
+        System.out.println("Test 5 - Encrypted: " + result5);
     }
 }

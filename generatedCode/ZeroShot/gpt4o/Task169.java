@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task169 {
     public static int[] countSmaller(int[] nums) {
         int n = nums.length;

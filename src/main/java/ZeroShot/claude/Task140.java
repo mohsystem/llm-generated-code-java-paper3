@@ -1,40 +1,43 @@
 package ZeroShot.claude;
 
+import java.util.Scanner;
+
 public class Task140 {
-    public static double calculate(double num1, double num2, char operator) {
-        double result = 0;
+    public static Double calculate(double num1, double num2, char operator) {
         switch (operator) {
             case '+':
-                result = num1 + num2;
-                break;
+                return num1 + num2;
             case '-':
-                result = num1 - num2;
-                break;
+                return num1 - num2;
             case '*':
-                result = num1 * num2;
-                break;
+                return num1 * num2;
             case '/':
-                if (num2 != 0) {
-                    result = num1 / num2;
-                } else {
-                    throw new ArithmeticException("Division by zero!");
+                if (num2 == 0) {
+                    System.out.println("Error: Division by zero");
+                    return null;
                 }
-                break;
+                return num1 / num2;
             default:
-                throw new IllegalArgumentException("Invalid operator!");
+                System.out.println("Error: Invalid operator");
+                return null;
         }
-        return result;
     }
-
+    
     public static void main(String[] args) {
-        try {
-            System.out.println(calculate(10, 5, '+')); // 15.0
-            System.out.println(calculate(10, 5, '-')); // 5.0
-            System.out.println(calculate(10, 5, '*')); // 50.0
-            System.out.println(calculate(10, 5, '/')); // 2.0
-            System.out.println(calculate(10, 2, '*')); // 20.0
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        // Test case 1: Addition
+        System.out.println("Test 1 (10 + 5): " + calculate(10, 5, '+'));
+        
+        // Test case 2: Subtraction
+        System.out.println("Test 2 (10 - 5): " + calculate(10, 5, '-'));
+        
+        // Test case 3: Multiplication
+        System.out.println("Test 3 (10 * 5): " + calculate(10, 5, '*'));
+        
+        // Test case 4: Division
+        System.out.println("Test 4 (10 / 5): " + calculate(10, 5, '/'));
+        
+        // Test case 5: Division by zero
+        System.out.print("Test 5 (10 / 0): ");
+        calculate(10, 0, '/');
     }
 }

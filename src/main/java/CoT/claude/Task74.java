@@ -3,59 +3,115 @@ package CoT.claude;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Task74 {
-    public static Connection getConnection(String host, String dbName, String user, String password) {
-        Connection conn = null;
+    
+    /**
+     * Creates and returns a secure PostgreSQL database connection
+     * @param host Database host
+     * @param port Database port
+     * @param database Database name
+     * @param username Database username
+     * @param password Database password
+     * @param useSSL Whether to use SSL connection
+     * @return Connection object
+     * @throws SQLException if connection fails
+     */
+    public static Connection createPostgresConnection(String host, int port, 
+                                                      String database, String username, 
+                                                      String password, boolean useSSL) 
+                                                      throws SQLException {
+        // Validate input parameters
+        if (host == null || host.trim().isEmpty()) {
+            throw new IllegalArgumentException("Host cannot be null or empty");
+        }
+        if (database == null || database.trim().isEmpty()) {
+            throw new IllegalArgumentException("Database name cannot be null or empty");
+        }
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (port < 1 || port > 65535) {
+            throw new IllegalArgumentException("Port must be between 1 and 65535");
+        }
+        
+        // Build secure connection URL
+        String url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+        
+        // Set connection properties for security
+        Properties props = new Properties();
+        props.setProperty("user", username);
+        props.setProperty("password", password);
+        
+        // Enable SSL if required
+        if (useSSL) {
+            props.setProperty("ssl", "true");
+            props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
+        }
+        
+        // Additional security settings
+        props.setProperty("tcpKeepAlive", "true");
+        props.setProperty("loginTimeout", "10");
+        
         try {
-            // Load the PostgreSQL JDBC driver
+            // Load PostgreSQL JDBC driver
             Class.forName("org.postgresql.Driver");
             
-            // Create connection URL with parameters
-            String url = String.format("jdbc:postgresql://%s:5432/%s", host, dbName);
-            
-            // Get connection with credentials
-            conn = DriverManager.getConnection(url, user, password);
-            
-            if (conn != null) {
-                return conn;
-            }
+            // Create and return connection
+            Connection connection = DriverManager.getConnection(url, props);
+            return connection;
             
         } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL JDBC driver not found.");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("Connection failed.");
-            e.printStackTrace();
+            throw new SQLException("PostgreSQL JDBC Driver not found", e);
         }
-        return conn;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String host = "localhost";
-        String dbName = "testdb";
-        String user = "postgres";
-        String password = "password123";
-
-        // Test case 1: Valid connection parameters
-        Connection conn1 = getConnection(host, dbName, user, password);
-        System.out.println("Test 1: " + (conn1 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 2: Invalid host
-        Connection conn2 = getConnection("invalidhost", dbName, user, password);
-        System.out.println("Test 2: " + (conn2 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 3: Invalid database name
-        Connection conn3 = getConnection(host, "invaliddb", user, password);
-        System.out.println("Test 3: " + (conn3 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 4: Invalid username
-        Connection conn4 = getConnection(host, dbName, "invaliduser", password);
-        System.out.println("Test 4: " + (conn4 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 5: Invalid password
-        Connection conn5 = getConnection(host, dbName, user, "invalidpass");
-        System.out.println("Test 5: " + (conn5 != null ? "Connection successful" : "Connection failed"));
+        // Test cases with sample credentials (use environment variables in production)
+        System.out.println("=== PostgreSQL Connection Test Cases ===\\n");
+        
+        // Test Case 1: Successful connection (simulated)
+        testConnection("Test 1: Standard Connection", 
+                      "localhost", 5432, "testdb", "postgres", "password", false);
+        
+        // Test Case 2: SSL Connection
+        testConnection("Test 2: SSL Connection", 
+                      "localhost", 5432, "testdb", "postgres", "password", true);
+        
+        // Test Case 3: Invalid port
+        testConnection("Test 3: Invalid Port", 
+                      "localhost", -1, "testdb", "postgres", "password", false);
+        
+        // Test Case 4: Empty host
+        testConnection("Test 4: Empty Host", 
+                      "", 5432, "testdb", "postgres", "password", false);
+        
+        // Test Case 5: Null database
+        testConnection("Test 5: Null Database", 
+                      "localhost", 5432, null, "postgres", "password", false);
+    }
+    
+    private static void testConnection(String testName, String host, int port, 
+                                      String database, String username, 
+                                      String password, boolean useSSL) {
+        System.out.println(testName);
+        try {
+            Connection conn = createPostgresConnection(host, port, database, 
+                                                       username, password, useSSL);
+            System.out.println("✓ Connection created successfully");
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+                System.out.println("✓ Connection closed successfully");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("✗ Validation Error: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("✗ SQL Error: " + e.getMessage());
+        }
+        System.out.println();
     }
 }

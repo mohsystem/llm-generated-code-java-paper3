@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

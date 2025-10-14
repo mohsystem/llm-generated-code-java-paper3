@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task51 {
     public static String encrypt(String input) {
         StringBuilder encrypted = new StringBuilder();

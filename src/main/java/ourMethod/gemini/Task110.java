@@ -1,34 +1,45 @@
 package ourMethod.gemini;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Task110 {
 
-    public static boolean isValidURL(String url) {
+    /**
+     * Validates if a given string is a well-formed URL.
+     *
+     * @param urlString The string to validate.
+     * @return true if the string is a valid URL, false otherwise.
+     */
+    public static boolean isValidURL(String urlString) {
+        if (urlString == null || urlString.trim().isEmpty()) {
+            return false;
+        }
         try {
-            new URL(url).toURI();
+            // Use Java's built-in URL and URI classes for robust validation.
+            // Creating a URL object checks for basic syntax.
+            // Converting it to a URI provides stricter syntax checking.
+            new URL(urlString).toURI();
             return true;
         } catch (MalformedURLException | URISyntaxException e) {
             return false;
         }
     }
 
-
-
     public static void main(String[] args) {
-        String[] testCases = {
-                "https://www.example.com",
-                "http://example.com",
-                "ftp://ftp.example.com",
-                "invalid-url",
-                "https://www.example.com/path?query=string#fragment"
+        String[] testUrls = {
+            "https://www.google.com",
+            "http://example.com/path?query=1",
+            "ftp://ftp.is.co.za/rfc/rfc1808.txt",
+            "www.invalid.com",
+            "https://",
+            "http://exa mple.com"
         };
 
-        for (String testCase : testCases) {
-            System.out.println(testCase + ": " + isValidURL(testCase));
+        System.out.println("Running URL validation tests:");
+        for (String url : testUrls) {
+            System.out.printf("URL: \"%s\" -> Valid: %b%n", url, isValidURL(url));
         }
     }
 }

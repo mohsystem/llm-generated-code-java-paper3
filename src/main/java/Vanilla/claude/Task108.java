@@ -1,65 +1,132 @@
 package Vanilla.claude;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-interface RemoteInterface extends Remote {
-    String getMessage() throws RemoteException;
-    void setMessage(String message) throws RemoteException;
-}
-
-class RemoteObject extends UnicastRemoteObject implements RemoteInterface {
-    private String message;
+class Task108 {
+    private static Map<String, Object> objectStore = new ConcurrentHashMap<>();
     
-    public RemoteObject() throws RemoteException {
-        message = "Default Message";
-    }
-    
-    public String getMessage() throws RemoteException {
-        return message;
-    }
-    
-    public void setMessage(String message) throws RemoteException {
-        this.message = message;
-    }
-}
-
-public class Task108 {
     public static void main(String[] args) {
-        try {
-            RemoteObject obj = new RemoteObject();
-            Registry registry = LocateRegistry.createRegistry(1099);
-            registry.rebind("RemoteObject", obj);
-            System.out.println("Server ready");
-            
-            // Test cases
-            RemoteInterface stub = (RemoteInterface) registry.lookup("RemoteObject");
-            
-            // Test 1: Get default message
-            System.out.println("Test 1: " + stub.getMessage());
-            
-            // Test 2: Set new message
-            stub.setMessage("Hello World");
-            System.out.println("Test 2: " + stub.getMessage());
-            
-            // Test 3: Set empty message
-            stub.setMessage("");
-            System.out.println("Test 3: " + stub.getMessage());
-            
-            // Test 4: Set special characters
-            stub.setMessage("!@#$%^&*()");
-            System.out.println("Test 4: " + stub.getMessage());
-            
-            // Test 5: Set long message
-            stub.setMessage("This is a very long message to test the remote object functionality");
-            System.out.println("Test 5: " + stub.getMessage());
-            
-        } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
-            e.printStackTrace();
+        // Test cases
+        System.out.println("=== Test Case 1: Store and Retrieve ===");
+        storeObject("key1", "Hello World");
+        System.out.println("Retrieved: " + retrieveObject("key1"));
+        
+        System.out.println("\\n=== Test Case 2: Store Multiple Objects ===");
+        storeObject("key2", 12345);
+        storeObject("key3", new double[]{1.1, 2.2, 3.3});
+        System.out.println("Retrieved key2: " + retrieveObject("key2"));
+        System.out.println("Retrieved key3: " + Arrays.toString((double[])retrieveObject("key3")));
+        
+        System.out.println("\\n=== Test Case 3: Update Object ===");
+        storeObject("key1", "Updated Value");
+        System.out.println("Updated key1: " + retrieveObject("key1"));
+        
+        System.out.println("\\n=== Test Case 4: Delete Object ===");
+        boolean deleted = deleteObject("key2");
+        System.out.println("Deleted key2: " + deleted);
+        System.out.println("Retrieve deleted key2: " + retrieveObject("key2"));
+        
+        System.out.println("\\n=== Test Case 5: List All Keys ===");
+        System.out.println("All keys: " + listKeys());
+        
+        // Start server in a separate thread for demonstration
+        Thread serverThread = new Thread(() -> {
+            try {
+                startServer(8080);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        serverThread.setDaemon(true);
+        serverThread.start();
+        
+        System.out.println("\\nServer started on port 8080. Press Ctrl+C to stop.");
+    }
+    
+    public static void storeObject(String key, Object value) {
+        objectStore.put(key, value);
+    }
+    
+    public static Object retrieveObject(String key) {
+        return objectStore.get(key);
+    }
+    
+    public static boolean deleteObject(String key) {
+        return objectStore.remove(key) != null;
+    }
+    
+    public static Set<String> listKeys() {
+        return new HashSet<>(objectStore.keySet());
+    }
+    
+    public static void startServer(int port) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(port);
+        System.out.println("Server listening on port " + port);
+        
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            new Thread(new ClientHandler(clientSocket)).start();
+        }
+    }
+    
+    static class ClientHandler implements Runnable {
+        private Socket clientSocket;
+        
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+        
+        @Override
+        public void run() {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+                
+                String request = in.readLine();
+                if (request == null) return;
+                
+                String[] parts = request.split("\\\\|");
+                String command = parts[0];
+                String response = "";
+                
+                switch (command) {
+                    case "STORE":
+                        if (parts.length >= 3) {
+                            storeObject(parts[1], parts[2]);
+                            response = "OK|Object stored";
+                        } else {
+                            response = "ERROR|Invalid parameters";
+                        }
+                        break;
+                    case "RETRIEVE":
+                        if (parts.length >= 2) {
+                            Object value = retrieveObject(parts[1]);
+                            response = value != null ? "OK|" + value : "ERROR|Key not found";
+                        } else {
+                            response = "ERROR|Invalid parameters";
+                        }
+                        break;
+                    case "DELETE":
+                        if (parts.length >= 2) {
+                            boolean deleted = deleteObject(parts[1]);
+                            response = deleted ? "OK|Object deleted" : "ERROR|Key not found";
+                        } else {
+                            response = "ERROR|Invalid parameters";
+                        }
+                        break;
+                    case "LIST":
+                        response = "OK|" + listKeys();
+                        break;
+                    default:
+                        response = "ERROR|Unknown command";
+                }
+                
+                out.println(response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

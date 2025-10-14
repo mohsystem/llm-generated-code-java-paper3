@@ -1,68 +1,77 @@
 package ZeroShot.gemini;
-import java.util.Objects;
 
-class Task199 {
+public class Task199 {
+    private static final int MINUTES_PER_HOUR = 60;
+    private static final int HOURS_PER_DAY = 24;
+    private static final int MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY; // 1440
 
-    static class Clock {
-        private int minutes;
+    private int totalMinutes;
 
-        public Clock(int hours, int minutes) {
-            this.minutes = (hours * 60 + minutes) % 1440;
-            if (this.minutes < 0) {
-                this.minutes += 1440;
-            }
-        }
+    public Task199(int hour, int minute) {
+        // Normalize the time
+        int total = hour * MINUTES_PER_HOUR + minute;
+        // The modulo operator in Java can return a negative result.
+        // We add MINUTES_PER_DAY and take the modulo again to ensure a positive result.
+        this.totalMinutes = (total % MINUTES_PER_DAY + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+    }
 
-        public void add(int minutes) {
-            this.minutes = (this.minutes + minutes) % 1440;
-            if (this.minutes < 0) {
-                this.minutes += 1440;
-            }
-        }
+    public void add(int minutes) {
+        this.totalMinutes = (this.totalMinutes + minutes % MINUTES_PER_DAY + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+    }
 
-        public void subtract(int minutes) {
-            add(-minutes);
-        }
+    public void subtract(int minutes) {
+        // Subtracting is the same as adding a negative number
+        add(-minutes);
+    }
 
-        public String toString() {
-            int hours = (minutes / 60) % 24;
-            int mins = minutes % 60;
-            return String.format("%02d:%02d", hours, mins);
-        }
+    @Override
+    public String toString() {
+        int hour = totalMinutes / MINUTES_PER_HOUR;
+        int minute = totalMinutes % MINUTES_PER_HOUR;
+        return String.format("%02d:%02d", hour, minute);
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Task199 clock = (Task199) obj;
+        return totalMinutes == clock.totalMinutes;
+    }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Clock clock = (Clock) o;
-            return minutes == clock.minutes;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(minutes);
-        }
+    @Override
+    public int hashCode() {
+        // It's good practice to override hashCode when you override equals
+        return Integer.hashCode(totalMinutes);
     }
 
     public static void main(String[] args) {
-        Clock clock1 = new Clock(10, 30);
-        Clock clock2 = new Clock(10, 30);
-        System.out.println(clock1.equals(clock2)); // true
+        // Test Case 1: Create a clock and test toString
+        Task199 clock1 = new Task199(10, 30);
+        System.out.println("Test Case 1: Create clock (10:30) -> " + clock1);
 
-        clock1.add(30);
-        System.out.println(clock1); // 11:00
+        // Test Case 2: Add minutes without day rollover
+        clock1.add(20);
+        System.out.println("Test Case 2: Add 20 mins to 10:30 -> " + clock1);
 
-        clock1.subtract(60);
-        System.out.println(clock1); // 10:00
+        // Test Case 3: Add minutes with day rollover
+        Task199 clock2 = new Task199(23, 50);
+        clock2.add(20);
+        System.out.println("Test Case 3: Add 20 mins to 23:50 -> " + clock2);
 
-        Clock clock3 = new Clock(23, 59);
-        clock3.add(1);
-        System.out.println(clock3); // 00:00
-
-
-        Clock clock4 = new Clock(0, 0);
-        clock4.subtract(1);
-        System.out.println(clock4); // 23:59
+        // Test Case 4: Subtract minutes with day rollover
+        Task199 clock3 = new Task199(0, 10);
+        clock3.subtract(20);
+        System.out.println("Test Case 4: Subtract 20 mins from 00:10 -> " + clock3);
+        
+        // Test Case 5: Equality
+        Task199 clockA = new Task199(14, 30);
+        Task199 clockB = new Task199(14, 30);
+        Task199 clockC = new Task199(10, 0);
+        Task199 clockD = new Task199(38, 30); // equivalent to 14:30
+        System.out.println("Test Case 5: Equality Check");
+        System.out.println("  14:30 equals 14:30 -> " + clockA.equals(clockB));
+        System.out.println("  14:30 equals 10:00 -> " + clockA.equals(clockC));
+        System.out.println("  14:30 equals normalized 38:30 -> " + clockA.equals(clockD));
     }
 }

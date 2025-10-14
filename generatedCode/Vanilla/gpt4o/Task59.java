@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task59 {
     public static String accum(String s) {
         StringBuilder result = new StringBuilder();

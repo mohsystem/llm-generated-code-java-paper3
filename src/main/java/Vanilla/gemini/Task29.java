@@ -1,41 +1,50 @@
 package Vanilla.gemini;
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
 
-class Task29 {
-    public static int[] twoSum(int[] nums, int target) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) {
-                return new int[] { map.get(complement), i };
+public class Task29 {
+    /**
+     * Finds two indices of numbers in an array that add up to a target value.
+     *
+     * @param numbers The input array of integers.
+     * @param target The target sum.
+     * @return An array of two integers representing the indices of the two numbers.
+     */
+    public static int[] twoSum(int[] numbers, int target) {
+        Map<Integer, Integer> numMap = new HashMap<>();
+        for (int i = 0; i < numbers.length; i++) {
+            int complement = target - numbers[i];
+            if (numMap.containsKey(complement)) {
+                return new int[]{numMap.get(complement), i};
             }
-            map.put(nums[i], i);
+            numMap.put(numbers[i], i);
         }
-        return new int[0]; // Should not happen since a solution is guaranteed
+        // According to the problem description, a solution always exists,
+        // so this part should not be reached.
+        throw new IllegalArgumentException("No two sum solution");
     }
 
     public static void main(String[] args) {
-        int[] nums1 = {1, 2, 3};
-        int target1 = 4;
-        System.out.println(Arrays.toString(twoSum(nums1, target1))); // Output: [0, 2]
+        // Test Case 1
+        int[] result1 = twoSum(new int[]{1, 2, 3}, 4);
+        System.out.println("Test 1: " + Arrays.toString(result1)); // Expected: [0, 2]
 
-        int[] nums2 = {3, 2, 4};
-        int target2 = 6;
-        System.out.println(Arrays.toString(twoSum(nums2, target2))); // Output: [1, 2]
+        // Test Case 2
+        int[] result2 = twoSum(new int[]{1234, 5678, 9012}, 14690);
+        System.out.println("Test 2: " + Arrays.toString(result2)); // Expected: [1, 2]
 
-        int[] nums3 = {10, 20, 30, 40};
-        int target3 = 50;
-        System.out.println(Arrays.toString(twoSum(nums3, target3))); // Output: [0, 3]
+        // Test Case 3
+        int[] result3 = twoSum(new int[]{2, 2, 3}, 4);
+        System.out.println("Test 3: " + Arrays.toString(result3)); // Expected: [0, 1]
+
+        // Test Case 4
+        int[] result4 = twoSum(new int[]{3, 2, 4}, 6);
+        System.out.println("Test 4: " + Arrays.toString(result4)); // Expected: [1, 2]
         
-        int[] nums4 = {5, 7, 2, 9};
-        int target4 = 11;
-        System.out.println(Arrays.toString(twoSum(nums4, target4))); // Output: [0, 2]
-        
-        int[] nums5 = {-1, 5, 10, -7};
-        int target5 = 3;
-        System.out.println(Arrays.toString(twoSum(nums5, target5))); // Output: [0, 2]
-
+        // Test Case 5
+        int[] result5 = twoSum(new int[]{2, 7, 11, 15}, 9);
+        System.out.println("Test 5: " + Arrays.toString(result5)); // Expected: [0, 1]
     }
 }

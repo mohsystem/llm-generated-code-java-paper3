@@ -1,22 +1,48 @@
 package Vanilla.gemini;
-import java.util.Arrays;
 
-class Task168 {
-    public String tweakLetters(String str, int[] arr) {
-        char[] chars = str.toCharArray();
-        for (int i = 0; i < arr.length && i < chars.length; i++) {
-            chars[i] = (char) (chars[i] + arr[i]);
+public class Task168 {
+
+    /**
+     * Tweaks letters by one forward (+1) or backwards (-1) according to an array.
+     *
+     * @param str The input string of lowercase letters.
+     * @param tweaks An array of integers (0, 1, or -1) corresponding to each character.
+     * @return The tweaked string.
+     */
+    public static String tweakLetters(String str, int[] tweaks) {
+        if (str == null || tweaks == null || str.length() != tweaks.length) {
+            return ""; // Or throw an exception for invalid input
         }
-        return new String(chars);
+        StringBuilder result = new StringBuilder(str.length());
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            int tweak = tweaks[i];
+            char newChar = (char) (c + tweak);
+
+            if (newChar > 'z') {
+                newChar = 'a';
+            } else if (newChar < 'a') {
+                newChar = 'z';
+            }
+            result.append(newChar);
+        }
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task168 task168 = new Task168();
-        System.out.println(task168.tweakLetters("apple", new int[]{0, 1, -1, 0, -1})); // Output: aqold
-        System.out.println(task168.tweakLetters("many", new int[]{0, 0, 0, -1})); // Output: manx
-        System.out.println(task168.tweakLetters("rhino", new int[]{1, 1, 1, 1, 1})); // Output: sijop
-        System.out.println(task168.tweakLetters("xyz", new int[]{1, 1, 1})); // Output: yza
-        System.out.println(task168.tweakLetters("abc", new int[]{-1, -1, -1})); // Output: zab
-
+        // Test Case 1
+        System.out.println(tweakLetters("apple", new int[]{0, 1, -1, 0, -1}));
+        
+        // Test Case 2
+        System.out.println(tweakLetters("many", new int[]{0, 0, 0, -1}));
+        
+        // Test Case 3
+        System.out.println(tweakLetters("rhino", new int[]{1, 1, 1, 1, 1}));
+        
+        // Test Case 4
+        System.out.println(tweakLetters("zebra", new int[]{1, -1, 1, -1, 1}));
+        
+        // Test Case 5
+        System.out.println(tweakLetters("abc", new int[]{-1, 0, 1}));
     }
 }

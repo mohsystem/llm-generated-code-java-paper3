@@ -1,57 +1,75 @@
 package Vanilla.gemini;
-import java.io.*;
-import java.net.URL;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+// WARNING: Downloading and executing files from the internet can be extremely dangerous.
+// Only run this with URLs from trusted sources.
 public class Task86 {
 
-    public static void downloadAndExecute(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        String fileName = urlString.substring(urlString.lastIndexOf('/') + 1);
-        File downloadedFile = new File(fileName);
+    /**
+     * Downloads an executable file from a URL and runs it.
+     * @param urlStr The URL of the EXE file to download.
+     * @param fileName The local filename to save the EXE as.
+     */
+    public static void downloadAndExecute(String urlStr, String fileName) {
+        try {
+            // Step 1: Download the file
+            System.out.println("Downloading " + urlStr + " to " + fileName + "...");
+            URL url = new URL(urlStr);
+            Path targetPath = Paths.get(fileName).toAbsolutePath();
 
-        try (InputStream in = url.openStream();
-             OutputStream out = new FileOutputStream(downloadedFile)) {
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
+            // Use try-with-resources to ensure the stream is closed
+            try (InputStream in = url.openStream()) {
+                Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
             }
-        }
+            System.out.println("Download complete.");
 
-        // For security reasons, it is highly discouraged to execute downloaded files directly. 
-        // This code is provided as a demonstration and should not be used in production environments.
-        // Consider sandboxing or other security measures.
-
-        if (downloadedFile.exists()) {
-            ProcessBuilder pb = new ProcessBuilder(downloadedFile.getAbsolutePath());
-            try {
-                Process p = pb.start();
-                p.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            // On some systems, we might need to make the file executable
+            if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                targetPath.toFile().setExecutable(true);
             }
-        }
 
-        // Clean up (optional, but recommended)
-        //downloadedFile.delete(); 
+            // Step 2: Execute the downloaded file
+            System.out.println("Executing " + targetPath + "...");
+            ProcessBuilder processBuilder = new ProcessBuilder(targetPath.toString());
+            Process process = processBuilder.start();
+            
+            // Wait for the process to complete and print its exit code
+            int exitCode = process.waitFor();
+            System.out.println("'" + fileName + "' finished with exit code: " + exitCode);
+
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
+    public static void main(String[] args) {
+        // Using a URL for a safe, well-known executable (PuTTY)
+        String fileUrl = "https://the.earth.li/~sgtatham/putty/latest/w64/putty.exe";
+        
+        System.out.println("--- Starting 5 Test Cases ---");
 
+        System.out.println("\n--- Test Case 1 ---");
+        downloadAndExecute(fileUrl, "putty_java_1.exe");
 
-//    public static void main(String[] args) {
-//        // Test cases (replace with actual URLs for testing) - Note: Executing arbitrary downloaded EXE files is highly risky.
-//        try {
-//            // These test cases are placeholders and should NOT be executed with real URLs without thorough security review.
-//            // downloadAndExecute("http://example.com/file1.exe"); // Example URL - DO NOT USE without caution
-//            // downloadAndExecute("http://example.com/file2.exe"); // Example URL - DO NOT USE without caution
-//            // downloadAndExecute("http://example.com/file3.exe"); // Example URL - DO NOT USE without caution
-//            // downloadAndExecute("http://example.com/file4.exe"); // Example URL - DO NOT USE without caution
-//            // downloadAndExecute("http://example.com/file5.exe"); // Example URL - DO NOT USE without caution
-//
-//            System.out.println("Test cases completed. (URLs were placeholders, no actual downloads/executions occurred)");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+        System.out.println("\n--- Test Case 2 ---");
+        downloadAndExecute(fileUrl, "putty_java_2.exe");
+
+        System.out.println("\n--- Test Case 3 ---");
+        downloadAndExecute(fileUrl, "putty_java_3.exe");
+
+        System.out.println("\n--- Test Case 4 ---");
+        downloadAndExecute(fileUrl, "putty_java_4.exe");
+
+        System.out.println("\n--- Test Case 5 ---");
+        downloadAndExecute(fileUrl, "putty_java_5.exe");
+        
+        System.out.println("\n--- All tests completed ---");
+    }
 }

@@ -1,42 +1,40 @@
 package ourMethod.claude;
 
 public class Task5 {
-    public static int persistence(long num) {
-        // Validate input
+    public static int persistence(int num) {
         if (num < 0) {
-            throw new IllegalArgumentException("Number must be positive");
+            throw new IllegalArgumentException("Input must be a positive number");
+        }
+        
+        if (num < 10) {
+            return 0;
         }
         
         int count = 0;
+        long current = num;
         
-        // Continue while number has more than one digit
-        while (num > 9) {
+        while (current >= 10) {
             long product = 1;
-            
-            // Multiply all digits
-            while (num > 0) {
-                product *= (num % 10);
-                num /= 10;
-                
-                // Check for overflow
-                if (product < 0) {
-                    throw new ArithmeticException("Multiplication overflow occurred");
-                }
+            while (current > 0) {
+                product *= current % 10;
+                current /= 10;
             }
-            
-            num = product;
+            current = product;
             count++;
+            
+            if (count > 100) {
+                throw new IllegalStateException("Exceeded maximum iterations");
+            }
         }
         
         return count;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(persistence(39));    // Should output 3
-        System.out.println(persistence(999));   // Should output 4
-        System.out.println(persistence(4));     // Should output 0
-        System.out.println(persistence(25));    // Should output 2
-        System.out.println(persistence(777));   // Should output 4
+        System.out.println("Test 1: persistence(39) = " + persistence(39));
+        System.out.println("Test 2: persistence(999) = " + persistence(999));
+        System.out.println("Test 3: persistence(4) = " + persistence(4));
+        System.out.println("Test 4: persistence(25) = " + persistence(25));
+        System.out.println("Test 5: persistence(0) = " + persistence(0));
     }
 }

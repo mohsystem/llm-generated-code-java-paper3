@@ -1,73 +1,111 @@
 package Vanilla.gemini;
+
 import java.util.*;
 
-class Task154 {
-    private Map<Integer, List<Integer>> graph;
+public class Task154 {
 
-    public Task154(Map<Integer, List<Integer>> graph) {
-        this.graph = graph;
-    }
+    /**
+     * Inner class to represent a graph using an adjacency list.
+     */
+    static class Graph {
+        private int V; // Number of vertices
+        private LinkedList<Integer>[] adj; // Adjacency List representation
 
-    public List<Integer> dfs(int startNode) {
-        List<Integer> visited = new ArrayList<>();
-        Stack<Integer> stack = new Stack<>();
+        /**
+         * Graph constructor.
+         * @param v Number of vertices in the graph.
+         */
+        @SuppressWarnings("unchecked")
+        Graph(int v) {
+            V = v;
+            adj = new LinkedList[v];
+            for (int i = 0; i < v; ++i) {
+                adj[i] = new LinkedList<>();
+            }
+        }
 
-        stack.push(startNode);
+        /**
+         * Adds an edge to the graph.
+         * @param v The source vertex.
+         * @param w The destination vertex.
+         */
+        void addEdge(int v, int w) {
+            adj[v].add(w);
+        }
 
-        while (!stack.isEmpty()) {
-            int currentNode = stack.pop();
+        /**
+         * A recursive helper function for DFS.
+         * @param v The current vertex.
+         * @param visited An array to keep track of visited vertices.
+         * @param result The list to store the DFS traversal order.
+         */
+        private void DFSUtil(int v, boolean[] visited, List<Integer> result) {
+            visited[v] = true;
+            result.add(v);
 
-            if (!visited.contains(currentNode)) {
-                visited.add(currentNode);
-
-                if (graph.containsKey(currentNode)) {
-                    for (int neighbor : graph.get(currentNode)) {
-                        if (!visited.contains(neighbor)) {
-                            stack.push(neighbor);
-                        }
-                    }
+            for (Integer neighbor : adj[v]) {
+                if (!visited[neighbor]) {
+                    DFSUtil(neighbor, visited, result);
                 }
             }
         }
 
-        return visited;
+        /**
+         * Performs Depth First Search traversal starting from a given node.
+         * @param startNode The starting node for the DFS.
+         * @return A list of integers representing the DFS traversal.
+         */
+        public List<Integer> performDFS(int startNode) {
+            List<Integer> result = new ArrayList<>();
+            if (startNode >= V) {
+                System.out.println("Start node is out of bounds.");
+                return result;
+            }
+            boolean[] visited = new boolean[V];
+            DFSUtil(startNode, visited, result);
+            return result;
+        }
     }
 
     public static void main(String[] args) {
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        Task154 dfs1 = new Task154(graph1);
-        System.out.println(dfs1.dfs(2)); // Example usage
+        // Test Case 1: Simple linear graph
+        System.out.println("Test Case 1:");
+        Graph g1 = new Graph(4);
+        g1.addEdge(0, 1);
+        g1.addEdge(1, 2);
+        g1.addEdge(2, 3);
+        System.out.println("DFS starting from node 0: " + g1.performDFS(0));
 
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(0, Arrays.asList(1, 2));
-        graph2.put(1, Arrays.asList(0, 3, 4));
-        graph2.put(2, Arrays.asList(0));
-        graph2.put(3, Arrays.asList(1));
-        graph2.put(4, Arrays.asList(1));
+        // Test Case 2: Graph with a fork
+        System.out.println("\nTest Case 2:");
+        Graph g2 = new Graph(5);
+        g2.addEdge(0, 1);
+        g2.addEdge(0, 2);
+        g2.addEdge(1, 3);
+        g2.addEdge(1, 4);
+        System.out.println("DFS starting from node 0: " + g2.performDFS(0));
 
-        Task154 dfs2 = new Task154(graph2);
-        System.out.println(dfs2.dfs(0));
+        // Test Case 3: Graph with a cycle
+        System.out.println("\nTest Case 3:");
+        Graph g3 = new Graph(4);
+        g3.addEdge(0, 1);
+        g3.addEdge(1, 2);
+        g3.addEdge(2, 0);
+        g3.addEdge(2, 3);
+        System.out.println("DFS starting from node 0: " + g3.performDFS(0));
 
-        Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        Task154 dfs3 = new Task154(graph3);
-        System.out.println(dfs3.dfs(0));
+        // Test Case 4: Disconnected graph (DFS only visits connected component)
+        System.out.println("\nTest Case 4:");
+        Graph g4 = new Graph(5);
+        g4.addEdge(0, 1);
+        g4.addEdge(0, 2);
+        g4.addEdge(3, 4);
+        System.out.println("DFS starting from node 0: " + g4.performDFS(0));
+        System.out.println("DFS starting from node 3: " + g4.performDFS(3));
 
-
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(0, Arrays.asList(1));
-        Task154 dfs4 = new Task154(graph4);
-        System.out.println(dfs4.dfs(0));
-
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(0, Arrays.asList(1, 2, 3));
-        graph5.put(1, Arrays.asList(4));
-        graph5.put(2, Arrays.asList(5));
-        graph5.put(3, Arrays.asList(6));
-        Task154 dfs5 = new Task154(graph5);
-        System.out.println(dfs5.dfs(0));
+        // Test Case 5: Single-node graph
+        System.out.println("\nTest Case 5:");
+        Graph g5 = new Graph(1);
+        System.out.println("DFS starting from node 0: " + g5.performDFS(0));
     }
 }

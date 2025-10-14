@@ -1,34 +1,54 @@
 package ZeroShot.claude;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
 public class Task126 {
-    public static String redirectPage(String userInput) {
+    private static final Map<String, String> validPages = new HashMap<>();
+    
+    static {
+        validPages.put("home", "/home");
+        validPages.put("about", "/about");
+        validPages.put("contact", "/contact");
+        validPages.put("services", "/services");
+        validPages.put("products", "/products");
+    }
+    
+    public static String redirectUser(String userInput) {
         if (userInput == null || userInput.trim().isEmpty()) {
-            return "error.html"; // Default error page
+            return "Invalid input. Redirecting to default page: /home";
         }
         
-        // Sanitize input by removing special characters
-        userInput = userInput.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        String sanitizedInput = userInput.trim().toLowerCase();
         
-        switch(userInput) {
-            case "home":
-                return "home.html";
-            case "about":
-                return "about.html"; 
-            case "contact":
-                return "contact.html";
-            case "products":
-                return "products.html";
-            default:
-                return "error.html";
+        if (validPages.containsKey(sanitizedInput)) {
+            return "Redirecting to: " + validPages.get(sanitizedInput);
+        } else {
+            return "Page not found. Redirecting to default page: /home";
         }
     }
     
     public static void main(String[] args) {
         // Test cases
-        System.out.println(redirectPage("home")); // home.html
-        System.out.println(redirectPage("about")); // about.html
-        System.out.println(redirectPage("<script>alert(1)</script>")); // error.html 
-        System.out.println(redirectPage("")); // error.html
-        System.out.println(redirectPage("products")); // products.html
+        System.out.println("Test Case 1:");
+        System.out.println(redirectUser("home"));
+        System.out.println();
+        
+        System.out.println("Test Case 2:");
+        System.out.println(redirectUser("about"));
+        System.out.println();
+        
+        System.out.println("Test Case 3:");
+        System.out.println(redirectUser("invalidpage"));
+        System.out.println();
+        
+        System.out.println("Test Case 4:");
+        System.out.println(redirectUser(""));
+        System.out.println();
+        
+        System.out.println("Test Case 5:");
+        System.out.println(redirectUser("PRODUCTS"));
+        System.out.println();
     }
 }

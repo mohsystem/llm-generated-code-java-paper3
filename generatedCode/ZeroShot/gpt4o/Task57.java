@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task57 {
     public static long factorial(int number) {
         if (number < 0) {

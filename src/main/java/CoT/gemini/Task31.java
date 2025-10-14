@@ -1,10 +1,21 @@
 package CoT.gemini;
+
 public class Task31 {
 
-    public String makeComplement(String dna) {
+    /**
+     * Given one side of a DNA strand, returns the other complementary side.
+     * 'A' and 'T' are complements, 'C' and 'G' are complements.
+     *
+     * @param dna The input DNA strand (e.g., "ATTGC").
+     * @return The complementary DNA strand (e.g., "TAACG").
+     */
+    public static String makeComplement(String dna) {
+        if (dna == null || dna.isEmpty()) {
+            return "";
+        }
         StringBuilder complement = new StringBuilder();
-        for (char base : dna.toCharArray()) {
-            switch (base) {
+        for (char c : dna.toCharArray()) {
+            switch (c) {
                 case 'A':
                     complement.append('T');
                     break;
@@ -18,7 +29,9 @@ public class Task31 {
                     complement.append('C');
                     break;
                 default:
-                    // Handle invalid input if needed
+                    // In case of invalid characters, we can either ignore them,
+                    // append them as is, or throw an exception.
+                    // For this problem, we assume valid input based on the description.
                     break;
             }
         }
@@ -26,13 +39,18 @@ public class Task31 {
     }
 
     public static void main(String[] args) {
-        Task31 task31 = new Task31();
-        System.out.println(task31.makeComplement("ATTGC")); // Expected: TAACG
-        System.out.println(task31.makeComplement("GTAT"));  // Expected: CATA
-        System.out.println(task31.makeComplement("AAAA"));  // Expected: TTTT
-        System.out.println(task31.makeComplement("CGCG"));  // Expected: GCGC
-        System.out.println(task31.makeComplement("ATCG"));  // Expected: TAGC
+        String[] testCases = {
+            "ATTGC",
+            "GTAT",
+            "AAAA",
+            "GATTACA",
+            "CGCG"
+        };
 
-
+        System.out.println("Java Test Cases:");
+        for (String test : testCases) {
+            String result = makeComplement(test);
+            System.out.println("Input: " + test + " -> Output: " + result);
+        }
     }
 }

@@ -1,203 +1,190 @@
 package CoT.gemini;
-import javax.servlet.ServletContext;
-import javax.servlet.http.*;
-import java.util.*;
+
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class Task43 {
 
-    public static class SessionManager {
-        private final Map<String, HttpSession> sessions = new HashMap<>();
+    /**
+     * Represents a user session.
+     */
+    private static class Session {
+        private final String userId;
+        private final Instant creationTime;
+        private Instant lastAccessedTime;
 
-        public String createSession(HttpServletRequest request) {
-            HttpSession session = request.getSession(true);
-            String sessionId = generateSessionId();
-            sessions.put(sessionId, session);
+        public Session(String userId) {
+            this.userId = userId;
+            this.creationTime = Instant.now();
+            this.lastAccessedTime = this.creationTime;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public Instant getCreationTime() {
+            return creationTime;
+        }
+
+        public Instant getLastAccessedTime() {
+            return lastAccessedTime;
+        }
+
+        public void updateLastAccessedTime() {
+            this.lastAccessedTime = Instant.now();
+        }
+    }
+
+    /**
+     * Manages user sessions securely.
+     */
+    public static class SessionManager {
+        // Use a thread-safe map to store sessions.
+        private final Map<String, Session> sessionStore = new ConcurrentHashMap<>();
+        private final SecureRandom secureRandom = new SecureRandom();
+        private static final long ABSOLUTE_TIMEOUT_SECONDS = 5; // e.g., 30 minutes
+        private static final long IDLE_TIMEOUT_SECONDS = 2;   // e.g., 5 minutes
+
+        /**
+         * Creates a new session for a given user.
+         *
+         * @param userId The ID of the user.
+         * @return A cryptographically secure session ID.
+         */
+        public String createSession(String userId) {
+            byte[] randomBytes = new byte[32];
+            secureRandom.nextBytes(randomBytes);
+            String sessionId = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+            Session session = new Session(userId);
+            sessionStore.put(sessionId, session);
             return sessionId;
         }
 
-        public HttpSession getSession(String sessionId) {
-            return sessions.get(sessionId);
-        }
-
-        public void terminateSession(String sessionId) {
-            HttpSession session = sessions.get(sessionId);
-            if (session != null) {
-                session.invalidate();
-                sessions.remove(sessionId);
+        /**
+         * Retrieves and validates a session.
+         *
+         * @param sessionId The session ID to validate.
+         * @return The Session object if valid, null otherwise.
+         */
+        public Session getSession(String sessionId) {
+            if (sessionId == null || sessionId.isEmpty()) {
+                return null;
             }
+
+            Session session = sessionStore.get(sessionId);
+            if (session == null) {
+                return null; // Session does not exist
+            }
+
+            Instant now = Instant.now();
+            // Check for absolute timeout
+            if (Duration.between(session.getCreationTime(), now).getSeconds() > ABSOLUTE_TIMEOUT_SECONDS) {
+                invalidateSession(sessionId);
+                return null; // Session expired
+            }
+
+            // Check for idle timeout
+            if (Duration.between(session.getLastAccessedTime(), now).getSeconds() > IDLE_TIMEOUT_SECONDS) {
+                invalidateSession(sessionId);
+                return null; // Session expired due to inactivity
+            }
+
+            // If valid, update the last accessed time
+            session.updateLastAccessedTime();
+            return session;
         }
 
-        private String generateSessionId() {
-            return UUID.randomUUID().toString();
+        /**
+         * Invalidates (terminates) a session.
+         *
+         * @param sessionId The session ID to invalidate.
+         */
+        public void invalidateSession(String sessionId) {
+            if (sessionId != null) {
+                sessionStore.remove(sessionId);
+            }
         }
     }
 
     public static void main(String[] args) {
-        SessionManager sm = new SessionManager();
-        // Test cases (Illustrative - would need a mock HttpServletRequest in real application)
+        SessionManager manager = new SessionManager();
+        System.out.println("Running Java Session Manager Test Cases...");
+        System.out.println("Absolute Timeout: " + SessionManager.ABSOLUTE_TIMEOUT_SECONDS + "s, Idle Timeout: " + SessionManager.IDLE_TIMEOUT_SECONDS + "s\n");
 
-        // Test 1: Create a session
-        MockHttpServletRequest request1 = new MockHttpServletRequest();
-        String sessionId1 = sm.createSession(request1);
-        System.out.println("Session 1 created: " + sessionId1);
+        // Test Case 1: Create and validate a new session
+        System.out.println("--- Test Case 1: Create and Validate Session ---");
+        String sessionId1 = manager.createSession("user123");
+        System.out.println("Created session for user123: " + sessionId1);
+        Session s1 = manager.getSession(sessionId1);
+        System.out.println("Session valid? " + (s1 != null ? "Yes, for user " + s1.getUserId() : "No"));
+        System.out.println();
 
+        // Test Case 2: Invalidate a session
+        System.out.println("--- Test Case 2: Invalidate Session ---");
+        manager.invalidateSession(sessionId1);
+        System.out.println("Session invalidated.");
+        s1 = manager.getSession(sessionId1);
+        System.out.println("Session valid after invalidation? " + (s1 != null));
+        System.out.println();
 
-        // Test 2: Retrieve the session
-        HttpSession session1 = sm.getSession(sessionId1);
-        System.out.println("Session 1 retrieved: " + (session1 != null));
+        // Test Case 3: Idle timeout
+        System.out.println("--- Test Case 3: Idle Timeout ---");
+        String sessionId2 = manager.createSession("user456");
+        System.out.println("Created session for user456: " + sessionId2);
+        try {
+            System.out.println("Waiting for " + (SessionManager.IDLE_TIMEOUT_SECONDS + 1) + " seconds to trigger idle timeout...");
+            TimeUnit.SECONDS.sleep(SessionManager.IDLE_TIMEOUT_SECONDS + 1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        Session s2 = manager.getSession(sessionId2);
+        System.out.println("Session valid after idle period? " + (s2 != null));
+        System.out.println();
 
-        // Test 3: Terminate the session
-        sm.terminateSession(sessionId1);
-        System.out.println("Session 1 terminated.");
+        // Test Case 4: Absolute timeout
+        System.out.println("--- Test Case 4: Absolute Timeout ---");
+        String sessionId3 = manager.createSession("user789");
+        System.out.println("Created session for user789: " + sessionId3);
+        try {
+            System.out.println("Accessing session every second to prevent idle timeout...");
+            for (int i = 0; i < SessionManager.ABSOLUTE_TIMEOUT_SECONDS - 1; i++) {
+                 TimeUnit.SECONDS.sleep(1);
+                 manager.getSession(sessionId3); // Keep it active
+                 System.out.println("Accessed at second " + (i+1));
+            }
+            System.out.println("Waiting for absolute timeout...");
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        Session s3 = manager.getSession(sessionId3);
+        System.out.println("Session valid after absolute timeout period? " + (s3 != null));
+        System.out.println();
+        
+        // Test Case 5: Prevent idle timeout by activity
+        System.out.println("--- Test Case 5: Prevent Idle Timeout ---");
+        String sessionId4 = manager.createSession("userABC");
+        System.out.println("Created session for userABC: " + sessionId4);
+        try {
+            TimeUnit.SECONDS.sleep(SessionManager.IDLE_TIMEOUT_SECONDS - 1);
+            System.out.println("Accessing session just before idle timeout...");
+            Session s4_active = manager.getSession(sessionId4);
+            System.out.println("Session is still active? " + (s4_active != null));
+            
+            TimeUnit.SECONDS.sleep(SessionManager.IDLE_TIMEOUT_SECONDS - 1);
+            s4_active = manager.getSession(sessionId4);
+            System.out.println("Accessing again. Session still active? " + (s4_active != null));
 
-        //Test 4: Try to retrieve terminated session
-        session1 = sm.getSession(sessionId1);
-        System.out.println("Session 1 retrieved after termination: " + (session1 != null));
-
-        //Test 5: Create multiple sessions
-        MockHttpServletRequest request2 = new MockHttpServletRequest();
-        String sessionId2 = sm.createSession(request2);
-        MockHttpServletRequest request3 = new MockHttpServletRequest();
-        String sessionId3 = sm.createSession(request3);
-
-        System.out.println("Session 2 created: " + sessionId2);
-        System.out.println("Session 3 created: " + sessionId3);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println();
     }
-
-
-    // Mock HttpServletRequest for testing - replace with actual request object in a real application
-    static class MockHttpServletRequest extends HttpServletRequestWrapper {
-        private final Map<String, Object> attributes = new HashMap<>();
-
-
-        public MockHttpServletRequest() {
-            super(null); // No real request object for testing
-        }
-
-
-        @Override
-        public HttpSession getSession(boolean create) {
-            return new MockHttpSession();
-        }
-
-
-        @Override
-        public Object getAttribute(String name) {
-            return attributes.get(name);
-        }
-
-
-        @Override
-        public void setAttribute(String name, Object o) {
-            attributes.put(name, o);
-        }
-    }
-
-
-    static class MockHttpSession implements HttpSession {
-        private final Map<String, Object> attributes = new HashMap<>();
-
-        @Override
-        public long getCreationTime() {
-            return 0;
-        }
-
-        @Override
-        public String getId() {
-            return UUID.randomUUID().toString();
-        }
-
-
-        @Override
-        public long getLastAccessedTime() {
-            return 0;
-        }
-
-
-        @Override
-        public ServletContext getServletContext() {
-            return null;
-        }
-
-
-        @Override
-        public void setMaxInactiveInterval(int interval) {
-
-        }
-
-
-        @Override
-        public int getMaxInactiveInterval() {
-            return 0;
-        }
-
-
-        @Override
-        public HttpSessionContext getSessionContext() {
-            return null;
-        }
-
-
-        @Override
-        public Object getAttribute(String name) {
-            return attributes.get(name);
-        }
-
-
-        @Override
-        public Object getValue(String name) {
-            return null;
-        }
-
-
-        @Override
-        public Enumeration<String> getAttributeNames() {
-            return Collections.enumeration(attributes.keySet());
-        }
-
-
-        @Override
-        public String[] getValueNames() {
-            return new String[0];
-        }
-
-
-        @Override
-        public void setAttribute(String name, Object value) {
-            attributes.put(name, value);
-
-        }
-
-
-        @Override
-        public void putValue(String name, Object value) {
-
-        }
-
-
-        @Override
-        public void removeAttribute(String name) {
-            attributes.remove(name);
-
-        }
-
-
-        @Override
-        public void removeValue(String name) {
-
-        }
-
-
-        @Override
-        public void invalidate() {
-
-        }
-
-
-        @Override
-        public boolean isNew() {
-            return false;
-        }
-    }
-
 }

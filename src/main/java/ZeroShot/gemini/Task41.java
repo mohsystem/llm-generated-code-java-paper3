@@ -1,31 +1,38 @@
 package ZeroShot.gemini;
-import java.util.Scanner;
 
 public class Task41 {
 
-    public static String processString(String input) {
-        if (input == null) {
-            return "";
-        }
-        char[] charArray = new char[input.length()];
-        input.getChars(0, input.length(), charArray, 0);
-        // Process charArray (e.g., convert to uppercase)
-        for (int i = 0; i < charArray.length; i++) {
-            charArray[i] = Character.toUpperCase(charArray[i]);
-        }
-
-        return new String(charArray);
-
-
+    /**
+     * Processes a string. In Java, string and array handling are memory-safe due to
+     * automatic bounds checking by the JVM. Buffer overflows in the C/C++ sense
+     * do not occur; instead, an IndexOutOfBoundsException is thrown.
+     *
+     * @param input The string to be processed.
+     */
+    public static void processString(String input) {
+        System.out.println("Processing input: \"" + input + "\"");
+        // In Java, operations on strings are inherently safe from buffer overflows.
+        String processedString = "Processed: " + input.toUpperCase();
+        System.out.println("Output: \"" + processedString + "\"");
+        System.out.println("------------------------------------");
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println(processString(scanner.nextLine()));
-         System.out.println(processString("hello"));
-         System.out.println(processString("world"));
-         System.out.println(processString("java"));
-         System.out.println(processString("secure"));
+        System.out.println("--- Java Test Cases ---");
 
+        // Test Case 1: A normal, short string
+        processString("Hello World");
+
+        // Test Case 2: An empty string
+        processString("");
+
+        // Test Case 3: A string with various special characters
+        processString("!@#$%^&*()_+-=[]{}|;':,./<>?");
+
+        // Test Case 4: A very long string
+        processString("This is a very long string that in a language like C could potentially cause a buffer overflow if not handled carefully. In Java, the String object will simply resize to accommodate the data.");
+
+        // Test Case 5: A string with Unicode characters
+        processString("Secure Code (安全なコード)");
     }
 }

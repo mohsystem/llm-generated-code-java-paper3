@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task33 {
     public static int queueTime(int[] customers, int n) {
         if (n <= 0 || customers == null) return 0;

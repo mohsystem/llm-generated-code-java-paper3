@@ -1,62 +1,107 @@
 package Vanilla.claude;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 public class Task106 {
-    private BigInteger n, d, e;
-    
-    public Task106() {
-        generateKeys(512);
-    }
-    
-    public void generateKeys(int bits) {
-        Random r = new Random();
-        BigInteger p = BigInteger.probablePrime(bits, r);
-        BigInteger q = BigInteger.probablePrime(bits, r);
-        n = p.multiply(q);
-        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-        e = BigInteger.probablePrime(bits/2, r);
-        while (phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0) {
-            e = e.add(BigInteger.ONE);
+    static class RSA {
+        private BigInteger n, d, e;
+        
+        public RSA(int bitLength) {
+            SecureRandom random = new SecureRandom();
+            BigInteger p = BigInteger.probablePrime(bitLength / 2, random);
+            BigInteger q = BigInteger.probablePrime(bitLength / 2, random);
+            
+            n = p.multiply(q);
+            BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+            
+            e = BigInteger.valueOf(65537);
+            while (phi.gcd(e).intValue() > 1) {
+                e = e.add(BigInteger.TWO);
+            }
+            
+            d = e.modInverse(phi);
         }
-        d = e.modInverse(phi);
-    }
-    
-    public BigInteger encrypt(BigInteger message) {
-        return message.modPow(e, n);
-    }
-    
-    public BigInteger decrypt(BigInteger encrypted) {
-        return encrypted.modPow(d, n);
+        
+        public BigInteger encrypt(BigInteger message) {
+            return message.modPow(e, n);
+        }
+        
+        public BigInteger decrypt(BigInteger encrypted) {
+            return encrypted.modPow(d, n);
+        }
+        
+        public String encryptString(String message) {
+            BigInteger msg = new BigInteger(message.getBytes());
+            BigInteger encrypted = encrypt(msg);
+            return encrypted.toString();
+        }
+        
+        public String decryptString(String encryptedMessage) {
+            BigInteger encrypted = new BigInteger(encryptedMessage);
+            BigInteger decrypted = decrypt(encrypted);
+            return new String(decrypted.toByteArray());
+        }
     }
     
     public static void main(String[] args) {
-        Task106 rsa = new Task106();
+        System.out.println("RSA Encryption/Decryption Test Cases:");
+        System.out.println("=====================================\\n");
         
-        // Test case 1
-        BigInteger msg1 = new BigInteger("123");
-        BigInteger encrypted1 = rsa.encrypt(msg1);
-        System.out.println("Test 1: " + msg1.equals(rsa.decrypt(encrypted1)));
+        // Test Case 1
+        System.out.println("Test Case 1: Simple message");
+        RSA rsa1 = new RSA(512);
+        String message1 = "Hello";
+        String encrypted1 = rsa1.encryptString(message1);
+        String decrypted1 = rsa1.decryptString(encrypted1);
+        System.out.println("Original: " + message1);
+        System.out.println("Encrypted: " + encrypted1);
+        System.out.println("Decrypted: " + decrypted1);
+        System.out.println("Match: " + message1.equals(decrypted1) + "\\n");
         
-        // Test case 2
-        BigInteger msg2 = new BigInteger("456789");
-        BigInteger encrypted2 = rsa.encrypt(msg2);
-        System.out.println("Test 2: " + msg2.equals(rsa.decrypt(encrypted2)));
+        // Test Case 2
+        System.out.println("Test Case 2: Longer message");
+        RSA rsa2 = new RSA(512);
+        String message2 = "RSA Algorithm";
+        String encrypted2 = rsa2.encryptString(message2);
+        String decrypted2 = rsa2.decryptString(encrypted2);
+        System.out.println("Original: " + message2);
+        System.out.println("Encrypted: " + encrypted2);
+        System.out.println("Decrypted: " + decrypted2);
+        System.out.println("Match: " + message2.equals(decrypted2) + "\\n");
         
-        // Test case 3
-        BigInteger msg3 = new BigInteger("1000000");
-        BigInteger encrypted3 = rsa.encrypt(msg3);
-        System.out.println("Test 3: " + msg3.equals(rsa.decrypt(encrypted3)));
+        // Test Case 3
+        System.out.println("Test Case 3: Numbers");
+        RSA rsa3 = new RSA(512);
+        String message3 = "12345";
+        String encrypted3 = rsa3.encryptString(message3);
+        String decrypted3 = rsa3.decryptString(encrypted3);
+        System.out.println("Original: " + message3);
+        System.out.println("Encrypted: " + encrypted3);
+        System.out.println("Decrypted: " + decrypted3);
+        System.out.println("Match: " + message3.equals(decrypted3) + "\\n");
         
-        // Test case 4
-        BigInteger msg4 = new BigInteger("987654321");
-        BigInteger encrypted4 = rsa.encrypt(msg4);
-        System.out.println("Test 4: " + msg4.equals(rsa.decrypt(encrypted4)));
+        // Test Case 4
+        System.out.println("Test Case 4: Special characters");
+        RSA rsa4 = new RSA(512);
+        String message4 = "Test@123!";
+        String encrypted4 = rsa4.encryptString(message4);
+        String decrypted4 = rsa4.decryptString(encrypted4);
+        System.out.println("Original: " + message4);
+        System.out.println("Encrypted: " + encrypted4);
+        System.out.println("Decrypted: " + decrypted4);
+        System.out.println("Match: " + message4.equals(decrypted4) + "\\n");
         
-        // Test case 5
-        BigInteger msg5 = new BigInteger("555555555");
-        BigInteger encrypted5 = rsa.encrypt(msg5);
-        System.out.println("Test 5: " + msg5.equals(rsa.decrypt(encrypted5)));
+        // Test Case 5
+        System.out.println("Test Case 5: Single character");
+        RSA rsa5 = new RSA(512);
+        String message5 = "A";
+        String encrypted5 = rsa5.encryptString(message5);
+        String decrypted5 = rsa5.decryptString(encrypted5);
+        System.out.println("Original: " + message5);
+        System.out.println("Encrypted: " + encrypted5);
+        System.out.println("Decrypted: " + decrypted5);
+        System.out.println("Match: " + message5.equals(decrypted5) + "\\n");
     }
 }

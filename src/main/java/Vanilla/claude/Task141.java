@@ -1,30 +1,41 @@
 package Vanilla.claude;
 
 public class Task141 {
-    public static String reverseString(String str) {
-        if (str == null || str.length() <= 1) {
-            return str;
+    public static String reverseString(String input) {
+        if (input == null) {
+            return null;
         }
-        StringBuilder reversed = new StringBuilder();
-        for (int i = str.length() - 1; i >= 0; i--) {
-            reversed.append(str.charAt(i));
-        }
-        return reversed.toString();
+        return new StringBuilder(input).reverse().toString();
     }
-
+    
     public static void main(String[] args) {
-        String[] testCases = {
-            "Hello World",
-            "Programming",
-            "12345",
-            "a",
-            ""
-        };
+        // Test case 1
+        String test1 = "Hello";
+        System.out.println("Input: " + test1);
+        System.out.println("Output: " + reverseString(test1));
+        System.out.println();
         
-        for (String test : testCases) {
-            System.out.println("Original: " + test);
-            System.out.println("Reversed: " + reverseString(test));
-            System.out.println();
-        }
+        // Test case 2
+        String test2 = "12345";
+        System.out.println("Input: " + test2);
+        System.out.println("Output: " + reverseString(test2));
+        System.out.println();
+        
+        // Test case 3
+        String test3 = "A man a plan a canal Panama";
+        System.out.println("Input: " + test3);
+        System.out.println("Output: " + reverseString(test3));
+        System.out.println();
+        
+        // Test case 4
+        String test4 = "";
+        System.out.println("Input: \"" + test4 + "\"");
+        System.out.println("Output: \"" + reverseString(test4) + "\"");
+        System.out.println();
+        
+        // Test case 5
+        String test5 = "Reverse Me!";
+        System.out.println("Input: " + test5);
+        System.out.println("Output: " + reverseString(test5));
     }
 }

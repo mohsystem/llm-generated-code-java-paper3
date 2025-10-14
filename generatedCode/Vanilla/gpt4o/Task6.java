@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task6 {
     public static double findUniq(double[] arr) {
         if (arr[0] != arr[1] && arr[0] != arr[2]) {

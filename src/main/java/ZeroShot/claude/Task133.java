@@ -1,77 +1,157 @@
 package ZeroShot.claude;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Task133 {
-    private static final int MIN_LENGTH = 8;
-    private static final int MAX_LENGTH = 20;
-    private static final String SPECIAL_CHARS = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    private static final int TOKEN_LENGTH = 32;
+    private static final int TOKEN_EXPIRY_MINUTES = 15;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$"
+    );
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@$!%*?&])[A-Za-z\\\\d@$!%*?&]{8,}$"
+    );
     
-    public static String resetPassword(String oldPassword, String newPassword, String confirmPassword) {
-        // Check if new password matches confirmation
-        if (!newPassword.equals(confirmPassword)) {
-            return "New password and confirmation do not match";
-        }
+    private static Map<String, User> users = new HashMap<>();
+    private static Map<String, ResetToken> resetTokens = new HashMap<>();
+    
+    static class User {
+        String email;
+        String passwordHash;
         
-        // Validate password strength
-        if (!isPasswordStrong(newPassword)) {
-            return "Password must be 8-20 characters and contain uppercase, lowercase, numbers and special characters";
+        User(String email, String passwordHash) {
+            this.email = email;
+            this.passwordHash = passwordHash;
         }
-        
-        // Check if new password is same as old
-        if (newPassword.equals(oldPassword)) {
-            return "New password must be different from old password";
-        }
-        
-        // Password reset successful - in real system would update in database
-        return "Password successfully reset";
     }
     
-    private static boolean isPasswordStrong(String password) {
-        if (password == null || password.length() < MIN_LENGTH || password.length() > MAX_LENGTH) {
-            return false;
+    static class ResetToken {
+        String token;
+        String email;
+        LocalDateTime expiryTime;
+        
+        ResetToken(String token, String email, LocalDateTime expiryTime) {
+            this.token = token;
+            this.email = email;
+            this.expiryTime = expiryTime;
         }
         
-        // Check for uppercase, lowercase, number and special char
-        Pattern upperCase = Pattern.compile("[A-Z]");
-        Pattern lowerCase = Pattern.compile("[a-z]");
-        Pattern number = Pattern.compile("[0-9]");
-        Pattern special = Pattern.compile("[" + Pattern.quote(SPECIAL_CHARS) + "]");
-        
-        return upperCase.matcher(password).find() &&
-               lowerCase.matcher(password).find() &&
-               number.matcher(password).find() &&
-               special.matcher(password).find();
+        boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiryTime);
+        }
     }
     
-    public static String generateTempPassword() {
+    public static String generateResetToken(String email) {
+        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
+            return "Error: Invalid email format";
+        }
+        
+        if (!users.containsKey(email)) {
+            return "Error: Email not found";
+        }
+        
         SecureRandom random = new SecureRandom();
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" + SPECIAL_CHARS;
-        StringBuilder sb = new StringBuilder();
+        StringBuilder token = new StringBuilder();
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         
-        for (int i = 0; i < 12; i++) {
-            int index = random.nextInt(chars.length());
-            sb.append(chars.charAt(index));
+        for (int i = 0; i < TOKEN_LENGTH; i++) {
+            token.append(chars.charAt(random.nextInt(chars.length())));
         }
         
-        return sb.toString();
+        String tokenStr = token.toString();
+        LocalDateTime expiryTime = LocalDateTime.now().plus(TOKEN_EXPIRY_MINUTES, ChronoUnit.MINUTES);
+        resetTokens.put(tokenStr, new ResetToken(tokenStr, email, expiryTime));
+        
+        return tokenStr;
     }
-
+    
+    public static String resetPassword(String token, String newPassword) {
+        if (token == null || token.isEmpty()) {
+            return "Error: Token is required";
+        }
+        
+        if (newPassword == null || !PASSWORD_PATTERN.matcher(newPassword).matches()) {
+            return "Error: Password must be at least 8 characters with uppercase, lowercase, digit, and special character";
+        }
+        
+        ResetToken resetToken = resetTokens.get(token);
+        
+        if (resetToken == null) {
+            return "Error: Invalid token";
+        }
+        
+        if (resetToken.isExpired()) {
+            resetTokens.remove(token);
+            return "Error: Token has expired";
+        }
+        
+        User user = users.get(resetToken.email);
+        user.passwordHash = hashPassword(newPassword);
+        resetTokens.remove(token);
+        
+        return "Success: Password reset successfully";
+    }
+    
+    private static String hashPassword(String password) {
+        return "HASHED_" + password;
+    }
+    
+    public static String registerUser(String email, String password) {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            return "Error: Invalid email format";
+        }
+        
+        if (users.containsKey(email)) {
+            return "Error: User already exists";
+        }
+        
+        users.put(email, new User(email, hashPassword(password)));
+        return "Success: User registered";
+    }
+    
     public static void main(String[] args) {
-        // Test case 1: Password reset success
-        System.out.println(resetPassword("OldPass123!", "NewPass123@", "NewPass123@"));
+        System.out.println("=== Password Reset Functionality Tests ===\\n");
         
-        // Test case 2: Password confirmation mismatch
-        System.out.println(resetPassword("OldPass123!", "NewPass123@", "DifferentPass123@"));
+        // Test Case 1: Register users
+        System.out.println("Test 1: Register users");
+        System.out.println(registerUser("user1@example.com", "Password123!"));
+        System.out.println(registerUser("user2@example.com", "Secure456@"));
+        System.out.println();
         
-        // Test case 3: Weak password
-        System.out.println(resetPassword("OldPass123!", "weak", "weak"));
+        // Test Case 2: Generate reset token for valid user
+        System.out.println("Test 2: Generate reset token for valid user");
+        String token1 = generateResetToken("user1@example.com");
+        System.out.println("Token generated: " + (token1.startsWith("Error") ? token1 : "Success (Length: " + token1.length() + ")"));
+        System.out.println();
         
-        // Test case 4: Same as old password
-        System.out.println(resetPassword("OldPass123!", "OldPass123!", "OldPass123!"));
+        // Test Case 3: Generate reset token for invalid email
+        System.out.println("Test 3: Generate reset token for invalid email");
+        System.out.println(generateResetToken("invalidemail"));
+        System.out.println();
         
-        // Test case 5: Generate temporary password
-        System.out.println("Generated temp password: " + generateTempPassword());
+        // Test Case 4: Reset password with valid token and valid password
+        System.out.println("Test 4: Reset password with valid token");
+        String token2 = generateResetToken("user2@example.com");
+        if (!token2.startsWith("Error")) {
+            System.out.println(resetPassword(token2, "NewPass789#"));
+        }
+        System.out.println();
+        
+        // Test Case 5: Reset password with invalid token
+        System.out.println("Test 5: Reset password with invalid token");
+        System.out.println(resetPassword("invalidtoken123", "ValidPass123!"));
+        System.out.println();
+        
+        // Test Case 6: Reset password with weak password
+        System.out.println("Test 6: Reset password with weak password");
+        String token3 = generateResetToken("user1@example.com");
+        if (!token3.startsWith("Error")) {
+            System.out.println(resetPassword(token3, "weak"));
+        }
     }
 }

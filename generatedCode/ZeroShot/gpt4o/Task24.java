@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task24 {
     public static boolean validatePin(String pin) {
         return pin.matches("\\d{4}|\\d{6}");

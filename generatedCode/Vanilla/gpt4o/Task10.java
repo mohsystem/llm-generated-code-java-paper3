@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task10 {
     public static int getSum(int a, int b) {
         int min = Math.min(a, b);

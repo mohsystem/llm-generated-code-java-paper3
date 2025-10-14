@@ -1,107 +1,125 @@
 package ZeroShot.gemini;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+
 import java.util.PriorityQueue;
 
-class Task186 {
+public class Task186 {
 
-    static class ListNode {
+    // Definition for singly-linked list.
+    public static class ListNode {
         int val;
         ListNode next;
-
         ListNode() {}
-
-        ListNode(int val) {
-            this.val = val;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
-        }
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
     }
 
+    /**
+     * Merges k sorted linked lists into one single sorted linked list.
+     * This implementation uses a min-heap (PriorityQueue) to efficiently
+     * find the minimum node among the heads of all lists.
+     *
+     * @param lists An array of sorted ListNode heads.
+     * @return The head of the merged sorted linked list.
+     */
     public ListNode mergeKLists(ListNode[] lists) {
         if (lists == null || lists.length == 0) {
             return null;
         }
 
-        PriorityQueue<ListNode> pq = new PriorityQueue<>(Comparator.comparingInt(n -> n.val));
+        // A min-heap to store the head nodes of the k lists.
+        // The comparator sorts nodes by their value.
+        PriorityQueue<ListNode> pq = new PriorityQueue<>(lists.length, (a, b) -> a.val - b.val);
 
-        for (ListNode list : lists) {
-            if (list != null) {
-                pq.offer(list);
+        // Add the head of each non-empty list to the priority queue.
+        for (ListNode head : lists) {
+            if (head != null) {
+                pq.add(head);
             }
         }
 
-        ListNode dummy = new ListNode(0);
+        // A dummy node to simplify the construction of the result list.
+        ListNode dummy = new ListNode(-1);
         ListNode tail = dummy;
 
+        // Process nodes from the priority queue until it's empty.
         while (!pq.isEmpty()) {
-            ListNode current = pq.poll();
-            tail.next = current;
+            // Get the node with the smallest value.
+            ListNode minNode = pq.poll();
+            
+            // Append it to the result list.
+            tail.next = minNode;
             tail = tail.next;
 
-            if (current.next != null) {
-                pq.offer(current.next);
+            // If the extracted node has a next element, add it to the queue.
+            if (minNode.next != null) {
+                pq.add(minNode.next);
             }
         }
+
         return dummy.next;
     }
 
-
+    // Main method with test cases
     public static void main(String[] args) {
-        Task186 task = new Task186();
+        Task186 solution = new Task186();
 
-        // Test cases
-        ListNode[] lists1 = new ListNode[]{createList(new int[]{1, 4, 5}), createList(new int[]{1, 3, 4}), createList(new int[]{2, 6})};
-        ListNode result1 = task.mergeKLists(lists1);
-        printList(result1); // Output: 1 1 2 3 4 4 5 6
+        // Helper function to create a list from an array
+        java.util.function.Function<int[], ListNode> createList = (arr) -> {
+            if (arr == null || arr.length == 0) return null;
+            ListNode dummy = new ListNode(-1);
+            ListNode current = dummy;
+            for (int val : arr) {
+                current.next = new ListNode(val);
+                current = current.next;
+            }
+            return dummy.next;
+        };
 
-        ListNode[] lists2 = new ListNode[]{};
-        ListNode result2 = task.mergeKLists(lists2);
-        printList(result2); // Output:
+        // Helper function to print a list
+        java.util.function.Consumer<ListNode> printList = (head) -> {
+            ListNode current = head;
+            while (current != null) {
+                System.out.print(current.val + " -> ");
+                current = current.next;
+            }
+            System.out.println("NULL");
+        };
 
+        System.out.println("--- Java Tests ---");
+        // Test Case 1: Example 1
+        ListNode[] lists1 = {
+            createList.apply(new int[]{1, 4, 5}),
+            createList.apply(new int[]{1, 3, 4}),
+            createList.apply(new int[]{2, 6})
+        };
+        System.out.print("Test Case 1: ");
+        printList.accept(solution.mergeKLists(lists1));
 
-        ListNode[] lists3 = new ListNode[]{null};
-        ListNode result3 = task.mergeKLists(lists3);
-        printList(result3); // Output:
+        // Test Case 2: Example 2 (empty array)
+        ListNode[] lists2 = {};
+        System.out.print("Test Case 2: ");
+        printList.accept(solution.mergeKLists(lists2));
 
+        // Test Case 3: Example 3 (array with one empty list)
+        ListNode[] lists3 = {createList.apply(new int[]{})};
+        System.out.print("Test Case 3: ");
+        printList.accept(solution.mergeKLists(lists3));
 
+        // Test Case 4: Mix of empty and non-empty lists
+        ListNode[] lists4 = {
+            createList.apply(new int[]{1, 2, 3}),
+            createList.apply(new int[]{}),
+            createList.apply(new int[]{4, 5})
+        };
+        System.out.print("Test Case 4: ");
+        printList.accept(solution.mergeKLists(lists4));
 
-        ListNode[] lists4 = new ListNode[]{createList(new int[]{-2,-1,-1,-1}) ,createList(new int[]{-2,-1,0,1})};
-        ListNode result4 = task.mergeKLists(lists4);
-        printList(result4);
-
-
-        ListNode[] lists5 = new ListNode[]{null,createList(new int[]{1})};
-        ListNode result5 = task.mergeKLists(lists5);
-        printList(result5); // Output: 1
-
-
-
-    }
-
-    static ListNode createList(int[] arr) {
-        if (arr == null || arr.length == 0) {
-            return null;
-        }
-        ListNode head = new ListNode(arr[0]);
-        ListNode current = head;
-        for (int i = 1; i < arr.length; i++) {
-            current.next = new ListNode(arr[i]);
-            current = current.next;
-        }
-        return head;
-    }
-
-    static void printList(ListNode head) {
-        while (head != null) {
-            System.out.print(head.val + " ");
-            head = head.next;
-        }
-        System.out.println();
+        // Test Case 5: Edge case with small lists
+        ListNode[] lists5 = {
+            createList.apply(new int[]{1}),
+            createList.apply(new int[]{0})
+        };
+        System.out.print("Test Case 5: ");
+        printList.accept(solution.mergeKLists(lists5));
     }
 }

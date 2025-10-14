@@ -1,36 +1,70 @@
 package ourMethod.claude;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Task13 {
+
     public static boolean isValidWalk(char[] walk) {
-        // Check if walk length is exactly 10 minutes
+        // Validate input: check for null
+        if (walk == null) {
+            return false;
+        }
+
+        // Check if walk is exactly 10 minutes
         if (walk.length != 10) {
             return false;
         }
-        
-        // Track position relative to start
-        int vertical = 0;    // north-south position
-        int horizontal = 0;  // east-west position
-        
+
+        // Track position
+        int x = 0;
+        int y = 0;
+
         // Process each direction
         for (char direction : walk) {
+            // Validate each direction character
             switch (direction) {
-                case 'n': vertical++; break;
-                case 's': vertical--; break;
-                case 'e': horizontal++; break;
-                case 'w': horizontal--; break;
+                case 'n':
+                    y++;
+                    break;
+                case 's':
+                    y--;
+                    break;
+                case 'e':
+                    x++;
+                    break;
+                case 'w':
+                    x--;
+                    break;
+                default:
+                    // Invalid direction
+                    return false;
             }
         }
-        
-        // Return true if back at start position
-        return vertical == 0 && horizontal == 0;
+
+        // Check if we're back at starting point
+        return x == 0 && y == 0;
     }
 
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(isValidWalk(new char[]{'n','s','n','s','n','s','n','s','n','s'})); // true
-        System.out.println(isValidWalk(new char[]{'w','e','w','e','w','e','w','e','w','e'})); // true
-        System.out.println(isValidWalk(new char[]{'n','n','n','s','n','s','n','s','n','s'})); // false
-        System.out.println(isValidWalk(new char[]{'n','s','e','w','n','s','e','w','n','s'})); // true
-        System.out.println(isValidWalk(new char[]{'n','s','n','s','n','s'})); // false
+        // Test case 1: Valid 10-minute walk returning to start
+        char[] test1 = {'n', 's', 'n', 's', 'n', 's', 'n', 's', 'n', 's'};
+        System.out.println("Test 1: " + isValidWalk(test1)); // true
+
+        // Test case 2: Valid 10-minute walk returning to start
+        char[] test2 = {'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e'};
+        System.out.println("Test 2: " + isValidWalk(test2)); // true
+
+        // Test case 3: 10 minutes but doesn't return to start
+        char[] test3 = {'n', 'n', 'n', 's', 'n', 's', 'n', 's', 'n', 's'};
+        System.out.println("Test 3: " + isValidWalk(test3)); // false
+
+        // Test case 4: Returns to start but not 10 minutes
+        char[] test4 = {'n', 's', 'w', 'e'};
+        System.out.println("Test 4: " + isValidWalk(test4)); // false
+
+        // Test case 5: Valid complex path
+        char[] test5 = {'w', 'w', 'w', 'e', 'n', 'n', 's', 's', 'e', 'e'};
+        System.out.println("Test 5: " + isValidWalk(test5)); // true
     }
 }

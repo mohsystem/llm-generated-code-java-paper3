@@ -1,37 +1,63 @@
 package ZeroShot.claude;
 
-class Task125 {
-    private static boolean isAuthorized(String username, String role, String resource) {
-        // Validate input
-        if (username == null || role == null || resource == null ||
-            username.isEmpty() || role.isEmpty() || resource.isEmpty()) {
-            return false;
+import java.util.*;
+import java.util.regex.Pattern;
+
+public class Task125 {
+    private static final Set<String> ALLOWED_RESOURCES = new HashSet<>(Arrays.asList(
+        "document1.txt", "document2.txt", "image1.jpg", "image2.jpg", "data.csv"
+    ));
+    
+    private static final Pattern VALID_RESOURCE_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]+$");
+    
+    public static String accessResource(String username, String resourceName) {
+        // Input validation
+        if (username == null || username.trim().isEmpty()) {
+            return "Error: Invalid username";
         }
         
-        // Basic authorization logic
-        if (role.equals("admin")) {
-            return true;
-        } else if (role.equals("user")) {
-            return resource.equals("public") || resource.equals("user_data");
-        } else if (role.equals("guest")) {
-            return resource.equals("public");
+        if (resourceName == null || resourceName.trim().isEmpty()) {
+            return "Error: Invalid resource name";
         }
-        return false;
-    }
-
-    private static String accessResource(String username, String role, String resource) {
-        if (isAuthorized(username, role, resource)) {
-            return "Access granted to " + resource + " for user " + username;
+        
+        // Sanitize input - remove whitespace
+        resourceName = resourceName.trim();
+        
+        // Validate resource name format (prevent path traversal)
+        if (!VALID_RESOURCE_PATTERN.matcher(resourceName).matches()) {
+            return "Error: Invalid resource name format";
         }
-        return "Access denied";
-    }
-
+        
+        // Check for path traversal attempts
+        if (resourceName.contains("..") || resourceName.contains("/") || resourceName.contains("\\")) {
+            return "Error: Path traversal attempt detected";        }
+        // Check if resource is in whitelist
+        if (!ALLOWED_RESOURCES.contains(resourceName)) {
+            return "Error: Access denied - resource not found or unauthorized";        }
+        // Simulate resource access
+        return "Success: User '" + username + "' accessed resource '" + resourceName + "'";    }
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(accessResource("admin1", "admin", "confidential")); // Granted
-        System.out.println(accessResource("user1", "user", "public")); // Granted
-        System.out.println(accessResource("user2", "user", "admin_panel")); // Denied
-        System.out.println(accessResource("guest1", "guest", "public")); // Granted
-        System.out.println(accessResource("guest2", "guest", "user_data")); // Denied
+        System.out.println("=== Resource Access Control System ===");
+        // Test case 1: Valid access
+        System.out.println("Test 1 - Valid access:");
+        System.out.println(accessResource("john_doe", "document1.txt"));
+        System.out.println();
+        // Test case 2: Valid access to different resource
+         System.out.println("Test 2 - Valid access to image:");
+         System.out.println(accessResource("jane_smith", "image1.jpg"));
+         System.out.println();
+         // Test case 3: Attempt to access non-existent resource
+        System.out.println("Test 3 - Non-existent resource:");
+        System.out.println(accessResource("user1", "secret.txt"));
+        System.out.println();
+        // Test case 4: Path traversal attempt
+        System.out.println("Test 4 - Path traversal attempt:");
+        System.out.println(accessResource("attacker", "../../../etc/passwd"));
+        System.out.println();
+        // Test case 5: Invalid input
+        System.out.println("Test 5 - Invalid input:");
+        System.out.println(accessResource("", "document1.txt"));
+        System.out.println(accessResource("user2", ""));
+        System.out.println();
     }
 }

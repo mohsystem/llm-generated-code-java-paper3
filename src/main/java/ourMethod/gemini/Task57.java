@@ -1,37 +1,45 @@
 package ourMethod.gemini;
-import java.util.Scanner;
+
+import java.util.InputMismatchException;
 
 public class Task57 {
 
+    /**
+     * Calculates the factorial of a non-negative integer.
+     * The input is restricted to the range [0, 20] to prevent long overflow.
+     *
+     * @param n The non-negative integer.
+     * @return The factorial of n.
+     * @throws IllegalArgumentException if n is negative or greater than 20.
+     */
     public static long factorial(int n) {
-        if (n < 0) {
-            throw new IllegalArgumentException("Factorial is not defined for negative numbers.");
+        // Rule #4: Validate input range to prevent invalid operations and overflow.
+        if (n < 0 || n > 20) {
+            throw new IllegalArgumentException("Input must be an integer between 0 and 20.");
         }
-        if (n == 0) {
-            return 1;
-        } else {
-            long result = 1;
-            for (int i = 1; i <= n; i++) {
-                if (Long.MAX_VALUE / result < i) {  // Check for potential overflow
-                    throw new ArithmeticException("Factorial result too large for long data type.");
-                }
-                result *= i;
-            }
-            return result;
+        
+        long result = 1L;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
         }
+        return result;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        int[] testCases = {0, 1, 5, 10, -1, 21}; // 5+ test cases including edge/error cases
 
-        System.out.println(factorial(0)); // Expected: 1
-        System.out.println(factorial(1)); // Expected: 1
-        System.out.println(factorial(5)); // Expected: 120
-        System.out.println(factorial(10)); // Expected: 3628800
-        System.out.println(factorial(20)); // Expected: 2432902008176640000
-
-        scanner.close();
-
-
+        System.out.println("Running test cases for factorial calculation:");
+        for (int testValue : testCases) {
+            System.out.println("-------------------------------------");
+            System.out.println("Calculating factorial for: " + testValue);
+            try {
+                // Rule #8: Ensure all exceptions are caught and handled.
+                long result = factorial(testValue);
+                System.out.println("Result: " + result);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error: " + e.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------");
     }
 }

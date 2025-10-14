@@ -1,59 +1,60 @@
 package CoT.gemini;
-import java.util.InputMismatchException;
-import java.util.Scanner;
 
-public class Task45 {
+class Task45 {
 
-    public static int performOperation(int num1, int num2, String operation) {
-        switch (operation) {
-            case "+":
-                return num1 + num2;
-            case "-":
-                return num1 - num2;
-            case "*":
-                return num1 * num2;
-            case "/":
-                if (num2 == 0) {
-                    throw new ArithmeticException("Division by zero");
-                }
-                return num1 / num2;
-            default:
-                throw new IllegalArgumentException("Invalid operation: " + operation);
+    /**
+     * Performs division on two numbers provided as strings.
+     * It handles potential errors like invalid number formats and division by zero.
+     *
+     * @param numeratorStr The string representation of the numerator.
+     * @param denominatorStr The string representation of the denominator.
+     * @return A string containing the result or an error message.
+     */
+    public static String performDivision(String numeratorStr, String denominatorStr) {
+        try {
+            // Attempt to parse the strings into double values.
+            // This can throw a NumberFormatException if the string is not a valid number.
+            double numerator = Double.parseDouble(numeratorStr);
+            double denominator = Double.parseDouble(denominatorStr);
+
+            // Check for division by zero, which is a logical error.
+            // Double division by zero results in "Infinity", but we'll treat it as an error.
+            if (denominator == 0) {
+                // Throw a specific exception for this case.
+                throw new IllegalArgumentException("Cannot divide by zero.");
+            }
+
+            double result = numerator / denominator;
+            return "Result: " + result;
+
+        } catch (NumberFormatException e) {
+            // Catch the error if parsing fails.
+            return "Error: Invalid number format. Please provide valid numbers.";
+        } catch (IllegalArgumentException e) {
+            // Catch the specific division by zero error.
+            return "Error: " + e.getMessage();
+        } catch (Exception e) {
+            // A general catch block for any other unexpected errors.
+            return "An unexpected error occurred: " + e.getMessage();
         }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        System.out.println("--- Java Test Cases ---");
 
-        try {
-            System.out.print("Enter first number: ");
-            int num1 = scanner.nextInt();
+        // Test Case 1: Valid division
+        System.out.println("Test 1 ('10', '2'): " + performDivision("10", "2"));
 
-            System.out.print("Enter second number: ");
-            int num2 = scanner.nextInt();
+        // Test Case 2: Division by zero
+        System.out.println("Test 2 ('5', '0'): " + performDivision("5", "0"));
 
-            System.out.print("Enter operation (+, -, *, /): ");
-            String operation = scanner.next();
+        // Test Case 3: Invalid numerator
+        System.out.println("Test 3 ('abc', '5'): " + performDivision("abc", "5"));
 
-            int result = performOperation(num1, num2, operation);
-            System.out.println("Result: " + result);
+        // Test Case 4: Invalid denominator
+        System.out.println("Test 4 ('10', 'xyz'): " + performDivision("10", "xyz"));
 
-             // Test cases
-            System.out.println(performOperation(5, 2, "+")); // 7
-            System.out.println(performOperation(10, 3, "-")); // 7
-            System.out.println(performOperation(4, 6, "*")); // 24
-            System.out.println(performOperation(8, 2, "/")); // 4
-            System.out.println(performOperation(5, 0, "/")); // Exception
-
-
-        } catch (InputMismatchException e) {
-            System.err.println("Invalid input: Please enter numbers.");
-        } catch (ArithmeticException e) {
-            System.err.println("Error: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            System.err.println("Error: " + e.getMessage());
-        } finally {
-            scanner.close();
-        }
+        // Test Case 5: Valid floating-point division
+        System.out.println("Test 5 ('7.5', '1.5'): " + performDivision("7.5", "1.5"));
     }
 }

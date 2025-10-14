@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task192 {
     public static boolean xorGame(int[] nums) {
         int xor = 0;

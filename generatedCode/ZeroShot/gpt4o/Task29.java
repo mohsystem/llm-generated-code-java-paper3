@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task29 {
     public static int[] twoSum(int[] numbers, int target) {
         for (int i = 0; i < numbers.length; i++) {

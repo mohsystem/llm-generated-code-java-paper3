@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task9 {
     public static String oddOrEven(int[] numbers) {
         int sum = 0;

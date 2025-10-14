@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task145 {
 
     // Function to find the maximum sum of contiguous subarray

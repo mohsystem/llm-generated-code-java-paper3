@@ -3,106 +3,162 @@ package Vanilla.claude;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.nio.file.*;
 
-// Server Class
-class ChatServer {
-    private static Map<String, String> users = new HashMap<>();
-    private ServerSocket serverSocket;
-    
-    public ChatServer(int port) {
-        try {
-            // Initialize with some test users
-            users.put("user1", "pass1");
-            users.put("user2", "pass2");
-            users.put("user3", "pass3");
-            
-            serverSocket = new ServerSocket(port);
-            System.out.println("Server started on port " + port);
-            
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                new ClientHandler(clientSocket).start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+class Task7 {
+    // User class to store credentials
+    static class User {
+        String username;
+        String password;
+        
+        User(String username, String password) {
+            this.username = username;
+            this.password = password;
         }
     }
     
-    private class ClientHandler extends Thread {
-        private Socket clientSocket;
+    // Client class
+    static class ChatClient {
+        private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
         
-        public ClientHandler(Socket socket) {
-            this.clientSocket = socket;
-        }
-        
-        public void run() {
-            try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                
-                String loginRequest = in.readLine();
-                String[] credentials = loginRequest.split(":");
-                
-                if (credentials.length == 2) {
-                    String username = credentials[0];
-                    String password = credentials[1];
-                    
-                    if (authenticateUser(username, password)) {
-                        out.println("LOGIN_SUCCESS");
-                    } else {
-                        out.println("LOGIN_FAILED");
-                    }
-                }
-                
-                clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        
-        private boolean authenticateUser(String username, String password) {
-            return users.containsKey(username) && users.get(username).equals(password);
-        }
-    }
-}
-
-// Client Class
-class ChatClient1 {
-    private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
-    
-    public ChatClient1(String host, int port) {
-        try {
+        public ChatClient(String host, int port) throws IOException {
             socket = new Socket(host, port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        
+        public String login(String username, String password) throws IOException {
+            String request = "LOGIN:" + username + ":" + password;
+            out.println(request);
+            return in.readLine();
+        }
+        
+        public void close() throws IOException {
+            in.close();
+            out.close();
+            socket.close();
         }
     }
     
-    public boolean login(String username, String password) {
-        try {
-            out.println(username + ":" + password);
-            String response = in.readLine();
-            socket.close();
-            return response.equals("LOGIN_SUCCESS");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    // Server class
+    static class ChatServer {
+        private ServerSocket serverSocket;
+        private Map<String, String> users;
+        private String userFilePath = "users.txt";
+        
+        public ChatServer(int port) throws IOException {
+            serverSocket = new ServerSocket(port);
+            users = new HashMap<>();
+            loadUsers();
+        }
+        
+        private void loadUsers() {
+            try {
+                File file = new File(userFilePath);
+                if (!file.exists()) {
+                    file.createNewFile();
+                    // Create default users
+                    try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+                        writer.println("alice:password123");
+                        writer.println("bob:securepass");
+                        writer.println("charlie:mypass456");
+                        writer.println("david:test1234");
+                        writer.println("eve:qwerty789");
+                    }
+                }
+                
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        users.put(parts[0], parts[1]);
+                    }
+                }
+                reader.close();
+            } catch (IOException e) {
+                System.err.println("Error loading users: " + e.getMessage());
+            }
+        }
+        
+        public void start() {
+            System.out.println("Server started on port " + serverSocket.getLocalPort());
+            while (true) {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    new Thread(new ClientHandler(clientSocket)).start();
+                } catch (IOException e) {
+                    System.err.println("Error accepting client: " + e.getMessage());
+                    break;
+                }
+            }
+        }
+        
+        class ClientHandler implements Runnable {
+            private Socket socket;
+            private PrintWriter out;
+            private BufferedReader in;
+            
+            public ClientHandler(Socket socket) {
+                this.socket = socket;
+            }
+            
+            public void run() {
+                try {
+                    out = new PrintWriter(socket.getOutputStream(), true);
+                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    
+                    String request = in.readLine();
+                    String response = processRequest(request);
+                    out.println(response);
+                    
+                    socket.close();
+                } catch (IOException e) {
+                    System.err.println("Error handling client: " + e.getMessage());
+                }
+            }
+            
+            private String processRequest(String request) {
+                if (request == null || !request.startsWith("LOGIN:")) {
+                    return "ERROR:Invalid request format";
+                }
+                
+                String[] parts = request.split(":");
+                if (parts.length != 3) {
+                    return "ERROR:Invalid login format";
+                }
+                
+                String username = parts[1];
+                String password = parts[2];
+                
+                if (users.containsKey(username) && users.get(username).equals(password)) {
+                    return "SUCCESS:Login successful";
+                } else {
+                    return "ERROR:Invalid username or password";
+                }
+            }
+        }
+        
+        public void stop() throws IOException {
+            serverSocket.close();
         }
     }
-}
-
-public class Task7 {
+    
     public static void main(String[] args) {
+        System.out.println("=== Chat System Test Cases ===\\n");
+        
         // Start server in a separate thread
-        new Thread(() -> {
-            new ChatServer(5000);
-        }).start();
+        Thread serverThread = new Thread(() -> {
+            try {
+                ChatServer server = new ChatServer(8080);
+                server.start();
+            } catch (IOException e) {
+                System.err.println("Server error: " + e.getMessage());
+            }
+        });
+        serverThread.start();
         
         // Wait for server to start
         try {
@@ -112,19 +168,32 @@ public class Task7 {
         }
         
         // Test cases
-        ChatClient1 client = new ChatClient1("localhost", 5000);
-        System.out.println("Test Case 1: " + client.login("user1", "pass1")); // Should return true
+        String[][] testCases = {
+            {"alice", "password123"},
+            {"bob", "securepass"},
+            {"charlie", "wrongpass"},
+            {"david", "test1234"},
+            {"unknown", "password"}
+        };
         
-        client = new ChatClient1("localhost", 5000);
-        System.out.println("Test Case 2: " + client.login("user2", "pass2")); // Should return true
+        for (int i = 0; i < testCases.length; i++) {
+            try {
+                System.out.println("Test Case " + (i + 1) + ":");
+                System.out.println("Username: " + testCases[i][0]);
+                System.out.println("Password: " + testCases[i][1]);
+                
+                ChatClient client = new ChatClient("localhost", 8080);
+                String response = client.login(testCases[i][0], testCases[i][1]);
+                System.out.println("Response: " + response);
+                client.close();
+                System.out.println();
+                
+                Thread.sleep(500);
+            } catch (Exception e) {
+                System.err.println("Client error: " + e.getMessage());
+            }
+        }
         
-        client = new ChatClient1("localhost", 5000);
-        System.out.println("Test Case 3: " + client.login("user1", "wrongpass")); // Should return false
-        
-        client = new ChatClient1("localhost", 5000);
-        System.out.println("Test Case 4: " + client.login("nonexistent", "pass")); // Should return false
-        
-        client = new ChatClient1("localhost", 5000);
-        System.out.println("Test Case 5: " + client.login("user3", "pass3")); // Should return true
+        System.exit(0);
     }
 }

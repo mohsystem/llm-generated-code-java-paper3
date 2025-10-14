@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task192 {
     public boolean xorGame(int[] nums) {
         int xor = 0;

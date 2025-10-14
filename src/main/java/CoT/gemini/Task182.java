@@ -1,29 +1,49 @@
 package CoT.gemini;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-class Task182 {
+import java.util.stream.Collectors;
+
+public class Task182 {
+
+    /**
+     * Cleans up a user-entered phone number string.
+     *
+     * @param phoneNumber The raw phone number string.
+     * @return A 10-digit NANP number string, or an empty string if the input is invalid.
+     */
     public static String cleanPhoneNumber(String phoneNumber) {
-        // Remove non-digit characters and the country code if present
-        String cleanedNumber = phoneNumber.replaceAll("[^0-9]", "");
-        if (cleanedNumber.startsWith("1") && cleanedNumber.length() == 11) {
-            cleanedNumber = cleanedNumber.substring(1);
+        if (phoneNumber == null) {
+            return "";
         }
-        return cleanedNumber;
+
+        // 1. Remove all non-digit characters.
+        String cleaned = phoneNumber.replaceAll("[^\\d]", "");
+
+        // 2. Handle country code if present.
+        if (cleaned.length() == 11 && cleaned.startsWith("1")) {
+            return cleaned.substring(1);
+        }
+
+        // 3. Check if the result is a 10-digit number.
+        if (cleaned.length() == 10) {
+            return cleaned;
+        }
+
+        // 4. If not, the number is invalid.
+        return "";
     }
 
     public static void main(String[] args) {
         String[] testCases = {
-                "+1 (613)-995-0253",
-                "613-995-0253",
-                "1 613 995 0253",
-                "613.995.0253",
-                "16139950253"
+            "+1 (613)-995-0253",
+            "613-995-0253",
+            "1 613 995 0253",
+            "613.995.0253",
+            "12345" // Invalid case
         };
 
         for (String testCase : testCases) {
-            String cleanedNumber = cleanPhoneNumber(testCase);
-            System.out.println(cleanedNumber);
+            String result = cleanPhoneNumber(testCase);
+            System.out.println("Input: \"" + testCase + "\", Cleaned: \"" + result + "\"");
         }
     }
 }

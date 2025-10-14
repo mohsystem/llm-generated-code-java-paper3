@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.util.Base64;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;

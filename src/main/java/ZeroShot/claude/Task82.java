@@ -2,45 +2,48 @@ package ZeroShot.claude;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 public class Task82 {
-    public static String hashPassword(String password, byte[] salt) {
+    public static String hashPasswordWithSalt(String password, String salt) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(hashedPassword);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String combined = password + salt;
+            byte[] hashBytes = digest.digest(combined.getBytes(StandardCharsets.UTF_8));
+            
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
+            throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
     
-    public static byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
-
     public static void main(String[] args) {
-        // Test cases
-        String[] passwords = {
-            "password123",
-            "SecurePass!@#",
-            "TestPass987",
-            "ComplexP@ssw0rd",
-            "SimpleP@ss"
-        };
-
-        for (String password : passwords) {
-            byte[] salt = generateSalt();
-            String hashedPassword = hashPassword(password, salt);
-            System.out.println("Password: " + password);
-            System.out.println("Salt (Base64): " + Base64.getEncoder().encodeToString(salt));
-            System.out.println("Hashed Password: " + hashedPassword);
-            System.out.println();
-        }
+        // Test case 1
+        String hash1 = hashPasswordWithSalt("password123", "randomsalt1");
+        System.out.println("Test 1: " + hash1);
+        
+        // Test case 2
+        String hash2 = hashPasswordWithSalt("securePass!", "salt2024");
+        System.out.println("Test 2: " + hash2);
+        
+        // Test case 3
+        String hash3 = hashPasswordWithSalt("admin", "xyz789");
+        System.out.println("Test 3: " + hash3);
+        
+        // Test case 4
+        String hash4 = hashPasswordWithSalt("MyP@ssw0rd", "abc123def");
+        System.out.println("Test 4: " + hash4);
+        
+        // Test case 5
+        String hash5 = hashPasswordWithSalt("test", "salt");
+        System.out.println("Test 5: " + hash5);
     }
 }

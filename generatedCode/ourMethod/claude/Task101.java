@@ -22,7 +22,7 @@ public class Task101 {
             // Create new file
             try (FileWriter writer = new FileWriter(scriptFile)) {
                 writer.write("#!/bin/bash\\n");
-                writer.write("echo \\"Hello World\\"\\n");
+                writer.write("echo \"Hello World\"\\n");
             }
 
             // Set executable permissions

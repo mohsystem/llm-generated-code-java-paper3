@@ -6,26 +6,27 @@ public class Task58 {
             return true;
         }
         
-        int xCount = 0;
-        int oCount = 0;
+        String lowerStr = str.toLowerCase();
+        int countX = 0;
+        int countO = 0;
         
-        for (char c : str.toLowerCase().toCharArray()) {
+        for (int i = 0; i < lowerStr.length(); i++) {
+            char c = lowerStr.charAt(i);
             if (c == 'x') {
-                xCount++;
+                countX++;
             } else if (c == 'o') {
-                oCount++; 
+                countO++;
             }
         }
         
-        return xCount == oCount;
+        return countX == countO;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(XO("ooxx")); // true
-        System.out.println(XO("xooxx")); // false  
-        System.out.println(XO("ooxXm")); // true
-        System.out.println(XO("zpzpzpp")); // true
-        System.out.println(XO("zzoo")); // false
+        System.out.println("Test 1: XO(\"ooxx\") = " + XO("ooxx"));
+        System.out.println("Test 2: XO(\"xooxx\") = " + XO("xooxx"));
+        System.out.println("Test 3: XO(\"ooxXm\") = " + XO("ooxXm"));
+        System.out.println("Test 4: XO(\"zpzpzpp\") = " + XO("zpzpzpp"));
+        System.out.println("Test 5: XO(\"zzoo\") = " + XO("zzoo"));
     }
 }

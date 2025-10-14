@@ -1,27 +1,30 @@
 package Vanilla.gemini;
-class Task59 {
-    public String accum(String s) {
-        StringBuilder sb = new StringBuilder();
+
+public class Task59 {
+
+    public static String accum(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            sb.append(Character.toUpperCase(c));
+            result.append(Character.toUpperCase(c));
             for (int j = 0; j < i; j++) {
-                sb.append(Character.toLowerCase(c));
+                result.append(Character.toLowerCase(c));
             }
             if (i < s.length() - 1) {
-                sb.append("-");
+                result.append("-");
             }
         }
-        return sb.toString();
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task59 task59 = new Task59();
-        System.out.println(task59.accum("abcd"));
-        System.out.println(task59.accum("RqaEzty"));
-        System.out.println(task59.accum("cwAt"));
-        System.out.println(task59.accum("xyz"));
-        System.out.println(task59.accum("NyffsGeyylB"));
-
+        System.out.println("Input: \"abcd\" -> Output: \"" + accum("abcd") + "\"");
+        System.out.println("Input: \"RqaEzty\" -> Output: \"" + accum("RqaEzty") + "\"");
+        System.out.println("Input: \"cwAt\" -> Output: \"" + accum("cwAt") + "\"");
+        System.out.println("Input: \"Z\" -> Output: \"" + accum("Z") + "\"");
+        System.out.println("Input: \"Mumbling\" -> Output: \"" + accum("Mumbling") + "\"");
     }
 }

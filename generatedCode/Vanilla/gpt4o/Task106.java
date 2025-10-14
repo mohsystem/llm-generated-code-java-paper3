@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.util.PriorityQueue;
 
 public class Task147 {

@@ -1,85 +1,94 @@
 package ZeroShot.gemini;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
+
+class Product {
+    private final String name;
+    private final double price;
+    private final String description;
+
+    public Product(String name, double price, String description) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Name: %s, Price: %.2f, Description: %s", name, price, description);
+    }
+}
 
 public class Task137 {
 
-    private static final Map<String, Product> productTable = new HashMap<>();
+    private static final Map<String, Product> productTable;
 
     static {
-        // Initialize product table (replace with your actual product data)
-        productTable.put("A123", new Product("A123", "Product A", 10.99));
-        productTable.put("B456", new Product("B456", "Product B", 25.50));
-        productTable.put("C789", new Product("C789", "Product C", 5.75));
+        Map<String, Product> aMap = new HashMap<>();
+        aMap.put("PROD101", new Product("Laptop", 999.99, "High-performance laptop"));
+        aMap.put("PROD102", new Product("Mouse", 25.50, "Ergonomic wireless mouse"));
+        aMap.put("PROD103", new Product("Keyboard", 75.00, "Mechanical gaming keyboard"));
+        aMap.put("PROD104", new Product("Monitor", 300.00, "27-inch 4K UHD monitor"));
+        productTable = Collections.unmodifiableMap(aMap);
     }
 
-    public static Product getProductDetails(String productId) {
+    /**
+     * Inquires the product table for product details in a secure manner.
+     * This method is secure because:
+     * 1. It validates input to reject null or empty strings.
+     * 2. It uses a pre-defined, in-memory map for lookups, which prevents
+     *    any form of injection attack (like SQL injection) as user input
+     *    is never used to construct a query.
+     * 3. It gracefully handles cases where the product is not found.
+     *
+     * @param productId The ID of the product to look up.
+     * @return A string with product details or an error message.
+     */
+    public static String getProductDetails(String productId) {
+        // 1. Input Validation: Check for null or empty/whitespace-only strings.
         if (productId == null || productId.trim().isEmpty()) {
-            return null; // Or throw an exception for invalid input
+            return "Error: Product ID cannot be null or empty.";
         }
-        return productTable.get(productId);
-    }
 
+        // 2. Data Lookup: Safely look up the product in the pre-defined map.
+        Product product = productTable.get(productId);
+
+        // 3. Result Handling: Return details or a 'not found' message.
+        if (product != null) {
+            return product.toString();
+        } else {
+            return "Product not found.";
+        }
+    }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        System.out.println("--- Product Inquiry System ---");
 
-        System.out.println("Enter product ID:");
-        String productId = scanner.nextLine();
+        // Test Case 1: Valid product ID
+        String test1 = "PROD101";
+        System.out.println("Querying for ID: '" + test1 + "'");
+        System.out.println("Result: " + getProductDetails(test1) + "\n");
 
-        Product product = getProductDetails(productId);
+        // Test Case 2: Another valid product ID
+        String test2 = "PROD103";
+        System.out.println("Querying for ID: '" + test2 + "'");
+        System.out.println("Result: " + getProductDetails(test2) + "\n");
 
-        if (product != null) {
-            System.out.println("Product Details:");
-            System.out.println("ID: " + product.getId());
-            System.out.println("Name: " + product.getName());
-            System.out.println("Price: $" + product.getPrice());
-        } else {
-            System.out.println("Product not found.");
-        }
+        // Test Case 3: Non-existent product ID
+        String test3 = "PROD999";
+        System.out.println("Querying for ID: '" + test3 + "'");
+        System.out.println("Result: " + getProductDetails(test3) + "\n");
 
-        // Test cases
-        System.out.println(getProductDetails("A123"));
-        System.out.println(getProductDetails("B456"));
-        System.out.println(getProductDetails("C789"));
-        System.out.println(getProductDetails("InvalidID"));
-        System.out.println(getProductDetails(""));
+        // Test Case 4: Empty string input (whitespace)
+        String test4 = " ";
+        System.out.println("Querying for ID: '" + test4 + "'");
+        System.out.println("Result: " + getProductDetails(test4) + "\n");
 
-        scanner.close();
-
-    }
-
-
-    private static class Product {
-        private String id;
-        private String name;
-        private double price;
-
-        public Product(String id, String name, double price) {
-            this.id = id;
-            this.name = name;
-            this.price = price;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public double getPrice() {
-            return price;
-        }
-
-        @Override
-        public String toString() {
-            return "Product{id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    ", price=" + price +
-                    '}';
-        }
+        // Test Case 5: Null input
+        String test5 = null;
+        System.out.println("Querying for ID: " + test5);
+        System.out.println("Result: " + getProductDetails(test5) + "\n");
     }
 }

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task11 {
 
     public static int nb_year(int p0, double percent, int aug, int p) {

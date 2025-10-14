@@ -1,57 +1,95 @@
 package ZeroShot.gemini;
+
 import java.util.InputMismatchException;
-import java.util.Scanner;
 
 public class Task45 {
 
-    public static int safeIntegerInput(Scanner scanner) {
-        int num = 0;
-        boolean validInput = false;
-        while (!validInput) {
-            try {
-                System.out.print("Enter an integer: ");
-                num = scanner.nextInt();
-                validInput = true;
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter an integer.");
-                scanner.next(); // Clear the invalid input
+    /**
+     * Securely converts two string inputs to doubles and performs division.
+     * It handles null/empty inputs, non-numeric formats, and division by zero.
+     *
+     * @param numStr1 The string representing the numerator.
+     * @param numStr2 The string representing the denominator.
+     * @return The result of the division, or Double.NaN if an error occurs.
+     */
+    public static double performDivision(String numStr1, String numStr2) {
+        try {
+            // 1. Validate for null or empty inputs
+            if (numStr1 == null || numStr1.trim().isEmpty() || numStr2 == null || numStr2.trim().isEmpty()) {
+                throw new IllegalArgumentException("Input strings cannot be null or empty.");
             }
-        }
-        return num;
-    }
 
+            // 2. Convert strings to numbers, handling format errors
+            double numerator = Double.parseDouble(numStr1);
+            double denominator = Double.parseDouble(numStr2);
+
+            // 3. Check for division by zero
+            if (denominator == 0) {
+                throw new ArithmeticException("Cannot divide by zero.");
+            }
+
+            return numerator / denominator;
+
+        } catch (NumberFormatException e) {
+            // Catches errors from Double.parseDouble for invalid number formats
+            System.err.println("Error: Invalid number format provided. Please provide valid numbers.");
+            return Double.NaN;
+        } catch (IllegalArgumentException e) {
+            // Catches our custom validation error
+            System.err.println("Error: " + e.getMessage());
+            return Double.NaN;
+        } catch (ArithmeticException e) {
+            // Catches division by zero
+            System.err.println("Error: " + e.getMessage());
+            return Double.NaN;
+        } catch (Exception e) {
+            // A general catch-all for any other unexpected errors
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            return Double.NaN;
+        }
+    }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // --- Test Cases ---
 
-        int num1 = safeIntegerInput(scanner);
-        int num2 = safeIntegerInput(scanner);
-
-        try {
-            int result = num1 / num2;
-            System.out.println("Result of division: " + result);
-        } catch (ArithmeticException e) {
-            System.out.println("Error: Division by zero.");
+        // Test Case 1: Valid input
+        System.out.println("Test Case 1: Valid input ('100', '20')");
+        double result1 = performDivision("100", "20");
+        if (!Double.isNaN(result1)) {
+            System.out.println("Result: " + result1);
         }
+        System.out.println("--------------------");
 
-
-        scanner.close();
-
-
-        //test cases
-        test(10,2);
-        test(5,0);
-        test(8,4);
-        test(12,3);
-        test(7,0);
-
-    }
-    public static void test(int num1, int num2){
-       try {
-            int result = num1 / num2;
-            System.out.println("Result of division: " + result);
-        } catch (ArithmeticException e) {
-            System.out.println("Error: Division by zero.");
+        // Test Case 2: Division by zero
+        System.out.println("Test Case 2: Division by zero ('10', '0')");
+        double result2 = performDivision("10", "0");
+        if (!Double.isNaN(result2)) {
+            System.out.println("Result: " + result2);
         }
+        System.out.println("--------------------");
+
+        // Test Case 3: Invalid number format
+        System.out.println("Test Case 3: Invalid number format ('abc', '5')");
+        double result3 = performDivision("abc", "5");
+        if (!Double.isNaN(result3)) {
+            System.out.println("Result: " + result3);
+        }
+        System.out.println("--------------------");
+
+        // Test Case 4: Null input
+        System.out.println("Test Case 4: Null input ('50', null)");
+        double result4 = performDivision("50", null);
+        if (!Double.isNaN(result4)) {
+            System.out.println("Result: " + result4);
+        }
+        System.out.println("--------------------");
+
+        // Test Case 5: Empty string input
+        System.out.println("Test Case 5: Empty string input ('', '10')");
+        double result5 = performDivision("", "10");
+        if (!Double.isNaN(result5)) {
+            System.out.println("Result: " + result5);
+        }
+        System.out.println("--------------------");
     }
 }

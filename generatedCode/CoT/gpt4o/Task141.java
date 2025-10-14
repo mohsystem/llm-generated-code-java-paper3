@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task141 {
     public static String reverseString(String input) {
         if (input == null) return null;

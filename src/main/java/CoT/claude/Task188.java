@@ -1,70 +1,84 @@
 package CoT.claude;
 
-public class Task188 {
+import java.util.concurrent.Semaphore;
+
+class Task188 {
     private int n;
-    private boolean fooTurn = true;
-    
+    private Semaphore fooSem;
+    private Semaphore barSem;
+
     public Task188(int n) {
-        if (n < 1 || n > 1000) {
-            throw new IllegalArgumentException("n must be between 1 and 1000");
-        }
         this.n = n;
+        this.fooSem = new Semaphore(1);
+        this.barSem = new Semaphore(0);
     }
-    
-    public synchronized void foo() throws InterruptedException {
+
+    public void foo(Runnable printFoo) throws InterruptedException {
         for (int i = 0; i < n; i++) {
-            while (!fooTurn) {
-                wait();
-            }
-            System.out.print("foo");
-            fooTurn = false;
-            notifyAll();
+            fooSem.acquire();
+            printFoo.run();
+            barSem.release();
         }
     }
-    
-    public synchronized void bar() throws InterruptedException {
+
+    public void bar(Runnable printBar) throws InterruptedException {
         for (int i = 0; i < n; i++) {
-            while (fooTurn) {
-                wait();
-            }
-            System.out.print("bar");
-            fooTurn = true;
-            notifyAll();
+            barSem.acquire();
+            printBar.run();
+            fooSem.release();
         }
     }
-    
+
     public static void main(String[] args) {
-        int[] testCases = {1, 2, 3, 5, 10};
+        // Test case 1
+        System.out.println("Test case 1:");
+        testFooBar(1);
         
-        for (int test : testCases) {
-            System.out.println("\\nTest case n = " + test);
-            final Task188 fooBar = new Task188(test);
-            
-            Thread threadA = new Thread(() -> {
-                try {
-                    fooBar.foo();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-            
-            Thread threadB = new Thread(() -> {
-                try {
-                    fooBar.bar();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-            
-            threadA.start();
-            threadB.start();
-            
+        // Test case 2
+        System.out.println("\\nTest case 2:");
+        testFooBar(2);
+        
+        // Test case 3
+        System.out.println("\\nTest case 3:");
+        testFooBar(5);
+        
+        // Test case 4
+        System.out.println("\\nTest case 4:");
+        testFooBar(10);
+        
+        // Test case 5
+        System.out.println("\\nTest case 5:");
+        testFooBar(3);
+    }
+
+    private static void testFooBar(int n) {
+        Task188 fooBar = new Task188(n);
+        
+        Thread threadA = new Thread(() -> {
             try {
-                threadA.join();
-                threadB.join();
+                fooBar.foo(() -> System.out.print("foo"));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        });
+        
+        Thread threadB = new Thread(() -> {
+            try {
+                fooBar.bar(() -> System.out.print("bar"));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        
+        threadA.start();
+        threadB.start();
+        
+        try {
+            threadA.join();
+            threadB.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+        System.out.println();
     }
 }

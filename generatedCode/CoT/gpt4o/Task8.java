@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task8 {
     public static char findMissingLetter(char[] array) {
         for (int i = 0; i < array.length - 1; i++) {

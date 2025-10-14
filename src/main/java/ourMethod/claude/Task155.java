@@ -1,23 +1,35 @@
 package ourMethod.claude;
 
+import java.util.Arrays;
+import java.util.Scanner;
+
 public class Task155 {
-    public static void heapSort(int[] arr) {
-        int n = arr.length;
-        
-        // Build max heap
-        for (int i = n / 2 - 1; i >= 0; i--)
-            heapify(arr, n, i);
-            
-        // Extract elements from heap one by one
-        for (int i = n - 1; i > 0; i--) {
-            // Move current root to end
-            int temp = arr[0];
-            arr[0] = arr[i];
-            arr[i] = temp;
-            
-            // Call heapify on reduced heap
-            heapify(arr, i, 0);
+    private static final int MAX_ARRAY_SIZE = 1000000;
+    
+    public static int[] heapSort(int[] arr) {
+        if (arr == null) {
+            throw new IllegalArgumentException("Input array cannot be null");
         }
+        
+        if (arr.length > MAX_ARRAY_SIZE) {
+            throw new IllegalArgumentException("Array size exceeds maximum allowed size");
+        }
+        
+        int[] result = Arrays.copyOf(arr, arr.length);
+        int n = result.length;
+        
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(result, n, i);
+        }
+        
+        for (int i = n - 1; i > 0; i--) {
+            int temp = result[0];
+            result[0] = result[i];
+            result[i] = temp;
+            heapify(result, i, 0);
+        }
+        
+        return result;
     }
     
     private static void heapify(int[] arr, int n, int i) {
@@ -25,46 +37,42 @@ public class Task155 {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
         
-        // Compare with left child
-        if (left < n && arr[left] > arr[largest])
+        if (left < n && arr[left] > arr[largest]) {
             largest = left;
-            
-        // Compare with right child    
-        if (right < n && arr[right] > arr[largest])
+        }
+        
+        if (right < n && arr[right] > arr[largest]) {
             largest = right;
-            
-        // If largest is not root
+        }
+        
         if (largest != i) {
-            int temp = arr[i];
+            int swap = arr[i];
             arr[i] = arr[largest];
-            arr[largest] = temp;
-            
-            // Recursively heapify affected sub-tree
+            arr[largest] = swap;
             heapify(arr, n, largest);
         }
     }
     
     public static void main(String[] args) {
-        // Test cases
         int[][] testCases = {
-            {4, 10, 3, 5, 1},
             {64, 34, 25, 12, 22, 11, 90},
+            {5, 2, 8, 1, 9},
+            {-5, -2, -8, -1, -9},
             {1},
-            {1, 2, 3, 4, 5},
-            {5, 4, 3, 2, 1}
+            {100, 50, 75, 25, 30, 60, 80}
         };
         
-        for(int i = 0; i < testCases.length; i++) {
-            System.out.print("Test case " + (i+1) + " Before sorting: ");
-            for(int num : testCases[i])
-                System.out.print(num + " ");
-                
-            heapSort(testCases[i]);
-            
-            System.out.print("\\nTest case " + (i+1) + " After sorting: ");
-            for(int num : testCases[i])
-                System.out.print(num + " ");
-            System.out.println("\\n");
+        for (int i = 0; i < testCases.length; i++) {
+            try {
+                int[] original = testCases[i];
+                int[] sorted = heapSort(original);
+                System.out.println("Test case " + (i + 1) + ":");
+                System.out.println("Original: " + Arrays.toString(original));
+                System.out.println("Sorted:   " + Arrays.toString(sorted));
+                System.out.println();
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error in test case " + (i + 1) + ": " + e.getMessage());
+            }
         }
     }
 }

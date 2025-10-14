@@ -1,32 +1,61 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-class Task25 {
-    public static List<String> number(List<String> lines) {
-        List<String> numberedLines = new ArrayList<>();
-        for (int i = 0; i < lines.size(); i++) {
-            numberedLines.add((i + 1) + ": " + lines.get(i));
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Arrays;
+
+public class Task25 {
+
+    /**
+     * Prepends line numbers to a list of strings.
+     * The numbering starts at 1. The format is n: string.
+     *
+     * @param lines The list of strings to be numbered. Can be null.
+     * @return A new list of strings with line numbers, or an empty list if input is null or empty.
+     */
+    public static List<String> numberLines(List<String> lines) {
+        if (lines == null || lines.isEmpty()) {
+            return Collections.emptyList();
         }
-        return numberedLines;
+
+        List<String> result = new ArrayList<>();
+        int lineNumber = 1;
+        for (String line : lines) {
+            // Using StringBuilder is efficient for string concatenation in a loop.
+            // It avoids creating multiple intermediate String objects.
+            StringBuilder sb = new StringBuilder();
+            sb.append(lineNumber);
+            sb.append(": ");
+            // Defensively handle potential nulls inside the list
+            if (line != null) {
+                sb.append(line);
+            }
+            result.add(sb.toString());
+            lineNumber++;
+        }
+        return result;
     }
 
     public static void main(String[] args) {
+        // Test Case 1: Empty list
         List<String> test1 = new ArrayList<>();
-        System.out.println(number(test1)); // Output: []
+        System.out.println("Test Case 1: Input [] -> Output " + numberLines(test1));
 
+        // Test Case 2: Basic list
         List<String> test2 = Arrays.asList("a", "b", "c");
-        System.out.println(number(test2)); // Output: [1: a, 2: b, 3: c]
+        System.out.println("Test Case 2: Input [\"a\", \"b\", \"c\"] -> Output " + numberLines(test2));
 
-        List<String> test3 = Arrays.asList("Hello", "world", "!");
-        System.out.println(number(test3)); // Output: [1: Hello, 2: world, 3: !]
+        // Test Case 3: List with empty strings
+        List<String> test3 = Arrays.asList("first", "", "third");
+        System.out.println("Test Case 3: Input [\"first\", \"\", \"third\"] -> Output " + numberLines(test3));
+        
+        // Test Case 4: Single element list
+        List<String> test4 = Arrays.asList("single line");
+        System.out.println("Test Case 4: Input [\"single line\"] -> Output " + numberLines(test4));
 
-        List<String> test4 = Arrays.asList("");
-        System.out.println(number(test4)); // Output: [1: ]
-
-        List<String> test5 = Arrays.asList("Line 1", "Line 2", "Line 3", "Line 4");
-        System.out.println(number(test5)); // Output: [1: Line 1, 2: Line 2, 3: Line 3, 4: Line 4]
-
+        // Test Case 5: Null input list
+        List<String> test5 = null;
+        System.out.println("Test Case 5: Input null -> Output " + numberLines(test5));
     }
 }

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task17 {
     public static String toJadenCase(String phrase) {
         if (phrase == null || phrase.isEmpty()) {

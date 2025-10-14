@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import org.json.JSONObject;
 
 public class Task62 {

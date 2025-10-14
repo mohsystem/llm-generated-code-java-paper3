@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task103 {
 
     public static boolean checkPasswordStrength(String password) {

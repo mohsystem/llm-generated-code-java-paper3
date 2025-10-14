@@ -42,11 +42,11 @@ public class Task61 {
     public static void main(String[] args) {
         // Test cases
         String[] tests = {
-            "<?xml version=\\"1.0\\"?><root><child>Test</child></root>",
+            "<?xml version=\"1.0\"?><root><child>Test</child></root>",
             "<simple>content</simple>",
-            "<!-- comment --><root attr=\\"value\\">content</root>",
-            "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><root/>",
-            "<root xmlns=\\"http://example.com\\">test</root>"
+            "<!-- comment --><root attr=\"value\">content</root>",
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root/>",
+            "<root xmlns=\"http://example.com\">test</root>"
         };
         
         for (String test : tests) {

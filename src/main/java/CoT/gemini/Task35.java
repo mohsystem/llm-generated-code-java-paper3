@@ -1,45 +1,37 @@
 package CoT.gemini;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class Task35 {
-
-    public static int peopleOnBus(List<int[]> stops) {
-        int people = 0;
+class Task35 {
+    public static int countPassengers(ArrayList<int[]> stops) {
+        int passengers = 0;
         for (int[] stop : stops) {
-            people += stop[0];
-            people -= stop[1];
+            passengers += stop[0];
+            passengers -= stop[1];
         }
-        return people;
+        return passengers;
     }
 
     public static void main(String[] args) {
-        List<int[]> stops1 = new ArrayList<>();
-        stops1.add(new int[]{10, 0});
-        stops1.add(new int[]{3, 5});
-        stops1.add(new int[]{2, 4});
-        System.out.println(peopleOnBus(stops1)); // Output: 4
+        // Test Case 1
+        ArrayList<int[]> test1 = new ArrayList<>(Arrays.asList(new int[]{10, 0}, new int[]{3, 5}, new int[]{5, 8}));
+        System.out.println("Remaining passengers: " + countPassengers(test1)); // Expected: 5
 
-        List<int[]> stops2 = new ArrayList<>();
-        stops2.add(new int[]{5, 0});
-        stops2.add(new int[]{7, 2});
-        stops2.add(new int[]{1, 9});
-        System.out.println(peopleOnBus(stops2)); // Output: 1
+        // Test Case 2
+        ArrayList<int[]> test2 = new ArrayList<>(Arrays.asList(new int[]{3, 0}, new int[]{9, 1}, new int[]{4, 10}, new int[]{12, 2}, new int[]{6, 1}, new int[]{7, 10}));
+        System.out.println("Remaining passengers: " + countPassengers(test2)); // Expected: 17
 
-        List<int[]> stops3 = new ArrayList<>();
-        stops3.add(new int[]{0, 0});
-        System.out.println(peopleOnBus(stops3)); // Output: 0
+        // Test Case 3
+        ArrayList<int[]> test3 = new ArrayList<>(Arrays.asList(new int[]{3, 0}, new int[]{9, 1}, new int[]{4, 8}, new int[]{12, 2}, new int[]{6, 1}, new int[]{7, 8}));
+        System.out.println("Remaining passengers: " + countPassengers(test3)); // Expected: 21
 
-        List<int[]> stops4 = new ArrayList<>();
-        stops4.add(new int[]{10, 5});
-        stops4.add(new int[]{3, 8});
-        System.out.println(peopleOnBus(stops4)); // Output: 0
-
-        List<int[]> stops5 = new ArrayList<>();
-        stops5.add(new int[]{5, 0});
-        stops5.add(new int[]{2, 2});
-        stops5.add(new int[]{3, 1});
-        System.out.println(peopleOnBus(stops5)); // Output: 5
+        // Test Case 4
+        ArrayList<int[]> test4 = new ArrayList<>(Arrays.asList(new int[]{0, 0}));
+        System.out.println("Remaining passengers: " + countPassengers(test4)); // Expected: 0
+        
+        // Test Case 5
+        ArrayList<int[]> test5 = new ArrayList<>(Arrays.asList(new int[]{100, 0}, new int[]{20, 30}, new int[]{5, 15}));
+        System.out.println("Remaining passengers: " + countPassengers(test5)); // Expected: 80
     }
 }

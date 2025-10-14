@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import javax.naming.*;
 import javax.naming.directory.*;
 import java.util.Hashtable;

@@ -1,64 +1,63 @@
 package ZeroShot.claude;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Task70 {
-    public static String readFile(String filePath) {
-        StringBuilder content = new StringBuilder();
-        
+    public static String readFileContent(String filePath) {
         try {
-            // Normalize and validate path
-            Path normalizedPath = Paths.get(filePath).normalize();
-            File file = normalizedPath.toFile();
+            // Normalize and validate the path to prevent directory traversal attacks
+            Path path = Paths.get(filePath).normalize().toAbsolutePath();
             
-            // Basic security checks
-            if(!file.exists()) {
-                return "File does not exist";
-            }
-            if(!file.canRead()) {
-                return "File cannot be read";
+            // Check if file exists and is a regular file
+            if (!Files.exists(path)) {
+                return "Error: File does not exist";
             }
             
-            // Read file using buffered reader
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    content.append(line).append("\\n");
-                }
+            if (!Files.isRegularFile(path)) {
+                return "Error: Path is not a regular file";
             }
+            
+            // Check if file is readable
+            if (!Files.isReadable(path)) {
+                return "Error: File is not readable";
+            }
+            
+            // Read and return file content
+            return new String(Files.readAllBytes(path));
+            
         } catch (IOException e) {
-            return "Error reading file: " + e.getMessage();
-        } catch (SecurityException e) {
-            return "Security error: " + e.getMessage();
+            return "Error: Unable to read file - " + e.getMessage();
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
-        
-        return content.toString();
     }
-
+    
     public static void main(String[] args) {
-        if(args.length < 1) {
-            System.out.println("Please provide file path as argument");
-            return;
-        }
-
         // Test cases
         String[] testFiles = {
-            args[0],                    // User provided path
-            "test1.txt",               // Normal file
-            "../test2.txt",            // Parent directory access
-            "nonexistent.txt",         // Non-existent file
-            "/etc/passwd"              // System file access attempt
+            "test1.txt",
+            "test2.txt",
+            "nonexistent.txt",
+            "../etc/passwd",
+            "test3.txt"
         };
-
-        for(String filePath : testFiles) {
-            System.out.println("Reading file: " + filePath);
-            System.out.println(readFile(filePath));
-            System.out.println("------------------------");
+        
+        // If command line argument is provided, use it
+        if (args.length > 0) {
+            String content = readFileContent(args[0]);
+            System.out.println("File Content:\\n" + content);
+        } else {
+            // Run test cases
+            System.out.println("Running test cases:\\n");
+            for (int i = 0; i < testFiles.length; i++) {
+                System.out.println("Test Case " + (i + 1) + ": " + testFiles[i]);
+                String content = readFileContent(testFiles[i]);
+                System.out.println(content);
+                System.out.println("-------------------\\n");
+            }
         }
     }
 }

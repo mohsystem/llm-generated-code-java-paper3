@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task139 {
     public static double calculateArea(double radius) {
         if (radius < 0) {

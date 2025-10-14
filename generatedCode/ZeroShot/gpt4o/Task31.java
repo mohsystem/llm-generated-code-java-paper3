@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task31 {
     public static String dnaComplement(String dna) {
         StringBuilder complement = new StringBuilder();

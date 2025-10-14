@@ -1,94 +1,197 @@
 package Vanilla.claude;
 
-class Permission {
-    private String name;
-    private boolean read;
-    private boolean write;
-    private boolean execute;
-    
-    public Permission(String name) {
-        this.name = name;
-        this.read = false;
-        this.write = false; 
-        this.execute = false;
-    }
-    
-    public void grantRead() { this.read = true; }
-    public void grantWrite() { this.write = true; }
-    public void grantExecute() { this.execute = true; }
-    
-    public void revokeRead() { this.read = false; }
-    public void revokeWrite() { this.write = false; }
-    public void revokeExecute() { this.execute = false; }
-    
-    public boolean canRead() { return read; }
-    public boolean canWrite() { return write; }
-    public boolean canExecute() { return execute; }
-    public String getName() { return name; }
-}
-
-class User {
-    private String username;
-    private Permission permission;
-    
-    public User(String username) {
-        this.username = username;
-        this.permission = new Permission(username);
-    }
-    
-    public String getUsername() { return username; }
-    public Permission getPermission() { return permission; }
-}
+import java.util.*;
 
 public class Task138 {
-    public static void managePermission(User user, boolean read, boolean write, boolean execute) {
-        Permission perm = user.getPermission();
+    private Map<String, User> users;
+    private Map<String, Role> roles;
+    
+    public Task138() {
+        users = new HashMap<>();
+        roles = new HashMap<>();
+        initializeDefaultRoles();
+    }
+    
+    private void initializeDefaultRoles() {
+        Role admin = new Role("admin");
+        admin.addPermission("read");
+        admin.addPermission("write");
+        admin.addPermission("delete");
+        admin.addPermission("execute");
+        roles.put("admin", admin);
         
-        if(read) perm.grantRead();
-        else perm.revokeRead();
+        Role editor = new Role("editor");
+        editor.addPermission("read");
+        editor.addPermission("write");
+        roles.put("editor", editor);
         
-        if(write) perm.grantWrite();
-        else perm.revokeWrite();
+        Role viewer = new Role("viewer");
+        viewer.addPermission("read");
+        roles.put("viewer", viewer);
+    }
+    
+    public boolean addUser(String username, String roleName) {
+        if (users.containsKey(username)) {
+            return false;
+        }
+        Role role = roles.get(roleName);
+        if (role == null) {
+            return false;
+        }
+        users.put(username, new User(username, role));
+        return true;
+    }
+    
+    public boolean removeUser(String username) {
+        return users.remove(username) != null;
+    }
+    
+    public boolean hasPermission(String username, String permission) {
+        User user = users.get(username);
+        if (user == null) {
+            return false;
+        }
+        return user.hasPermission(permission);
+    }
+    
+    public boolean assignRole(String username, String roleName) {
+        User user = users.get(username);
+        Role role = roles.get(roleName);
+        if (user == null || role == null) {
+            return false;
+        }
+        user.setRole(role);
+        return true;
+    }
+    
+    public Set<String> getUserPermissions(String username) {
+        User user = users.get(username);
+        if (user == null) {
+            return new HashSet<>();
+        }
+        return user.getPermissions();
+    }
+    
+    public boolean addPermissionToRole(String roleName, String permission) {
+        Role role = roles.get(roleName);
+        if (role == null) {
+            return false;
+        }
+        role.addPermission(permission);
+        return true;
+    }
+    
+    public boolean removePermissionFromRole(String roleName, String permission) {
+        Role role = roles.get(roleName);
+        if (role == null) {
+            return false;
+        }
+        return role.removePermission(permission);
+    }
+    
+    public String getUserRole(String username) {
+        User user = users.get(username);
+        if (user == null) {
+            return null;
+        }
+        return user.getRole().getName();
+    }
+    
+    static class User {
+        private String username;
+        private Role role;
         
-        if(execute) perm.grantExecute();
-        else perm.revokeExecute();
+        public User(String username, Role role) {
+            this.username = username;
+            this.role = role;
+        }
+        
+        public boolean hasPermission(String permission) {
+            return role.hasPermission(permission);
+        }
+        
+        public Set<String> getPermissions() {
+            return role.getPermissions();
+        }
+        
+        public Role getRole() {
+            return role;
+        }
+        
+        public void setRole(Role role) {
+            this.role = role;
+        }
+    }
+    
+    static class Role {
+        private String name;
+        private Set<String> permissions;
+        
+        public Role(String name) {
+            this.name = name;
+            this.permissions = new HashSet<>();
+        }
+        
+        public void addPermission(String permission) {
+            permissions.add(permission);
+        }
+        
+        public boolean removePermission(String permission) {
+            return permissions.remove(permission);
+        }
+        
+        public boolean hasPermission(String permission) {
+            return permissions.contains(permission);
+        }
+        
+        public Set<String> getPermissions() {
+            return new HashSet<>(permissions);
+        }
+        
+        public String getName() {
+            return name;
+        }
     }
     
     public static void main(String[] args) {
-        // Test cases
-        User user1 = new User("admin");
-        managePermission(user1, true, true, true);
-        System.out.println("User: " + user1.getUsername());
-        System.out.println("Read: " + user1.getPermission().canRead());
-        System.out.println("Write: " + user1.getPermission().canWrite());
-        System.out.println("Execute: " + user1.getPermission().canExecute());
+        Task138 system = new Task138();
         
-        User user2 = new User("guest");
-        managePermission(user2, true, false, false);
-        System.out.println("\\nUser: " + user2.getUsername());
-        System.out.println("Read: " + user2.getPermission().canRead());
-        System.out.println("Write: " + user2.getPermission().canWrite());
-        System.out.println("Execute: " + user2.getPermission().canExecute());
+        // Test Case 1: Add users with different roles
+        System.out.println("Test Case 1: Add users");
+        System.out.println("Add admin user: " + system.addUser("john", "admin"));
+        System.out.println("Add editor user: " + system.addUser("jane", "editor"));
+        System.out.println("Add viewer user: " + system.addUser("bob", "viewer"));
+        System.out.println();
         
-        User user3 = new User("developer");
-        managePermission(user3, true, true, false);
-        System.out.println("\\nUser: " + user3.getUsername());
-        System.out.println("Read: " + user3.getPermission().canRead());
-        System.out.println("Write: " + user3.getPermission().canWrite());
-        System.out.println("Execute: " + user3.getPermission().canExecute());
+        // Test Case 2: Check permissions
+        System.out.println("Test Case 2: Check permissions");
+        System.out.println("john has delete permission: " + system.hasPermission("john", "delete"));
+        System.out.println("jane has delete permission: " + system.hasPermission("jane", "delete"));
+        System.out.println("bob has read permission: " + system.hasPermission("bob", "read"));
+        System.out.println("bob has write permission: " + system.hasPermission("bob", "write"));
+        System.out.println();
         
-        User user4 = new User("viewer");
-        managePermission(user4, true, false, false);
-        System.out.println("\\nUser: " + user4.getUsername());
-        System.out.println("Read: " + user4.getPermission().canRead());
-        System.out.println("Write: " + user4.getPermission().canWrite());
-        System.out.println("Execute: " + user4.getPermission().canExecute());
+        // Test Case 3: Get user permissions
+        System.out.println("Test Case 3: Get user permissions");
+        System.out.println("john's permissions: " + system.getUserPermissions("john"));
+        System.out.println("jane's permissions: " + system.getUserPermissions("jane"));
+        System.out.println("bob's permissions: " + system.getUserPermissions("bob"));
+        System.out.println();
         
-        User user5 = new User("root");
-        managePermission(user5, true, true, true);
-        System.out.println("\\nUser: " + user5.getUsername());
-        System.out.println("Read: " + user5.getPermission().canRead());
-        System.out.println("Write: " + user5.getPermission().canWrite());
-        System.out.println("Execute: " + user5.getPermission().canExecute());
+        // Test Case 4: Change user role
+        System.out.println("Test Case 4: Change user role");
+        System.out.println("bob's current role: " + system.getUserRole("bob"));
+        System.out.println("Assign editor role to bob: " + system.assignRole("bob", "editor"));
+        System.out.println("bob's new role: " + system.getUserRole("bob"));
+        System.out.println("bob now has write permission: " + system.hasPermission("bob", "write"));
+        System.out.println();
+        
+        // Test Case 5: Add and remove permissions from role
+        System.out.println("Test Case 5: Modify role permissions");
+        System.out.println("Add 'backup' permission to viewer: " + system.addPermissionToRole("viewer", "backup"));
+        system.addUser("alice", "viewer");
+        System.out.println("alice has backup permission: " + system.hasPermission("alice", "backup"));
+        System.out.println("Remove 'backup' permission from viewer: " + system.removePermissionFromRole("viewer", "backup"));
+        System.out.println("alice still has backup permission: " + system.hasPermission("alice", "backup"));
     }
 }

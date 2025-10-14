@@ -1,101 +1,198 @@
 package Vanilla.claude;
 
 import java.net.*;
-import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class Task91 {
-    private static final int BUFFER_SIZE = 512;
+    private static final int DNS_PORT = 5353;
+    private static final Map<String, String> DNS_RECORDS = new HashMap<>();
     
-    public void startDNSServer(String ipAddress, int port) throws IOException {
+    static {
+        DNS_RECORDS.put("example.com", "93.184.216.34");
+        DNS_RECORDS.put("test.com", "192.168.1.100");
+        DNS_RECORDS.put("localhost", "127.0.0.1");
+        DNS_RECORDS.put("google.com", "142.250.185.46");
+        DNS_RECORDS.put("github.com", "140.82.114.4");
+    }
+    
+    public static void startDNSServer(String ipAddress, int port) throws Exception {
         DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName(ipAddress));
-        byte[] buffer = new byte[BUFFER_SIZE];
+        System.out.println("DNS Server listening on " + ipAddress + ":" + port);
         
-        while (true) {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            
-            // Parse DNS request
-            byte[] data = packet.getData();
-            int queryId = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-            String domainName = parseDomainName(data);
-            
-            // Create DNS response
-            byte[] response = createDNSResponse(queryId, domainName);
-            
-            // Send response
-            DatagramPacket responsePacket = new DatagramPacket(
-                response, 
-                response.length,
-                packet.getAddress(),
-                packet.getPort()
-            );
-            socket.send(responsePacket);
-        }
+        byte[] buffer = new byte[512];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+        
+        socket.receive(packet);
+        byte[] query = Arrays.copyOf(packet.getData(), packet.getLength());
+        String domainName = parseDNSQuery(query);
+        System.out.println("Received query for: " + domainName);
+        
+        String ipAddr = resolveDNSRecord(domainName);
+        byte[] response = createDNSResponse(query, ipAddr);
+        
+        DatagramPacket responsePacket = new DatagramPacket(
+            response, response.length, packet.getAddress(), packet.getPort()
+        );
+        socket.send(responsePacket);
+        System.out.println("Sent response: " + ipAddr);
+        
+        socket.close();
     }
     
-    private String parseDomainName(byte[] data) {
-        StringBuilder name = new StringBuilder();
-        int position = 12; // Skip DNS header
+    public static String parseDNSQuery(byte[] query) {
+        StringBuilder domain = new StringBuilder();
+        int pos = 12; // Skip DNS header
         
-        while (data[position] != 0) {
-            int length = data[position] & 0xFF;
-            position++;
+        while (pos < query.length && query[pos] != 0) {
+            int len = query[pos] & 0xFF;
+            if (len == 0) break;
             
-            for (int i = 0; i < length; i++) {
-                name.append((char) (data[position + i] & 0xFF));
+            if (domain.length() > 0) domain.append(".");
+            pos++;
+            
+            for (int i = 0; i < len && pos < query.length; i++, pos++) {
+                domain.append((char) query[pos]);
             }
-            name.append('.');
-            position += length;
         }
         
-        return name.substring(0, name.length() - 1);
+        return domain.toString();
     }
     
-    private byte[] createDNSResponse(int queryId, String domain) {
-        try {
-            InetAddress resolvedIP = InetAddress.getByName(domain);
-            byte[] ip = resolvedIP.getAddress();
-            
-            byte[] response = new byte[32];
-            // DNS Header
-            response[0] = (byte) ((queryId >> 8) & 0xFF);
-            response[1] = (byte) (queryId & 0xFF);
-            response[2] = (byte) 0x81; // Response + Recursion
-            response[3] = (byte) 0x80;
-            response[6] = 0x00; // 1 answer
-            response[7] = 0x01;
-            
-            // Copy question from request
-            System.arraycopy(new byte[]{(byte) 0xC0, 0x0C}, 0, response, 12, 2);
-            
-            // Answer
-            response[14] = 0x00;
-            response[15] = 0x01; // Type A
-            response[16] = 0x00;
-            response[17] = 0x01; // Class IN
-            response[21] = 0x00; // TTL
-            response[22] = 0x04; // Data length
-            
-            // Copy IP address
-            System.arraycopy(ip, 0, response, 23, 4);
-            
-            return response;
-        } catch (UnknownHostException e) {
-            return new byte[0];
+    public static String resolveDNSRecord(String domainName) {
+        return DNS_RECORDS.getOrDefault(domainName, "0.0.0.0");
+    }
+    
+    public static byte[] createDNSResponse(byte[] query, String ipAddress) {
+        ByteBuffer response = ByteBuffer.allocate(512);
+        
+        // Copy transaction ID
+        response.put(query[0]);
+        response.put(query[1]);
+        
+        // Flags: Response, Standard Query, No Error
+        response.put((byte) 0x81);
+        response.put((byte) 0x80);
+        
+        // Questions count
+        response.put(query[4]);
+        response.put(query[5]);
+        
+        // Answers count
+        response.put((byte) 0x00);
+        response.put((byte) 0x01);
+        
+        // Authority and Additional RRs
+        response.put((byte) 0x00);
+        response.put((byte) 0x00);
+        response.put((byte) 0x00);
+        response.put((byte) 0x00);
+        
+        // Copy question section
+        int pos = 12;
+        while (pos < query.length && query[pos] != 0) {
+            response.put(query[pos++]);
+        }
+        response.put((byte) 0x00); // End of domain name
+        pos++;
+        
+        // Copy QTYPE and QCLASS
+        for (int i = 0; i < 4 && pos < query.length; i++, pos++) {
+            response.put(query[pos]);
+        }
+        
+        // Answer section
+        response.put((byte) 0xC0);
+        response.put((byte) 0x0C); // Pointer to domain name
+        
+        // Type A
+        response.put((byte) 0x00);
+        response.put((byte) 0x01);
+        
+        // Class IN
+        response.put((byte) 0x00);
+        response.put((byte) 0x01);
+        
+        // TTL (300 seconds)
+        response.putInt(300);
+        
+        // Data length
+        response.put((byte) 0x00);
+        response.put((byte) 0x04);
+        
+        // IP Address
+        String[] octets = ipAddress.split("\\\\.");
+        for (String octet : octets) {
+            response.put((byte) Integer.parseInt(octet));
+        }
+        
+        byte[] result = new byte[response.position()];
+        response.rewind();
+        response.get(result);
+        return result;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("DNS Server Test Cases:");
+        System.out.println("======================\\n");
+        
+        // Test Case 1: Parse DNS query
+        System.out.println("Test 1: Parse DNS Query");
+        byte[] testQuery1 = createTestQuery("example.com");
+        String parsed1 = parseDNSQuery(testQuery1);
+        System.out.println("Parsed domain: " + parsed1 + "\\n");
+        
+        // Test Case 2: Resolve DNS record
+        System.out.println("Test 2: Resolve DNS Record");
+        String resolved = resolveDNSRecord("google.com");
+        System.out.println("Resolved IP: " + resolved + "\\n");
+        
+        // Test Case 3: Resolve unknown domain
+        System.out.println("Test 3: Resolve Unknown Domain");
+        String unknownResolved = resolveDNSRecord("unknown.com");
+        System.out.println("Resolved IP: " + unknownResolved + "\\n");
+        
+        // Test Case 4: Create DNS response
+        System.out.println("Test 4: Create DNS Response");
+        byte[] response = createDNSResponse(testQuery1, "93.184.216.34");
+        System.out.println("Response created with length: " + response.length + "\\n");
+        
+        // Test Case 5: Multiple domain parsing
+        System.out.println("Test 5: Parse Multiple Domains");
+        String[] domains = {"localhost", "test.com", "github.com"};
+        for (String domain : domains) {
+            byte[] query = createTestQuery(domain);
+            String parsed = parseDNSQuery(query);
+            String ip = resolveDNSRecord(parsed);
+            System.out.println(domain + " -> " + parsed + " -> " + ip);
         }
     }
-
-    public static void main(String[] args) {
-        Task91 server = new Task91();
-        try {
-            // Test case 1: Start server on localhost:53
-            server.startDNSServer("127.0.0.1", 53);
-            
-            // Note: Real testing would require sending actual DNS queries
-            // Test cases 2-5 would involve sending different domain queries
-            // Example domains: google.com, example.com, localhost, etc.
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+    private static byte[] createTestQuery(String domain) {
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+        buffer.put((byte) 0x12);
+        buffer.put((byte) 0x34);
+        buffer.put((byte) 0x01);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x01);
+        buffer.putInt(0);
+        buffer.putInt(0);
+        
+        String[] labels = domain.split("\\\\.");
+        for (String label : labels) {
+            buffer.put((byte) label.length());
+            buffer.put(label.getBytes());
         }
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x01);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x01);
+        
+        byte[] result = new byte[buffer.position()];
+        buffer.rewind();
+        buffer.get(result);
+        return result;
     }
 }

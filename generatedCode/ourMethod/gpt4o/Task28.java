@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task28 {
     public static String whoLikesIt(String[] names) {
         switch (names.length) {

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task32 {
     public static int calculateYears(double principal, double interest, double tax, double desired) {
         if (principal >= desired) return 0;

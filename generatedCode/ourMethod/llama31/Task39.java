@@ -10,7 +10,7 @@ public class Task39 {
             String filename = reader.readLine();
 
             // Validate the filename to prevent path traversal attacks
-            if (filename.contains("../") || filename.contains("..\\") || filename.startsWith("/") || filename.startsWith("\\")) {
+            if (filename.contains("../") || filename.contains("..\") || filename.startsWith("/") || filename.startsWith("\")) {
                 System.out.println("Invalid filename. Path traversal attempt detected.");
                 return;
             }

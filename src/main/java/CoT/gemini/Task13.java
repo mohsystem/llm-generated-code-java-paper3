@@ -1,14 +1,18 @@
 package CoT.gemini;
-import java.util.List;
 
-class Task13 {
-    public static boolean isValidWalk(List<Character> walk) {
-        if (walk.size() != 10) {
+import java.util.Arrays;
+
+public class Task13 {
+
+    public static boolean isValidWalk(char[] walk) {
+        // 1. The walk must take exactly 10 minutes.
+        if (walk.length != 10) {
             return false;
         }
 
-        int x = 0;
-        int y = 0;
+        // 2. The walk must return you to your starting point.
+        int x = 0; // Represents East-West axis
+        int y = 0; // Represents North-South axis
 
         for (char direction : walk) {
             switch (direction) {
@@ -24,6 +28,7 @@ class Task13 {
                 case 'w':
                     x--;
                     break;
+                // No default case needed as input is guaranteed to be valid.
             }
         }
 
@@ -31,20 +36,19 @@ class Task13 {
     }
 
     public static void main(String[] args) {
-        List<Character> walk1 = List.of('n', 's', 'n', 's', 'n', 's', 'n', 's', 'n', 's');
-        System.out.println(isValidWalk(walk1)); // true
+        // Test Cases
+        char[][] testCases = {
+            {'n','s','n','s','n','s','n','s','n','s'}, // true
+            {'w','e','w','e','w','e','w','e','w','e'}, // true
+            {'w'},                                    // false (too short)
+            {'n','n','n','s','n','s','n','s','n','s'}, // false (doesn't return to start)
+            {'e','e','e','e','w','w','w','w','w','w'}  // false (doesn't return to start)
+        };
 
-        List<Character> walk2 = List.of('w', 'e', 'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e');
-        System.out.println(isValidWalk(walk2)); // false
-
-        List<Character> walk3 = List.of('w');
-        System.out.println(isValidWalk(walk3)); // false
-
-        List<Character> walk4 = List.of('n', 'n', 'n', 's', 'n', 's', 'n', 's', 'n', 's');
-        System.out.println(isValidWalk(walk4)); // false
-
-        List<Character> walk5 = List.of('e', 'w', 'e', 'w', 'n', 's', 'n', 's', 'e', 'w');
-        System.out.println(isValidWalk(walk5)); // true
-
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ": " + Arrays.toString(testCases[i]));
+            System.out.println("Result: " + isValidWalk(testCases[i]));
+            System.out.println();
+        }
     }
 }

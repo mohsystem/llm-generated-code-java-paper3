@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task73 {
     public static boolean isValidAdminPassword(String password) {
         if (password == null || password.length() < 8) return false;

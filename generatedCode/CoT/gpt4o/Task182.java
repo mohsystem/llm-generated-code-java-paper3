@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task182 {
     public static String cleanPhoneNumber(String input) {
         // Remove all non-numeric characters

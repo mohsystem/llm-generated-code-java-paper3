@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task4 {
     public static boolean isIsogram(String str) {
         str = str.toLowerCase();

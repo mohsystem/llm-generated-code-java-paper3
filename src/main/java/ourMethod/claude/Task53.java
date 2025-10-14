@@ -1,123 +1,190 @@
 package ourMethod.claude;
 
-import java.time.Duration;
-import java.util.*;
-import java.security.SecureRandom;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.KeySpec;
 import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Task53 {
-    private static final int SESSION_ID_LENGTH = 32;
-    private static final int SESSION_TIMEOUT_MINUTES = 30;
-    private static final int MAX_SESSIONS_PER_USER = 5;
-    private static Map<String, Session> sessions = new HashMap<>();
-    private static SecureRandom secureRandom = new SecureRandom();
+    private static final int SESSION_TIMEOUT_SECONDS = 3600;
+    private static final int TOKEN_SIZE = 32;
+    private static final int SALT_SIZE = 16;
+    private static final int IV_SIZE = 12;
+    private static final int TAG_SIZE = 128;
+    private static final int PBKDF2_ITERATIONS = 210000;
     
-    static class Session {
-        private String sessionId;
-        private String userId;
-        private Instant creationTime;
-        private Instant lastAccessTime;
+    private final ConcurrentHashMap<String, Session> sessions;
+    private final SecureRandom secureRandom;
+    
+    public Task53() {
+        this.sessions = new ConcurrentHashMap<>();
+        this.secureRandom = new SecureRandom();
+    }
+    
+    private static class Session {
+        final String userId;
+        final byte[] encryptedData;
+        final long expiryTime;
+        final byte[] salt;
+        final byte[] iv;
         
-        public Session(String sessionId, String userId) {
-            this.sessionId = sessionId;
+        Session(String userId, byte[] encryptedData, long expiryTime, byte[] salt, byte[] iv) {
             this.userId = userId;
-            this.creationTime = Instant.now();
-            this.lastAccessTime = Instant.now();
-        }
-        
-        public boolean isValid() {
-            return Duration.between(lastAccessTime, Instant.now())
-                   .toMinutes() < SESSION_TIMEOUT_MINUTES;
-        }
-        
-        public void updateLastAccessTime() {
-            this.lastAccessTime = Instant.now();
+            this.encryptedData = encryptedData.clone();
+            this.expiryTime = expiryTime;
+            this.salt = salt.clone();
+            this.iv = iv.clone();
         }
     }
     
-    public static String createSession(String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new IllegalArgumentException("User ID cannot be null or empty");
+    public String createSession(String userId, String sessionData, String masterKey) {
+        if (userId == null || userId.isEmpty() || userId.length() > 256) {
+            throw new IllegalArgumentException("Invalid userId");
+        }
+        if (sessionData == null || sessionData.isEmpty() || sessionData.length() > 10000) {
+            throw new IllegalArgumentException("Invalid sessionData");
+        }
+        if (masterKey == null || masterKey.length() < 16) {
+            throw new IllegalArgumentException("Invalid masterKey");
         }
         
-        // Clean expired sessions first
-        cleanExpiredSessions();
-        
-        // Check number of active sessions for this user
-        long userSessionCount = sessions.values().stream()
-            .filter(s -> s.userId.equals(userId) && s.isValid())
-            .count();
+        try {
+            byte[] sessionToken = new byte[TOKEN_SIZE];
+            secureRandom.nextBytes(sessionToken);
+            String tokenHex = bytesToHex(sessionToken);
             
-        if (userSessionCount >= MAX_SESSIONS_PER_USER) {
-            throw new IllegalStateException("Maximum session limit reached for user");
+            byte[] salt = new byte[SALT_SIZE];
+            secureRandom.nextBytes(salt);
+            
+            byte[] iv = new byte[IV_SIZE];
+            secureRandom.nextBytes(iv);
+            
+            SecretKey key = deriveKey(masterKey, salt);
+            byte[] encryptedData = encryptAES(sessionData.getBytes(StandardCharsets.UTF_8), key, iv);
+            
+            long expiryTime = Instant.now().getEpochSecond() + SESSION_TIMEOUT_SECONDS;
+            
+            Session session = new Session(userId, encryptedData, expiryTime, salt, iv);
+            sessions.put(tokenHex, session);
+            
+            return tokenHex;
+        } catch (Exception e) {
+            throw new RuntimeException("Session creation failed");
         }
-        
-        // Generate secure random session ID
-        String sessionId = generateSecureSessionId();
-        sessions.put(sessionId, new Session(sessionId, userId));
-        return sessionId;
     }
     
-    public static boolean validateSession(String sessionId) {
-        if (sessionId == null || sessionId.trim().isEmpty()) {
+    public String getSessionData(String token, String masterKey) {
+        if (token == null || token.length() != TOKEN_SIZE * 2) {
+            return null;
+        }
+        if (masterKey == null || masterKey.length() < 16) {
+            return null;
+        }
+        
+        Session session = sessions.get(token);
+        if (session == null) {
+            return null;
+        }
+        
+        if (Instant.now().getEpochSecond() > session.expiryTime) {
+            sessions.remove(token);
+            return null;
+        }
+        
+        try {
+            SecretKey key = deriveKey(masterKey, session.salt);
+            byte[] decryptedData = decryptAES(session.encryptedData, key, session.iv);
+            return new String(decryptedData, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public boolean invalidateSession(String token) {
+        if (token == null || token.length() != TOKEN_SIZE * 2) {
+            return false;
+        }
+        return sessions.remove(token) != null;
+    }
+    
+    public boolean validateSession(String token) {
+        if (token == null || token.length() != TOKEN_SIZE * 2) {
             return false;
         }
         
-        Session session = sessions.get(sessionId);
-        if (session == null || !session.isValid()) {
+        Session session = sessions.get(token);
+        if (session == null) {
             return false;
         }
         
-        session.updateLastAccessTime();
+        if (Instant.now().getEpochSecond() > session.expiryTime) {
+            sessions.remove(token);
+            return false;
+        }
+        
         return true;
     }
     
-    public static void invalidateSession(String sessionId) {
-        if (sessionId != null) {
-            sessions.remove(sessionId);
-        }
+    private SecretKey deriveKey(String passphrase, byte[] salt) throws Exception {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(passphrase.toCharArray(), salt, PBKDF2_ITERATIONS, 256);
+        SecretKey tmp = factory.generateSecret(spec);
+        return new SecretKeySpec(tmp.getEncoded(), "AES");
     }
     
-    private static String generateSecureSessionId() {
-        byte[] randomBytes = new byte[SESSION_ID_LENGTH];
-        secureRandom.nextBytes(randomBytes);
-        StringBuilder sb = new StringBuilder();
-        for (byte b : randomBytes) {
+    private byte[] encryptAES(byte[] plaintext, SecretKey key, byte[] iv) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key, spec);
+        return cipher.doFinal(plaintext);
+    }
+    
+    private byte[] decryptAES(byte[] ciphertext, SecretKey key, byte[] iv) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key, spec);
+        return cipher.doFinal(ciphertext);
+    }
+    
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
     }
     
-    private static void cleanExpiredSessions() {
-        sessions.entrySet().removeIf(entry -> !entry.getValue().isValid());
-    }
-
     public static void main(String[] args) {
-        // Test Case 1: Create new session
-        String userId1 = "user123";
-        String sessionId1 = createSession(userId1);
-        System.out.println("Test 1 - New Session Created: " + sessionId1);
+        Task53 manager = new Task53();
+        String masterKey = "securemaster_passphrase_key_2024";
         
-        // Test Case 2: Validate valid session
-        boolean isValid = validateSession(sessionId1);
-        System.out.println("Test 2 - Session Valid: " + isValid);
+        System.out.println("Test 1: Create and validate session");
+        String token1 = manager.createSession("user123", "sessionData1", masterKey);
+        System.out.println("Created token: " + token1.substring(0, 16) + "...");
+        System.out.println("Valid: " + manager.validateSession(token1));
         
-        // Test Case 3: Invalid session ID
-        boolean isInvalidSessionValid = validateSession("invalid_session_id");
-        System.out.println("Test 3 - Invalid Session Valid: " + isInvalidSessionValid);
+        System.out.println("\\nTest 2: Retrieve session data");
+        String data = manager.getSessionData(token1, masterKey);
+        System.out.println("Retrieved data: " + data);
         
-        // Test Case 4: Invalidate session
-        invalidateSession(sessionId1);
-        boolean isValidAfterInvalidation = validateSession(sessionId1);
-        System.out.println("Test 4 - Session Valid After Invalidation: " + isValidAfterInvalidation);
+        System.out.println("\\nTest 3: Invalidate session");
+        boolean invalidated = manager.invalidateSession(token1);
+        System.out.println("Invalidated: " + invalidated);
+        System.out.println("Still valid: " + manager.validateSession(token1));
         
-        // Test Case 5: Maximum sessions per user
-        try {
-            for (int i = 0; i <= MAX_SESSIONS_PER_USER; i++) {
-                createSession(userId1);
-            }
-        } catch (IllegalStateException e) {
-            System.out.println("Test 5 - Max Sessions Exceeded: " + e.getMessage());
-        }
+        System.out.println("\\nTest 4: Multiple sessions");
+        String token2 = manager.createSession("user456", "sessionData2", masterKey);
+        String token3 = manager.createSession("user789", "sessionData3", masterKey);
+        System.out.println("Token2 valid: " + manager.validateSession(token2));
+        System.out.println("Token3 valid: " + manager.validateSession(token3));
+        
+        System.out.println("\\nTest 5: Invalid token handling");
+        boolean validInvalid = manager.validateSession("invalidtoken123");
+        System.out.println("Invalid token valid: " + validInvalid);
     }
 }

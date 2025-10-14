@@ -1,86 +1,63 @@
 package ZeroShot.gemini;
-import java.io.IOException;
-import java.io.PrintWriter;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-public class Task120 extends HttpServlet {
+import java.util.stream.Stream;
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            String userInput = request.getParameter("userInput");
+public class Task120 {
 
-            // Escape user input to prevent XSS vulnerabilities
-            String safeUserInput = escapeHtml(userInput);
-
-
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>User Input Display</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>User Input:</h1>");
-            out.println("<p>" + safeUserInput + "</p>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-     private String escapeHtml(String input) {
-        if (input == null) {
-            return "";
+    /**
+     * Sanitizes user input by escaping HTML special characters to prevent XSS attacks,
+     * and then embeds it into a simple HTML page structure.
+     *
+     * @param userInput The raw string provided by the user.
+     * @return A string containing a full HTML document with the sanitized user input.
+     */
+    public static String generateSafeHtml(String userInput) {
+        if (userInput == null || userInput.isEmpty()) {
+            return "<html><body><p>User input: </p></body></html>";
         }
 
-        StringBuilder safeInput = new StringBuilder();
-        for (char c : input.toCharArray()) {
+        StringBuilder sanitizedInput = new StringBuilder();
+        for (char c : userInput.toCharArray()) {
             switch (c) {
+                case '&':
+                    sanitizedInput.append("&amp;");
+                    break;
                 case '<':
-                    safeInput.append("&lt;");
+                    sanitizedInput.append("&lt;");
                     break;
                 case '>':
-                    safeInput.append("&gt;");
-                    break;
-                case '&':
-                    safeInput.append("&amp;");
+                    sanitizedInput.append("&gt;");
                     break;
                 case '"':
-                    safeInput.append("&quot;");
+                    sanitizedInput.append("&quot;");
                     break;
                 case '\'':
-                    safeInput.append("&#x27;");
-                    break;
-                case '/':
-                    safeInput.append("&#x2F;");
+                    sanitizedInput.append("&#39;"); // &apos; is not supported in HTML4
                     break;
                 default:
-                    safeInput.append(c);
+                    sanitizedInput.append(c);
+                    break;
             }
         }
-        return safeInput.toString();
+
+        return "<html><body><p>User input: " + sanitizedInput.toString() + "</p></body></html>";
     }
 
-
-    // Test cases (for demonstration - would typically be handled by a testing framework)
     public static void main(String[] args) {
-        Task120 task = new Task120();
         String[] testCases = {
-                "<script>alert('XSS')</script>",
-                "<b>bold text</b>",
-                "plain text",
-                "1 < 2 > 3",
-                null
+            "Hello, World!",
+            "1 < 5 is true",
+            "He said, \"It's a & b > c\"",
+            "<script>alert('XSS attack!');</script>",
+            ""
         };
+
+        System.out.println("--- Java Test Cases ---");
         for (String testCase : testCases) {
             System.out.println("Input: " + testCase);
-            System.out.println("Escaped Output: " + task.escapeHtml(testCase));
-            System.out.println("---");
-
+            String safeHtml = generateSafeHtml(testCase);
+            System.out.println("Output: " + safeHtml);
+            System.out.println();
         }
     }
-
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task5 {
     public static int persistence(int num) {
         int count = 0;

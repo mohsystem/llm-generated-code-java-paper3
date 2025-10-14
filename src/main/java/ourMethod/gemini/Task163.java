@@ -1,40 +1,58 @@
 package ourMethod.gemini;
-import java.util.Arrays;
 
-class Task163 {
-    public int longestRun(int[] nums) {
-        if (nums == null || nums.length == 0) {
-            return 0; // Handle empty or null input
+public class Task163 {
+
+    /**
+     * Calculates the length of the longest consecutive-run in an array.
+     * A consecutive-run is a list of adjacent, consecutive integers,
+     * which can be either increasing or decreasing.
+     *
+     * @param arr The input array of integers.
+     * @return The length of the longest consecutive-run.
+     */
+    public static int longestRun(int[] arr) {
+        if (arr == null || arr.length == 0) {
+            return 0;
+        }
+        if (arr.length == 1) {
+            return 1;
         }
 
-        if (nums.length == 1) {
-            return 1; // Handle single-element input
-        }
-        
-        Arrays.sort(nums);
+        int maxLength = 1;
+        int currentIncreasingLength = 1;
+        int currentDecreasingLength = 1;
 
-        int longest = 1;
-        int current = 1;
-
-        for (int i = 1; i < nums.length; i++) {
-            if (nums[i] == nums[i - 1] + 1) {
-                current++;
-            } else if (nums[i] != nums[i-1]) {
-                longest = Math.max(longest, current);
-                current = 1;
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] == arr[i - 1] + 1) {
+                currentIncreasingLength++;
+                currentDecreasingLength = 1;
+            } else if (arr[i] == arr[i - 1] - 1) {
+                currentDecreasingLength++;
+                currentIncreasingLength = 1;
+            } else {
+                currentIncreasingLength = 1;
+                currentDecreasingLength = 1;
             }
+            maxLength = Math.max(maxLength, Math.max(currentIncreasingLength, currentDecreasingLength));
         }
-        longest = Math.max(longest, current); //check for last run
-
-        return longest;
+        return maxLength;
     }
 
     public static void main(String[] args) {
-        Task163 task = new Task163();
-        System.out.println(task.longestRun(new int[]{1, 2, 3, 5, 6, 7, 8, 9})); // 5
-        System.out.println(task.longestRun(new int[]{1, 2, 3, 10, 11, 15})); // 3
-        System.out.println(task.longestRun(new int[]{5, 4, 2, 1})); // 2
-        System.out.println(task.longestRun(new int[]{3, 5, 7, 10, 15})); // 1
-        System.out.println(task.longestRun(new int[]{})); //0
+        // Test cases
+        int[] test1 = {1, 2, 3, 5, 6, 7, 8, 9};
+        System.out.println("longestRun([1, 2, 3, 5, 6, 7, 8, 9]) -> " + longestRun(test1));
+
+        int[] test2 = {1, 2, 3, 10, 11, 15};
+        System.out.println("longestRun([1, 2, 3, 10, 11, 15]) -> " + longestRun(test2));
+
+        int[] test3 = {5, 4, 2, 1};
+        System.out.println("longestRun([5, 4, 2, 1]) -> " + longestRun(test3));
+
+        int[] test4 = {3, 5, 7, 10, 15};
+        System.out.println("longestRun([3, 5, 7, 10, 15]) -> " + longestRun(test4));
+
+        int[] test5 = {1, 2, 3, 2, 1, 0, 1, 2};
+        System.out.println("longestRun([1, 2, 3, 2, 1, 0, 1, 2]) -> " + longestRun(test5));
     }
 }

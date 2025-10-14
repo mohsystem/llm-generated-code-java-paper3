@@ -2,34 +2,63 @@ package CoT.claude;
 
 public class Task174 {
     public static String shortestPalindrome(String s) {
-        if (s == null || s.length() <= 1) return s;
-        
-        String temp = s + "#" + new StringBuilder(s).reverse().toString();
-        int[] lps = new int[temp.length()];
-        
-        // Computing KMP pattern
-        for (int i = 1; i < lps.length; i++) {
-            int len = lps[i-1];
-            while (len > 0 && temp.charAt(len) != temp.charAt(i)) {
-                len = lps[len-1];
-            }
-            if (temp.charAt(len) == temp.charAt(i)) {
-                len++;
-            }
-            lps[i] = len;
+        // Input validation
+        if (s == null || s.length() == 0) {
+            return "";
         }
         
-        return new StringBuilder(s.substring(lps[temp.length()-1]))
-            .reverse()
-            .toString() + s;
+        if (s.length() > 50000) {
+            throw new IllegalArgumentException("String length exceeds maximum allowed");
+        }
+        
+        // Validate that string contains only lowercase letters
+        for (char c : s.toCharArray()) {
+            if (c < 'a' || c > 'z') {
+                throw new IllegalArgumentException("String must contain only lowercase letters");
+            }
+        }
+        
+        // Use KMP algorithm to find longest palindromic prefix
+        String rev = new StringBuilder(s).reverse().toString();
+        String combined = s + "#" + rev;
+        int[] lps = computeLPS(combined);
+        
+        // Find the part to prepend
+        int palindromeLength = lps[combined.length() - 1];
+        String toPrepend = rev.substring(0, s.length() - palindromeLength);
+        
+        return toPrepend + s;
+    }
+    
+    private static int[] computeLPS(String s) {
+        int n = s.length();
+        int[] lps = new int[n];
+        int len = 0;
+        int i = 1;
+        
+        while (i < n) {
+            if (s.charAt(i) == s.charAt(len)) {
+                len++;
+                lps[i] = len;
+                i++;
+            } else {
+                if (len != 0) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+        return lps;
     }
     
     public static void main(String[] args) {
         // Test cases
-        System.out.println(shortestPalindrome("aacecaaa")); // aaacecaaa
-        System.out.println(shortestPalindrome("abcd")); // dcbabcd
-        System.out.println(shortestPalindrome("")); // ""
-        System.out.println(shortestPalindrome("a")); // a
-        System.out.println(shortestPalindrome("aba")); // aba
+        System.out.println(shortestPalindrome("aacecaaa")); // "aaacecaaa"
+        System.out.println(shortestPalindrome("abcd"));     // "dcbabcd"
+        System.out.println(shortestPalindrome(""));         // ""
+        System.out.println(shortestPalindrome("a"));        // "a"
+        System.out.println(shortestPalindrome("abbacd"));   // "dcabbacd"
     }
 }

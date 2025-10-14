@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task146 {
     public static int findMissingNumber(int[] numbers, int n) {
         int totalSum = n * (n + 1) / 2;

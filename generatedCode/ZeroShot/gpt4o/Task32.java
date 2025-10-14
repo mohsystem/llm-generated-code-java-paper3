@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task32 {
     public static int calculateYears(double principal, double interestRate, double taxRate, double desired) {
         int years = 0;

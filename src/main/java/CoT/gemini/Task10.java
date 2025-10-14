@@ -1,27 +1,38 @@
 package CoT.gemini;
-class Task10 {
-    public int getSum(int a, int b) {
+
+public class Task10 {
+
+    /**
+     * Given two integers a and b, which can be positive or negative,
+     * find the sum of all the integers between and including them and return it.
+     * If the two numbers are equal return a or b.
+     *
+     * @param a an integer.
+     * @param b an integer.
+     * @return the sum of all integers between a and b (inclusive).
+     */
+    public static long getSum(int a, int b) {
+        // If the numbers are the same, return one of them.
         if (a == b) {
             return a;
         }
-        int sum = 0;
-        int start = Math.min(a, b);
-        int end = Math.max(a, b);
-        for (int i = start; i <= end; i++) {
-            sum += i;
-        }
-        return sum;
+
+        // Use long to prevent potential integer overflow during calculation.
+        long min = Math.min(a, b);
+        long max = Math.max(a, b);
+        
+        // Apply the formula for the sum of an arithmetic series:
+        // Sum = n/2 * (first + last)
+        // where n is the number of terms (max - min + 1)
+        return (max - min + 1) * (min + max) / 2;
     }
 
     public static void main(String[] args) {
-        Task10 task10 = new Task10();
-        System.out.println(task10.getSum(1, 0)); // 1
-        System.out.println(task10.getSum(1, 2)); // 3
-        System.out.println(task10.getSum(0, 1)); // 1
-        System.out.println(task10.getSum(1, 1)); // 1
-        System.out.println(task10.getSum(-1, 0)); // -1
-        System.out.println(task10.getSum(-1, 2)); // 2
-
-
+        // Test cases
+        System.out.println(getSum(1, 0));    // Expected: 1
+        System.out.println(getSum(1, 2));    // Expected: 3
+        System.out.println(getSum(1, 1));    // Expected: 1
+        System.out.println(getSum(-1, 0));   // Expected: -1
+        System.out.println(getSum(-1, 2));   // Expected: 2
     }
 }

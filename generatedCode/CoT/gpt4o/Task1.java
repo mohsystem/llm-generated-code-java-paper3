@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task1 {
     public static int peopleOnBus(int[][] busStops) {
         int totalPeople = 0;

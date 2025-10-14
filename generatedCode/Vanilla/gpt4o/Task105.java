@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;

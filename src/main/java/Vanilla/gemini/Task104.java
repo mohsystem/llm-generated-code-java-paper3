@@ -1,18 +1,31 @@
 package Vanilla.gemini;
-class Task104 {
+
+public class Task104 {
+
     public static String handleInput(String input, int bufferSize) {
+        if (input == null || bufferSize <= 0) {
+            return "";
+        }
         if (input.length() > bufferSize) {
             return input.substring(0, bufferSize);
-        } else {
-            return input;
         }
+        return input;
     }
 
     public static void main(String[] args) {
-        System.out.println(handleInput("Hello", 10));
-        System.out.println(handleInput("This is a long string", 10));
-        System.out.println(handleInput("", 5));
-        System.out.println(handleInput("Short", 20));
-        System.out.println(handleInput("Exactly ten chars", 10));
+        final int BUFFER_SIZE = 16;
+        String[] testCases = {
+            "Hello World",
+            "This is a long string that will be truncated",
+            "1234567890123456", // Exactly 16 characters
+            "",
+            "Another long test for truncation"
+        };
+
+        for (String test : testCases) {
+            String result = handleInput(test, BUFFER_SIZE);
+            System.out.println("Input:  \"" + test + "\"");
+            System.out.println("Output: \"" + result + "\"\n");
+        }
     }
 }

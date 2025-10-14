@@ -2,44 +2,44 @@ package Vanilla.claude;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class Task80 {
-    public static SSLSocket createSSLSocket(String host, int port) throws Exception {
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
-        socket.setEnabledProtocols(new String[] {"TLSv1.2"});
-        return socket;
+    public static SSLSocket createSSLClientSocket(String host, int port) throws IOException {
+        SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket();
+        
+        // Create an IPv6 address and connect
+        InetSocketAddress address = new InetSocketAddress(host, port);
+        sslSocket.connect(address, 5000); // 5 second timeout
+        
+        return sslSocket;
     }
-
+    
     public static void main(String[] args) {
-        try {
-            // Test case 1
-            SSLSocket socket1 = createSSLSocket("google.com", 443);
-            System.out.println("Test 1: Connected to google.com:443");
-            socket1.close();
-
-            // Test case 2 
-            SSLSocket socket2 = createSSLSocket("github.com", 443);
-            System.out.println("Test 2: Connected to github.com:443");
-            socket2.close();
-
-            // Test case 3
-            SSLSocket socket3 = createSSLSocket("microsoft.com", 443);
-            System.out.println("Test 3: Connected to microsoft.com:443");
-            socket3.close();
-
-            // Test case 4
-            SSLSocket socket4 = createSSLSocket("amazon.com", 443);
-            System.out.println("Test 4: Connected to amazon.com:443");
-            socket4.close();
-
-            // Test case 5
-            SSLSocket socket5 = createSSLSocket("facebook.com", 443);
-            System.out.println("Test 5: Connected to facebook.com:443");
-            socket5.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Test cases
+        String[] testHosts = {
+            "www.google.com",
+            "www.github.com",
+            "www.amazon.com",
+            "www.microsoft.com",
+            "www.apple.com"
+        };
+        int[] testPorts = {443, 443, 443, 443, 443};
+        
+        for (int i = 0; i < testHosts.length; i++) {
+            try {
+                System.out.println("Test " + (i + 1) + ": Connecting to " + testHosts[i] + ":" + testPorts[i]);
+                SSLSocket socket = createSSLClientSocket(testHosts[i], testPorts[i]);
+                System.out.println("Successfully connected!");
+                System.out.println("Remote Address: " + socket.getInetAddress());
+                System.out.println("Local Address: " + socket.getLocalAddress());
+                socket.close();
+                System.out.println("Connection closed.\\n");
+            } catch (Exception e) {
+                System.out.println("Failed to connect: " + e.getMessage() + "\\n");
+            }
         }
     }
 }

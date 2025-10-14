@@ -2,7 +2,7 @@ import java.io.*;
 import java.nio.file.*;
 
 public class AddPackageStatment {
-    static String promptType = "ZeroShot"; //this is the name of the root directory
+    static String promptType = "ourMethodv2"; //this is the name of the root directory
 
     public static void main(String[] args) {
         // Replace with the directory path where your folders and files are located

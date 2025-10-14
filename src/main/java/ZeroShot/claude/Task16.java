@@ -2,7 +2,7 @@ package ZeroShot.claude;
 
 public class Task16 {
     public static boolean solution(String str, String ending) {
-        if (ending.length() > str.length()) {
+        if (str == null || ending == null) {
             return false;
         }
         return str.endsWith(ending);
@@ -10,10 +10,10 @@ public class Task16 {
     
     public static void main(String[] args) {
         // Test cases
-        System.out.println(solution("abc", "bc")); // true
-        System.out.println(solution("abc", "d")); // false
-        System.out.println(solution("samurai", "ai")); // true
-        System.out.println(solution("ninja", "ja")); // true
-        System.out.println(solution("sensei", "i")); // true
+        System.out.println(solution("abc", "bc"));      // true
+        System.out.println(solution("abc", "d"));       // false
+        System.out.println(solution("hello", "lo"));    // true
+        System.out.println(solution("test", ""));       // true
+        System.out.println(solution("", "test"));       // false
     }
 }

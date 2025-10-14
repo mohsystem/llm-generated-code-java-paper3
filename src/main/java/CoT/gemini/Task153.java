@@ -1,59 +1,91 @@
 package CoT.gemini;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 public class Task153 {
 
-    public static List<Integer> bfs(Map<Integer, List<Integer>> graph, int startNode) {
-        List<Integer> visited = new ArrayList<>();
-        Queue<Integer> queue = new LinkedList<>();
+    static class Graph {
+        private int V; // Number of vertices
+        private List<List<Integer>> adj; // Adjacency List
 
-        queue.offer(startNode);
-        visited.add(startNode);
-
-        while (!queue.isEmpty()) {
-            int currentNode = queue.poll();
-
-            if (!graph.containsKey(currentNode)) continue; // Handle cases where the start node has no neighbors.
-
-            for (int neighbor : graph.get(currentNode)) {
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    queue.offer(neighbor);
-                }
+        Graph(int v) {
+            V = v;
+            adj = new ArrayList<>(v);
+            for (int i = 0; i < v; ++i) {
+                adj.add(new LinkedList<>());
             }
         }
-        return visited;
+
+        void addEdge(int v, int w) {
+            if (v >= 0 && v < V && w >= 0 && w < V) {
+                adj.get(v).add(w);
+                adj.get(w).add(v); // For undirected graph
+            }
+        }
+
+        List<Integer> bfs(int startNode) {
+            List<Integer> result = new ArrayList<>();
+            if (startNode < 0 || startNode >= V) {
+                System.err.println("Error: Start node " + startNode + " is out of bounds.");
+                return result; // Return empty list for invalid start node
+            }
+
+            boolean[] visited = new boolean[V];
+            Queue<Integer> queue = new LinkedList<>();
+
+            visited[startNode] = true;
+            queue.add(startNode);
+
+            while (!queue.isEmpty()) {
+                int currentNode = queue.poll();
+                result.add(currentNode);
+
+                for (int neighbor : adj.get(currentNode)) {
+                    if (!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.add(neighbor);
+                    }
+                }
+            }
+            return result;
+        }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        System.out.println(bfs(graph1, 2)); // Expected: [2, 0, 3, 1] or similar order
+        // Test Cases
+        System.out.println("--- Breadth-First Search (BFS) Traversal ---");
 
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(0, Arrays.asList(1, 2));
-        graph2.put(1, Arrays.asList(0,3,4));
-        graph2.put(2, Arrays.asList(0));
-        graph2.put(3, Arrays.asList(1));
-        graph2.put(4, Arrays.asList(1));
+        // Graph structure for all test cases
+        //        0
+        //       / \
+        //      1---2
+        //     / \ |
+        //    3---4 5
+        //         |
+        //         6
+        int numVertices = 7;
+        Graph g = new Graph(numVertices);
+        g.addEdge(0, 1);
+        g.addEdge(0, 2);
+        g.addEdge(1, 3);
+        g.addEdge(1, 4);
+        g.addEdge(2, 5);
+        g.addEdge(3, 4);
+        g.addEdge(5, 6);
 
-        System.out.println(bfs(graph2, 1));
+        int[] startNodes = {0, 3, 6, 4, 1};
 
-
-        Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        System.out.println(bfs(graph3, 1)); // Empty graph test case
-
-
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(0, Arrays.asList(1, 2));
-        System.out.println(bfs(graph4, 0));
-
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(0, new ArrayList<>());
-        System.out.println(bfs(graph5, 0)); // Node with empty neighbor list
+        for (int i = 0; i < startNodes.length; i++) {
+            System.out.println("\nTest Case " + (i + 1) + ": Starting from node " + startNodes[i]);
+            List<Integer> bfsResult = g.bfs(startNodes[i]);
+            System.out.print("BFS Traversal: ");
+            for (int node : bfsResult) {
+                System.out.print(node + " ");
+            }
+            System.out.println();
+        }
     }
 }

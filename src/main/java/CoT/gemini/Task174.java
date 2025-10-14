@@ -1,33 +1,82 @@
 package CoT.gemini;
-import java.util.*;
+
+import java.util.Arrays;
 
 class Task174 {
-    public String shortestPalindrome(String s) {
-        String reversed = new StringBuilder(s).reverse().toString();
-        String combined = s + "#" + reversed;
-        int[] kmpTable = new int[combined.length()];
 
-        for (int i = 1; i < combined.length(); i++) {
-            int j = kmpTable[i - 1];
-            while (j > 0 && combined.charAt(i) != combined.charAt(j)) {
-                j = kmpTable[j - 1];
+    /**
+     * Computes the Longest Proper Prefix Suffix (LPS) array for KMP algorithm.
+     *
+     * @param pattern The string for which to compute the LPS array.
+     * @return The LPS array.
+     */
+    private int[] computeLPSArray(String pattern) {
+        int n = pattern.length();
+        int[] lps = new int[n];
+        int length = 0; // length of the previous longest prefix suffix
+        int i = 1;
+
+        while (i < n) {
+            if (pattern.charAt(i) == pattern.charAt(length)) {
+                length++;
+                lps[i] = length;
+                i++;
+            } else {
+                if (length != 0) {
+                    length = lps[length - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
             }
-            if (combined.charAt(i) == combined.charAt(j)) {
-                j++;
-            }
-            kmpTable[i] = j;
+        }
+        return lps;
+    }
+
+    /**
+     * Finds the shortest palindrome by adding characters to the front of the string.
+     *
+     * @param s The input string.
+     * @return The shortest palindrome.
+     */
+    public String shortestPalindrome(String s) {
+        if (s == null || s.length() <= 1) {
+            return s;
         }
 
-        return reversed.substring(0, reversed.length() - kmpTable[combined.length() - 1]) + s;
+        String reversed_s = new StringBuilder(s).reverse().toString();
+        String temp = s + "#" + reversed_s;
+
+        int[] lps = computeLPSArray(temp);
+        int palindromicPrefixLength = lps[temp.length() - 1];
+
+        String suffixToPrepend = s.substring(palindromicPrefixLength);
+        String prefix = new StringBuilder(suffixToPrepend).reverse().toString();
+
+        return prefix + s;
     }
 
     public static void main(String[] args) {
-        Task174 task = new Task174();
-        System.out.println(task.shortestPalindrome("aacecaaa")); // Expected: aaacecaaa
-        System.out.println(task.shortestPalindrome("abcd")); // Expected: dcbabcd
-        System.out.println(task.shortestPalindrome("racecar")); // Expected: racecar
-        System.out.println(task.shortestPalindrome("")); // Expected: ""
-        System.out.println(task.shortestPalindrome("a")); // Expected: a
+        Task174 solution = new Task174();
 
+        // Test Case 1
+        String s1 = "aacecaaa";
+        System.out.println("Input: \"" + s1 + "\", Output: \"" + solution.shortestPalindrome(s1) + "\"");
+
+        // Test Case 2
+        String s2 = "abcd";
+        System.out.println("Input: \"" + s2 + "\", Output: \"" + solution.shortestPalindrome(s2) + "\"");
+
+        // Test Case 3
+        String s3 = "abacaba";
+        System.out.println("Input: \"" + s3 + "\", Output: \"" + solution.shortestPalindrome(s3) + "\"");
+
+        // Test Case 4
+        String s4 = "";
+        System.out.println("Input: \"" + s4 + "\", Output: \"" + solution.shortestPalindrome(s4) + "\"");
+
+        // Test Case 5
+        String s5 = "abab";
+        System.out.println("Input: \"" + s5 + "\", Output: \"" + solution.shortestPalindrome(s5) + "\"");
     }
 }

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task5 {
     public static void main(String[] args) {
         System.out.println(persistence(39));  // Output: 3

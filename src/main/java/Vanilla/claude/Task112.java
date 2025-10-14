@@ -1,59 +1,85 @@
 package Vanilla.claude;
 
-import com.mongodb.client.*;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.*;
 
 public class Task112 {
     private MongoClient mongoClient;
     private MongoDatabase database;
     private MongoCollection<Document> collection;
 
-    public Task112() {
-        mongoClient = MongoClients.create("mongodb://localhost:27017");
-        database = mongoClient.getDatabase("testdb");
-        collection = database.getCollection("users");
+    public Task112(String connectionString, String dbName, String collectionName) {
+        this.mongoClient = MongoClients.create(connectionString);
+        this.database = mongoClient.getDatabase(dbName);
+        this.collection = database.getCollection(collectionName);
     }
 
-    public void create(String name, int age) {
-        Document document = new Document("name", name)
-                .append("age", age);
-        collection.insertOne(document);
+    // Create operation
+    public String create(String name, int age, String email) {
+        Document doc = new Document("name", name)
+                .append("age", age)
+                .append("email", email);
+        collection.insertOne(doc);
+        return "Created document with ID: " + doc.getObjectId("_id").toString();
     }
 
-    public Document read(String name) {
-        return collection.find(Filters.eq("name", name)).first();
+    // Read operation
+    public String read(String name) {
+        Document doc = collection.find(eq("name", name)).first();
+        if (doc != null) {
+            return "Found: " + doc.toJson();
+        }
+        return "Document not found";
     }
 
-    public void update(String name, int newAge) {
-        collection.updateOne(
-            Filters.eq("name", name),
-            Updates.set("age", newAge)
-        );
+    // Update operation
+    public String update(String name, int newAge) {
+        UpdateResult result = collection.updateOne(eq("name", name), set("age", newAge));
+        return "Modified count: " + result.getModifiedCount();
     }
 
-    public void delete(String name) {
-        collection.deleteOne(Filters.eq("name", name));
+    // Delete operation
+    public String delete(String name) {
+        DeleteResult result = collection.deleteOne(eq("name", name));
+        return "Deleted count: " + result.getDeletedCount();
+    }
+
+    public void close() {
+        if (mongoClient != null) {
+            mongoClient.close();
+        }
     }
 
     public static void main(String[] args) {
-        Task112 mongo = new Task112();
+        // Note: Replace with your MongoDB connection string
+        String connectionString = "mongodb://localhost:27017";
+        String dbName = "testdb";
+        String collectionName = "users";
 
-        // Test Case 1: Create
-        mongo.create("John", 25);
+        Task112 mongoOps = new Task112(connectionString, dbName, collectionName);
 
-        // Test Case 2: Read
-        System.out.println(mongo.read("John"));
+        System.out.println("Test Case 1: Create a document");
+        System.out.println(mongoOps.create("John Doe", 30, "john@example.com"));
 
-        // Test Case 3: Update
-        mongo.update("John", 26);
-        System.out.println(mongo.read("John"));
+        System.out.println("\\nTest Case 2: Read a document");
+        System.out.println(mongoOps.read("John Doe"));
 
-        // Test Case 4: Create another record
-        mongo.create("Jane", 30);
+        System.out.println("\\nTest Case 3: Update a document");
+        System.out.println(mongoOps.update("John Doe", 31));
 
-        // Test Case 5: Delete
-        mongo.delete("John");
+        System.out.println("\\nTest Case 4: Read updated document");
+        System.out.println(mongoOps.read("John Doe"));
+
+        System.out.println("\\nTest Case 5: Delete a document");
+        System.out.println(mongoOps.delete("John Doe"));
+
+        mongoOps.close();
     }
 }

@@ -48,7 +48,7 @@ public class Task120 extends HttpServlet {
         String[] tests = {
             "Hello World",
             "<script>alert('xss')</script>", 
-            "Test & <> \\"'",
+            "Test & <> \"'",
             "Normal text 123",
             "" // Empty input
         };

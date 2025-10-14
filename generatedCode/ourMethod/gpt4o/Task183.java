@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task183 {
     public static int largestProduct(String input, int span) {
         if (span <= 0 || input == null || input.length() < span) {

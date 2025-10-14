@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task161 {
     public static int knapsack(int capacity, int[] weights, int[] values, int n) {
         int[][] dp = new int[n + 1][capacity + 1];

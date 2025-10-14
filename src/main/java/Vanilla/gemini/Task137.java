@@ -1,46 +1,65 @@
 package Vanilla.gemini;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class Task137 {
 
-    public static String getProductDetails(String productName, Map<String, String> productTable) {
-        return productTable.getOrDefault(productName, "Product not found");
+    // A simple class to represent a product
+    static class Product {
+        int id;
+        String name;
+        double price;
+        int quantity;
+
+        public Product(int id, String name, double price, int quantity) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+            this.quantity = quantity;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("ID: %d, Name: %s, Price: %.2f, Quantity: %d", id, name, price, quantity);
+        }
+    }
+
+    // Static product table (simulating a database)
+    private static final Map<String, Product> productTable = new HashMap<>();
+
+    static {
+        productTable.put("Laptop", new Product(101, "Laptop", 1200.50, 10));
+        productTable.put("Mouse", new Product(102, "Mouse", 25.00, 150));
+        productTable.put("Keyboard", new Product(103, "Keyboard", 75.99, 80));
+        productTable.put("Monitor", new Product(104, "Monitor", 300.00, 45));
+        productTable.put("USB Hub", new Product(105, "USB Hub", 15.50, 200));
+    }
+
+    /**
+     * Inquires the product table for a product's details by its name.
+     * @param productName The name of the product to search for.
+     * @return A string with the product details or a "not found" message.
+     */
+    public static String getProductDetails(String productName) {
+        Product product = productTable.get(productName);
+        if (product != null) {
+            return product.toString();
+        } else {
+            return "Product not found.";
+        }
     }
 
     public static void main(String[] args) {
-        Map<String, String> productTable = new HashMap<>();
-        productTable.put("Laptop", "Price: $1200, RAM: 16GB, Storage: 1TB SSD");
-        productTable.put("Mouse", "Price: $25, Wireless, Optical");
-        productTable.put("Keyboard", "Price: $75, Mechanical, RGB");
-        productTable.put("Monitor", "Price: $300, 27-inch, 144Hz");
-        productTable.put("Webcam", "Price: $50, 1080p, Built-in microphone");
+        // 5 test cases
+        String[] testCases = {"Laptop", "Monitor", "Mouse", "Webcam", "USB Hub"};
 
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter product name:");
-        String productName1 = scanner.nextLine();
-        System.out.println(getProductDetails(productName1, productTable));
-
-        System.out.println("Enter product name:");
-        String productName2 = scanner.nextLine();
-        System.out.println(getProductDetails(productName2, productTable));
-
-        System.out.println("Enter product name:");
-        String productName3 = scanner.nextLine();
-        System.out.println(getProductDetails(productName3, productTable));
-
-        System.out.println("Enter product name:");
-        String productName4 = scanner.nextLine();
-        System.out.println(getProductDetails(productName4, productTable));
-
-        System.out.println("Enter product name:");
-        String productName5 = scanner.nextLine();
-        System.out.println(getProductDetails(productName5, productTable));
-
-
-        scanner.close();
-
+        System.out.println("--- Java Product Inquiry System ---");
+        for (String testCase : testCases) {
+            System.out.println("Querying for: " + testCase);
+            String details = getProductDetails(testCase);
+            System.out.println("Result: " + details);
+            System.out.println();
+        }
     }
 }

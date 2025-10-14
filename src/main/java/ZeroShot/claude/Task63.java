@@ -2,53 +2,49 @@ package ZeroShot.claude;
 
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 
 public class Task63 {
-    public static Object processRequest(String raw_data) {
+    
+    public static Object processRequest(String rawData) {
         try {
-            // Validate input
-            if (raw_data == null || raw_data.trim().isEmpty()) {
-                throw new IllegalArgumentException("Raw data cannot be null or empty");
-            }
-
-            // Convert string to UTF-8 bytes and decode Base64
-            byte[] decodedBytes = Base64.getDecoder().decode(raw_data.getBytes(StandardCharsets.UTF_8));
+            // Step 1 & 2: Ensure UTF-8 encoding and decode Base64
+            byte[] decodedBytes = Base64.getDecoder().decode(rawData.getBytes(StandardCharsets.UTF_8));
             
-            // Convert bytes back to string
+            // Step 3: Deserialize the decoded data (assuming JSON format)
             String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Object deserializedData = objectMapper.readValue(decodedString, Object.class);
             
-            // Deserialize JSON 
-            JSONObject jsonData = new JSONObject(decodedString);
+            // Step 4 & 5: Store and return the deserialized data
+            return deserializedData;
             
-            return jsonData;
-
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid Base64 encoded data");
         } catch (Exception e) {
-            throw new RuntimeException("Error processing request: " + e.getMessage());
+            System.err.println("Error processing request: " + e.getMessage());
+            return null;
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] testCases = {
-            "eyJuYW1lIjoiSm9obiIsImFnZSI6MzB9", // {"name":"John","age":30}
-            "eyJpZCI6MSwidGl0bGUiOiJUZXN0In0=", // {"id":1,"title":"Test"}
-            "eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ==", // {"email":"test@example.com"}
-            "eyJhY3RpdmUiOnRydWUsInJvbGUiOiJ1c2VyIn0=", // {"active":true,"role":"user"}
-            "eyJkYXRhIjpbMSwyLDNdfQ==" // {"data":[1,2,3]}
-        };
-
-        for (int i = 0; i < testCases.length; i++) {
-            try {
-                System.out.println("Test case " + (i + 1) + ":");
-                Object result = processRequest(testCases[i]);
-                System.out.println("Result: " + result);
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-            System.out.println();
-        }
+        // Test Case 1: Simple JSON object
+        String test1 = Base64.getEncoder().encodeToString("{\"name\":\"John\",\"age\":30}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 1: " + processRequest(test1));
+        
+        // Test Case 2: JSON array
+        String test2 = Base64.getEncoder().encodeToString("[1,2,3,4,5]".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 2: " + processRequest(test2));
+        
+        // Test Case 3: Nested JSON
+        String test3 = Base64.getEncoder().encodeToString("{\"user\":{\"id\":1,\"name\":\"Alice\"}}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 3: " + processRequest(test3));
+        
+        // Test Case 4: JSON with special characters
+        String test4 = Base64.getEncoder().encodeToString("{\"message\":\"Hello, World!\"}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 4: " + processRequest(test4));
+        
+        // Test Case 5: Empty JSON object
+        String test5 = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 5: " + processRequest(test5));
     }
 }

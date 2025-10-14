@@ -1,43 +1,105 @@
 package ZeroShot.gemini;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class Task169 {
+public class Task169 {
+
+    private static class Pair {
+        int val;
+        int index;
+
+        Pair(int val, int index) {
+            this.val = val;
+            this.index = index;
+        }
+    }
+
     public List<Integer> countSmaller(int[] nums) {
-        List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < nums.length; i++) {
-            int count = 0;
-            for (int j = i + 1; j < nums.length; j++) {
-                if (nums[j] < nums[i]) {
-                    count++;
-                }
-            }
+        if (nums == null || nums.length == 0) {
+            return new ArrayList<>();
+        }
+
+        int n = nums.length;
+        Pair[] pairs = new Pair[n];
+        for (int i = 0; i < n; i++) {
+            pairs[i] = new Pair(nums[i], i);
+        }
+
+        int[] counts = new int[n];
+        mergeSort(pairs, 0, n - 1, counts);
+
+        List<Integer> result = new ArrayList<>(n);
+        for (int count : counts) {
             result.add(count);
         }
         return result;
     }
 
+    private void mergeSort(Pair[] pairs, int start, int end, int[] counts) {
+        if (start >= end) {
+            return;
+        }
+
+        int mid = start + (end - start) / 2;
+        mergeSort(pairs, start, mid, counts);
+        mergeSort(pairs, mid + 1, end, counts);
+        merge(pairs, start, mid, end, counts);
+    }
+
+    private void merge(Pair[] pairs, int start, int mid, int end, int[] counts) {
+        int tempSize = end - start + 1;
+        Pair[] temp = new Pair[tempSize];
+        
+        int i = start;        // pointer for the left half
+        int j = mid + 1;      // pointer for the right half
+        int k = 0;            // pointer for the temporary array
+        int rightElementsSmaller = 0;
+
+        while (i <= mid && j <= end) {
+            if (pairs[i].val > pairs[j].val) {
+                temp[k++] = pairs[j++];
+                rightElementsSmaller++;
+            } else {
+                counts[pairs[i].index] += rightElementsSmaller;
+                temp[k++] = pairs[i++];
+            }
+        }
+
+        while (i <= mid) {
+            counts[pairs[i].index] += rightElementsSmaller;
+            temp[k++] = pairs[i++];
+        }
+
+        while (j <= end) {
+            temp[k++] = pairs[j++];
+        }
+
+        System.arraycopy(temp, 0, pairs, start, tempSize);
+    }
+
     public static void main(String[] args) {
-        Task169 task169 = new Task169();
+        Task169 solution = new Task169();
+
+        // Test Case 1
         int[] nums1 = {5, 2, 6, 1};
-        List<Integer> output1 = task169.countSmaller(nums1);
-        System.out.println(output1); // Output: [2, 1, 1, 0]
+        System.out.println("Test Case 1: " + solution.countSmaller(nums1));
 
+        // Test Case 2
         int[] nums2 = {-1};
-        List<Integer> output2 = task169.countSmaller(nums2);
-        System.out.println(output2); // Output: [0]
+        System.out.println("Test Case 2: " + solution.countSmaller(nums2));
 
+        // Test Case 3
         int[] nums3 = {-1, -1};
-        List<Integer> output3 = task169.countSmaller(nums3);
-        System.out.println(output3); // Output: [0, 0]
+        System.out.println("Test Case 3: " + solution.countSmaller(nums3));
 
-        int[] nums4 = {1, 2, 3, 4};
-        List<Integer> output4 = task169.countSmaller(nums4);
-        System.out.println(output4); // Output: [0, 0, 0, 0]
+        // Test Case 4
+        int[] nums4 = {};
+        System.out.println("Test Case 4: " + solution.countSmaller(nums4));
 
-        int[] nums5 = {4, 3, 2, 1};
-        List<Integer> output5 = task169.countSmaller(nums5);
-        System.out.println(output5); // Output: [3, 2, 1, 0]
+        // Test Case 5
+        int[] nums5 = {2, 0, 1};
+        System.out.println("Test Case 5: " + solution.countSmaller(nums5));
     }
 }

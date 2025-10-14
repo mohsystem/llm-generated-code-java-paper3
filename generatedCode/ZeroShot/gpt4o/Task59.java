@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task59 {
     public static String accum(String s) {
         StringBuilder result = new StringBuilder();

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task14 {
     public static int findEvenIndex(int[] arr) {
         int totalSum = 0;

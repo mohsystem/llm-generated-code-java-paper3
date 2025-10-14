@@ -1,25 +1,33 @@
 package Vanilla.gemini;
-class Task10 {
-    public int getSum(int a, int b) {
-        if (a == b) {
-            return a;
-        }
-        int sum = 0;
-        int start = Math.min(a, b);
-        int end = Math.max(a, b);
-        for (int i = start; i <= end; i++) {
-            sum += i;
-        }
-        return sum;
+
+public class Task10 {
+
+    /**
+     * Given two integers a and b, which can be positive or negative,
+     * find the sum of all the integers between and including them and return it.
+     * If the two numbers are equal return a or b.
+     *
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The sum of all integers between and including a and b.
+     */
+    public static int getSum(int a, int b) {
+        // Use the formula for the sum of an arithmetic series:
+        // sum = (number of terms / 2) * (first term + last term)
+        // number of terms = abs(a - b) + 1
+        // first term + last term = a + b
+        // The formula correctly handles the case where a == b:
+        // sum = ( (0 + 1) / 2.0 ) * (a + a) = 0.5 * 2a = a
+        // We use long for the intermediate multiplication to prevent integer overflow.
+        return (int) ((long)(a + b) * (Math.abs(a - b) + 1) / 2);
     }
 
     public static void main(String[] args) {
-        Task10 task10 = new Task10();
-        System.out.println(task10.getSum(1, 0)); // 1
-        System.out.println(task10.getSum(1, 2)); // 3
-        System.out.println(task10.getSum(0, 1)); // 1
-        System.out.println(task10.getSum(1, 1)); // 1
-        System.out.println(task10.getSum(-1, 0)); // -1
-        System.out.println(task10.getSum(-1, 2)); // 2
+        // Test cases
+        System.out.println(getSum(1, 0));   // Expected: 1
+        System.out.println(getSum(1, 2));   // Expected: 3
+        System.out.println(getSum(1, 1));   // Expected: 1
+        System.out.println(getSum(-1, 0));  // Expected: -1
+        System.out.println(getSum(-1, 2));  // Expected: 2
     }
 }

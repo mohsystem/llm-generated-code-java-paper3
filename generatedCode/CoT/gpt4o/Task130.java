@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import spark.Filter;
 import spark.Request;
 import spark.Response;

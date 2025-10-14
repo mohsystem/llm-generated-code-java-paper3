@@ -1,100 +1,141 @@
 package CoT.claude;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-import java.io.*;
-import java.net.InetSocketAddress;
 import java.sql.*;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 public class Task49 {
     private static final String DB_URL = "jdbc:sqlite:users.db";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$");
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z\\\\s]{1,100}$");
     
-    public static void main(String[] args) throws Exception {
-        // Initialize database
-        initializeDB();
+    static class APIResponse {
+        boolean success;
+        String message;
         
-        // Create HTTP server
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.createContext("/api/users", new UserHandler());
-        server.setExecutor(null);
-        server.start();
-        System.out.println("Server started on port 8080");
-        
-        // Test cases
-        testUserAPI();
-    }
-    
-    static class UserHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if ("POST".equals(exchange.getRequestMethod())) {
-                // Read request body
-                String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                
-                // Validate input
-                if (!isValidInput(requestBody)) {
-                    sendResponse(exchange, 400, "Invalid input");
-                    return;
-                }
-                
-                try {
-                    // Store in database
-                    storeUser(requestBody);
-                    sendResponse(exchange, 200, "User stored successfully");
-                } catch (SQLException e) {
-                    sendResponse(exchange, 500, "Database error");
-                }
-            } else {
-                sendResponse(exchange, 405, "Method not allowed");
-            }
+        APIResponse(boolean success, String message) {
+            this.success = success;
+            this.message = message;
         }
     }
     
-    private static void initializeDB() throws SQLException {
+    static class UserData {
+        String name;
+        String email;
+        String password;
+        
+        UserData(String name, String email, String password) {
+            this.name = name;
+            this.email = email;
+            this.password = password;
+        }
+    }
+    
+    public static void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
-            String sql = "CREATE TABLE IF NOT EXISTS users " +
-                        "(id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        " data TEXT NOT NULL)";
+            String sql = "CREATE TABLE IF NOT EXISTS users (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "name TEXT NOT NULL," +
+                        "email TEXT UNIQUE NOT NULL," +
+                        "password_hash TEXT NOT NULL," +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
             stmt.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("Database initialization error: " + e.getMessage());
         }
     }
     
-    private static void storeUser(String userData) throws SQLException {
-        String sql = "INSERT INTO users (data) VALUES (?)";
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Hashing error: " + e.getMessage());
+        }
+    }
+    
+    public static boolean validateInput(UserData userData) {
+        if (userData.name == null || userData.email == null || userData.password == null) {
+            return false;
+        }
+        
+        if (userData.name.length() > 100 || userData.email.length() > 255 || userData.password.length() < 8) {
+            return false;
+        }
+        
+        if (!NAME_PATTERN.matcher(userData.name).matches()) {
+            return false;
+        }
+        
+        if (!EMAIL_PATTERN.matcher(userData.email).matches()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public static APIResponse createUser(UserData userData) {
+        if (!validateInput(userData)) {
+            return new APIResponse(false, "Invalid input data");
+        }
+        
+        String passwordHash = hashPassword(userData.password);
+        
+        String sql = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
+        
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, userData);
+            
+            pstmt.setString(1, userData.name);
+            pstmt.setString(2, userData.email);
+            pstmt.setString(3, passwordHash);
+            
             pstmt.executeUpdate();
+            return new APIResponse(true, "User created successfully");
+            
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed")) {
+                return new APIResponse(false, "Email already exists");
+            }
+            return new APIResponse(false, "Database error: " + e.getMessage());
         }
     }
     
-    private static void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
-        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-        exchange.sendResponseHeaders(statusCode, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-    
-    private static boolean isValidInput(String input) {
-        // Basic input validation
-        return input != null && 
-               input.length() <= 1000 && 
-               Pattern.matches("^[a-zA-Z0-9\\\\s\\\\{\\\\}\"\\\\:\\\\,]*$", input);
-    }
-    
-    private static void testUserAPI() {
-        // Test cases would typically be implemented here
-        // In a real application, you would use HTTP client to test the API
-        System.out.println("Test cases:");
-        System.out.println("1. Valid user data");
-        System.out.println("2. Invalid input (special characters)");
-        System.out.println("3. Empty input");
-        System.out.println("4. Too long input");
-        System.out.println("5. Non-POST request");
+    public static void main(String[] args) {
+        initializeDatabase();
+        
+        System.out.println("=== Test Case 1: Valid user ===");
+        UserData user1 = new UserData("John Doe", "john@example.com", "SecurePass123");
+        APIResponse response1 = createUser(user1);
+        System.out.println("Success: " + response1.success + ", Message: " + response1.message);
+        
+        System.out.println("\\n=== Test Case 2: Duplicate email ===");
+        UserData user2 = new UserData("Jane Doe", "john@example.com", "AnotherPass456");
+        APIResponse response2 = createUser(user2);
+        System.out.println("Success: " + response2.success + ", Message: " + response2.message);
+        
+        System.out.println("\\n=== Test Case 3: Invalid email ===");
+        UserData user3 = new UserData("Alice Smith", "invalid-email", "Password789");
+        APIResponse response3 = createUser(user3);
+        System.out.println("Success: " + response3.success + ", Message: " + response3.message);
+        
+        System.out.println("\\n=== Test Case 4: Short password ===");
+        UserData user4 = new UserData("Bob Johnson", "bob@example.com", "short");
+        APIResponse response4 = createUser(user4);
+        System.out.println("Success: " + response4.success + ", Message: " + response4.message);
+        
+        System.out.println("\\n=== Test Case 5: Invalid name with numbers ===");
+        UserData user5 = new UserData("Charlie123", "charlie@example.com", "ValidPass123");
+        APIResponse response5 = createUser(user5);
+        System.out.println("Success: " + response5.success + ", Message: " + response5.message);
     }
 }

@@ -3,44 +3,51 @@ package Vanilla.claude;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 public class Task63 {
-    public static Object processRequest(String raw_data) {
+    public static String processRequest(String rawData) {
         try {
-            // Ensure UTF-8 encoding
-            byte[] encodedBytes = raw_data.getBytes(StandardCharsets.UTF_8);
+            // Step 1: Ensure raw_data is encoded in UTF-8 (already String in Java)
+            byte[] rawDataBytes = rawData.getBytes(StandardCharsets.UTF_8);
             
-            // Base64 decode
-            byte[] decodedBytes = Base64.getDecoder().decode(encodedBytes);
+            // Step 2: Decode the raw_data using Base64
+            byte[] decodedBytes = Base64.getDecoder().decode(rawDataBytes);
             
-            // Convert to string
-            String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+            // Step 3: Convert decoded bytes to String
+            String decodedData = new String(decodedBytes, StandardCharsets.UTF_8);
             
-            // Deserialize JSON 
-            JSONObject deserializedData = new JSONObject(decodedString);
+            // Step 4: Deserialize the decoded data (assuming JSON format)
+            // Store the deserialized data
+            JSONObject jsonObject = new JSONObject(decodedData);
+            String storedData = jsonObject.toString();
             
-            return deserializedData;
-            
+            // Step 5: Return the stored data
+            return storedData;
         } catch (Exception e) {
-            return null;
+            return "Error processing request: " + e.getMessage();
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] testCases = {
-            "eyJuYW1lIjoiSm9obiIsImFnZSI6MzB9", // {"name":"John","age":30}
-            "eyJpZCI6MSwidGl0bGUiOiJUZXN0In0=", // {"id":1,"title":"Test"}
-            "eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ==", // {"email":"test@example.com"}
-            "eyJhY3RpdmUiOnRydWUsInJvbGUiOiJ1c2VyIn0=", // {"active":true,"role":"user"}
-            "eyJzY29yZSI6OTUsImdyYWRlIjoiQSJ9" // {"score":95,"grade":"A"}
-        };
+        // Test case 1: Simple JSON object
+        String test1 = Base64.getEncoder().encodeToString("{\"name\":\"John\",\"age\":30}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 1: " + processRequest(test1));
         
-        for(int i = 0; i < testCases.length; i++) {
-            System.out.println("Test case " + (i+1) + ":");
-            System.out.println("Input: " + testCases[i]);
-            System.out.println("Output: " + processRequest(testCases[i]));
-            System.out.println();
-        }
+        // Test case 2: JSON with nested object
+        String test2 = Base64.getEncoder().encodeToString("{\"user\":{\"id\":1,\"name\":\"Alice\"}}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 2: " + processRequest(test2));
+        
+        // Test case 3: JSON with array
+        String test3 = Base64.getEncoder().encodeToString("{\"items\":[1,2,3,4,5]}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 3: " + processRequest(test3));
+        
+        // Test case 4: JSON with boolean and null
+        String test4 = Base64.getEncoder().encodeToString("{\"active\":true,\"data\":null}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 4: " + processRequest(test4));
+        
+        // Test case 5: Complex JSON
+        String test5 = Base64.getEncoder().encodeToString("{\"company\":\"TechCorp\",\"employees\":[{\"name\":\"Bob\",\"role\":\"Developer\"}]}".getBytes(StandardCharsets.UTF_8));
+        System.out.println("Test 5: " + processRequest(test5));
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

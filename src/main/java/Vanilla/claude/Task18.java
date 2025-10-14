@@ -1,19 +1,33 @@
 package Vanilla.claude;
 
 public class Task18 {
-    public static int binaryArrayToNumber(int[] arr) {
+    public static int binaryArrayToInt(int[] binary) {
         int result = 0;
-        for(int bit : arr) {
-            result = result * 2 + bit;
+        for (int i = 0; i < binary.length; i++) {
+            result = result * 2 + binary[i];
         }
         return result;
     }
     
     public static void main(String[] args) {
-        System.out.println(binaryArrayToNumber(new int[]{0, 0, 0, 1})); // 1
-        System.out.println(binaryArrayToNumber(new int[]{0, 0, 1, 0})); // 2
-        System.out.println(binaryArrayToNumber(new int[]{0, 1, 0, 1})); // 5
-        System.out.println(binaryArrayToNumber(new int[]{1, 0, 0, 1})); // 9
-        System.out.println(binaryArrayToNumber(new int[]{1, 1, 1, 1})); // 15
+        // Test case 1
+        int[] test1 = {0, 0, 0, 1};
+        System.out.println("Testing: [0, 0, 0, 1] ==> " + binaryArrayToInt(test1));
+        
+        // Test case 2
+        int[] test2 = {0, 0, 1, 0};
+        System.out.println("Testing: [0, 0, 1, 0] ==> " + binaryArrayToInt(test2));
+        
+        // Test case 3
+        int[] test3 = {0, 1, 0, 1};
+        System.out.println("Testing: [0, 1, 0, 1] ==> " + binaryArrayToInt(test3));
+        
+        // Test case 4
+        int[] test4 = {1, 0, 0, 1};
+        System.out.println("Testing: [1, 0, 0, 1] ==> " + binaryArrayToInt(test4));
+        
+        // Test case 5
+        int[] test5 = {1, 1, 1, 1};
+        System.out.println("Testing: [1, 1, 1, 1] ==> " + binaryArrayToInt(test5));
     }
 }

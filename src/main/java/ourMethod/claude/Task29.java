@@ -1,40 +1,43 @@
 package ourMethod.claude;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Task29 {
     public static int[] twoSum(int[] numbers, int target) {
         if (numbers == null || numbers.length < 2) {
-            throw new IllegalArgumentException("Input array must contain at least 2 numbers");
+            throw new IllegalArgumentException("Array must contain at least 2 elements");
         }
         
-        for (int i = 0; i < numbers.length - 1; i++) {
-            for (int j = i + 1; j < numbers.length; j++) {
-                // Use safe arithmetic to prevent integer overflow
-                if (numbers[i] <= target && numbers[j] <= target) {
-                    long sum = (long) numbers[i] + numbers[j];
-                    if (sum == target) {
-                        return new int[]{i, j};
-                    }
-                }
+        Map<Integer, Integer> map = new HashMap<>();
+        
+        for (int i = 0; i < numbers.length; i++) {
+            int complement = target - numbers[i];
+            
+            if (map.containsKey(complement)) {
+                return new int[]{map.get(complement), i};
             }
+            
+            map.put(numbers[i], i);
         }
-        return new int[]{};  // Should not reach here given problem constraints
+        
+        throw new IllegalArgumentException("No valid pair found");
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        int[][] testArrays = {
-            {1, 2, 3},
-            {3, 2, 4},
-            {2, 7, 11, 15},
-            {1234, 5678, 9012},
-            {0, 0, 0}
-        };
-        int[] testTargets = {4, 6, 9, 14690, 0};
-
-        for (int i = 0; i < testArrays.length; i++) {
-            int[] result = twoSum(testArrays[i], testTargets[i]);
-            System.out.printf("Test %d: [%d, %d]%n", 
-                            i + 1, result[0], result[1]);
-        }
+        int[] result1 = twoSum(new int[]{1, 2, 3}, 4);
+        System.out.println("[" + result1[0] + ", " + result1[1] + "]");
+        
+        int[] result2 = twoSum(new int[]{3, 2, 4}, 6);
+        System.out.println("[" + result2[0] + ", " + result2[1] + "]");
+        
+        int[] result3 = twoSum(new int[]{1, 5, 3, 7, 9}, 12);
+        System.out.println("[" + result3[0] + ", " + result3[1] + "]");
+        
+        int[] result4 = twoSum(new int[]{10, 20, 30, 40}, 50);
+        System.out.println("[" + result4[0] + ", " + result4[1] + "]");
+        
+        int[] result5 = twoSum(new int[]{-1, -2, -3, -4, -5}, -8);
+        System.out.println("[" + result5[0] + ", " + result5[1] + "]");
     }
 }

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task11 {
 
     public static int nb_year(int p0, double percent, int aug, int p) {

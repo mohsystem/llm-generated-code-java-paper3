@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task141 {
     public static String reverseString(String input) {
         StringBuilder reversed = new StringBuilder(input);

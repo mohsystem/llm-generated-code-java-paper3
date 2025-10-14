@@ -4,52 +4,104 @@ import java.io.*;
 import java.util.*;
 
 public class Task190 {
-    public static List<String> transpose(List<String> input) {
-        if (input == null || input.isEmpty()) return new ArrayList<>();
-        
-        String[][] matrix = new String[input.size()][];
-        int maxCols = 0;
-        
-        // Split each line into array and find max columns
-        for (int i = 0; i < input.size(); i++) {
-            matrix[i] = input.get(i).split(" ");
-            maxCols = Math.max(maxCols, matrix[i].length);
-        }
-
-        // Transpose matrix
+    public static List<String> transpose(String filename) {
         List<String> result = new ArrayList<>();
-        for (int j = 0; j < maxCols; j++) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < matrix.length; i++) {
-                if (j < matrix[i].length) {
-                    sb.append(matrix[i][j]);
-                }
-                if (i != matrix.length - 1) {
-                    sb.append(" ");
-                }
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+            List<String[]> rows = new ArrayList<>();
+            String line;
+            int maxCols = 0;
+            
+            while ((line = br.readLine()) != null) {
+                String[] cols = line.split(" ");
+                rows.add(cols);
+                maxCols = Math.max(maxCols, cols.length);
             }
-            result.add(sb.toString());
+            br.close();
+            
+            for (int col = 0; col < maxCols; col++) {
+                StringBuilder sb = new StringBuilder();
+                for (int row = 0; row < rows.size(); row++) {
+                    if (col < rows.get(row).length) {
+                        if (sb.length() > 0) sb.append(" ");
+                        sb.append(rows.get(row)[col]);
+                    }
+                }
+                result.add(sb.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return result;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        List<List<String>> testCases = Arrays.asList(
-            Arrays.asList("name age", "alice 21", "ryan 30"),
-            Arrays.asList("a b c", "1 2 3", "x y z"),
-            Arrays.asList("col1 col2", "val1 val2"),
-            Arrays.asList("single"),
-            Arrays.asList("header1 header2 header3", "data1 data2 data3")
-        );
-
-        for (int i = 0; i < testCases.size(); i++) {
-            System.out.println("Test case " + (i + 1) + ":");
-            System.out.println("Input:");
-            testCases.get(i).forEach(System.out::println);
-            System.out.println("Output:");
-            transpose(testCases.get(i)).forEach(System.out::println);
+        // Test case 1
+        try {
+            PrintWriter writer = new PrintWriter("test1.txt");
+            writer.println("name age");
+            writer.println("alice 21");
+            writer.println("ryan 30");
+            writer.close();
+            System.out.println("Test 1:");
+            transpose("test1.txt").forEach(System.out::println);
             System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Test case 2
+        try {
+            PrintWriter writer = new PrintWriter("test2.txt");
+            writer.println("a b c");
+            writer.println("d e f");
+            writer.println("g h i");
+            writer.close();
+            System.out.println("Test 2:");
+            transpose("test2.txt").forEach(System.out::println);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Test case 3
+        try {
+            PrintWriter writer = new PrintWriter("test3.txt");
+            writer.println("1 2");
+            writer.println("3 4");
+            writer.close();
+            System.out.println("Test 3:");
+            transpose("test3.txt").forEach(System.out::println);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Test case 4
+        try {
+            PrintWriter writer = new PrintWriter("test4.txt");
+            writer.println("x");
+            writer.println("y");
+            writer.println("z");
+            writer.close();
+            System.out.println("Test 4:");
+            transpose("test4.txt").forEach(System.out::println);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Test case 5
+        try {
+            PrintWriter writer = new PrintWriter("test5.txt");
+            writer.println("first second third fourth");
+            writer.println("1 2 3 4");
+            writer.close();
+            System.out.println("Test 5:");
+            transpose("test5.txt").forEach(System.out::println);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

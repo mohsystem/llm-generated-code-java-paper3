@@ -26,7 +26,7 @@ public class Task111 {
         
         private String sanitizeInput(String input) {
             // Basic input sanitization
-            return input.replaceAll("[<>\\"']", "");
+            return input.replaceAll("[<>\"']", "");
         }
     }
     

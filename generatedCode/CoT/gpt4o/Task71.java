@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task71 {
     public static void main(String[] args) {
         for (String arg : args) {

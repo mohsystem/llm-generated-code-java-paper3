@@ -1,47 +1,63 @@
 package ourMethod.claude;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Task92 {
-    private static final int MAX_COUNTER = 5;
-    private static volatile int currentCounter = 0;
-    private static final Object lock = new Object();
+    private static final Lock lock = new ReentrantLock();
+    private static final AtomicInteger currentCounter = new AtomicInteger(0);
+    private static int maxCounter;
 
-    static class Worker implements Runnable {
-        private final String threadName;
-
-        public Worker(String name) {
-            this.threadName = name;
+    public static boolean accessSharedResource(String threadName, int max) {
+        if (threadName == null || threadName.isEmpty()) {
+            return false;
         }
-
-        @Override
-        public void run() {
-            while (true) {
-                synchronized (lock) {
-                    if (currentCounter >= MAX_COUNTER) {
-                        break;
-                    }
-                    currentCounter++;
-                    System.out.println(threadName + " accessing counter. Current value: " + currentCounter);
+        if (max < 0) {
+            return false;
+        }
+        
+        int current = currentCounter.get();
+        if (current <= max) {
+            lock.lock();
+            try {
+                current = currentCounter.get();
+                if (current <= max) {
+                    currentCounter.incrementAndGet();
+                    System.out.println("Thread " + threadName + " is accessing currentCounter: " + currentCounter.get());
+                    return true;
                 }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            } finally {
+                lock.unlock();
             }
+        }
+        return false;
+    }
+
+    public static void resetCounter() {
+        lock.lock();
+        try {
+            currentCounter.set(0);
+        } finally {
+            lock.unlock();
         }
     }
 
+    public static int getCurrentCounter() {
+        return currentCounter.get();
+    }
+
     public static void main(String[] args) {
-        // Test case 1: Create and start 3 threads
-        Thread t1 = new Thread(new Worker("Thread-1"));
-        Thread t2 = new Thread(new Worker("Thread-2"));
-        Thread t3 = new Thread(new Worker("Thread-3"));
+        maxCounter = 5;
+        
+        System.out.println("Test Case 1: Multiple threads with maxCounter=5");
+        resetCounter();
+        Thread t1 = new Thread(() -> accessSharedResource("T1", 5));
+        Thread t2 = new Thread(() -> accessSharedResource("T2", 5));
+        Thread t3 = new Thread(() -> accessSharedResource("T3", 5));
         t1.start();
         t2.start();
         t3.start();
-
-        // Test case 2: Wait for all threads to complete
         try {
             t1.join();
             t2.join();
@@ -49,23 +65,38 @@ public class Task92 {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
 
-        // Test case 3: Reset and create 2 threads
-        currentCounter = 0;
-        Thread t4 = new Thread(new Worker("Thread-4"));
-        Thread t5 = new Thread(new Worker("Thread-5"));
-        t4.start();
-        t5.start();
-
-        // Test case 4: Wait for second batch to complete
+        System.out.println("Test Case 2: Threads exceeding maxCounter");
+        resetCounter();
+        for (int i = 0; i < 8; i++) {
+            final int num = i;
+            new Thread(() -> accessSharedResource("T" + num, 5)).start();
+        }
         try {
-            t4.join();
-            t5.join();
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
 
-        // Test case 5: Verify final counter value
-        System.out.println("Final counter value: " + currentCounter);
+        System.out.println("Test Case 3: maxCounter=0");
+        resetCounter();
+        accessSharedResource("T_Zero", 0);
+        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+
+        System.out.println("Test Case 4: Sequential access");
+        resetCounter();
+        for (int i = 0; i < 3; i++) {
+            accessSharedResource("T_Seq" + i, 10);
+        }
+        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+
+        System.out.println("Test Case 5: Invalid inputs");
+        resetCounter();
+        accessSharedResource(null, 5);
+        accessSharedResource("", 5);
+        accessSharedResource("T_Valid", -1);
+        System.out.println("Final counter: " + getCurrentCounter());
     }
 }

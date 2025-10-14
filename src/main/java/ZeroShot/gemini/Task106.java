@@ -1,76 +1,91 @@
 package ZeroShot.gemini;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 
-class Task106 {
-    private BigInteger n, e, d;
+import javax.crypto.Cipher;
+import java.security.*;
+import java.util.Base64;
 
-    public Task106(int bitLength) {
-        SecureRandom random = new SecureRandom();
-        BigInteger p = BigInteger.probablePrime(bitLength / 2, random);
-        BigInteger q = BigInteger.probablePrime(bitLength / 2, random);
-        n = p.multiply(q);
-        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-        e = new BigInteger("65537"); // Common public exponent
-        while (phi.gcd(e).compareTo(BigInteger.ONE) != 0) {
-            e = e.add(BigInteger.valueOf(2));
-        }
-        d = e.modInverse(phi);
+/**
+ * Note: RSA is typically used to encrypt small amounts of data, such as a
+ * symmetric key for another algorithm (like AES). It is not efficient for
+ * encrypting large files. The maximum data size is limited by the key size
+ * and the padding scheme used.
+ */
+public class Task106 {
+
+    private static final String ALGORITHM = "RSA";
+    // Using OAEP padding is more secure than the older PKCS1Padding
+    private static final String PADDING = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+    private static final int KEY_SIZE = 2048; // Minimum recommended key size
+
+    /**
+     * Generates an RSA KeyPair.
+     * @return The generated KeyPair.
+     * @throws NoSuchAlgorithmException if the RSA algorithm is not available.
+     */
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
+        keyGen.initialize(KEY_SIZE);
+        return keyGen.generateKeyPair();
     }
 
-    public BigInteger encrypt(BigInteger message) {
-        return message.modPow(e, n);
+    /**
+     * Encrypts data using the RSA public key.
+     * @param data The plaintext string to encrypt.
+     * @param publicKey The public key to use for encryption.
+     * @return The encrypted data as a byte array.
+     * @throws Exception if encryption fails.
+     */
+    public static byte[] encrypt(String data, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance(PADDING);
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return cipher.doFinal(data.getBytes("UTF-8"));
     }
 
-    public BigInteger decrypt(BigInteger ciphertext) {
-        return ciphertext.modPow(d, n);
+    /**
+     * Decrypts data using the RSA private key.
+     * @param data The encrypted byte array.
+     * @param privateKey The private key to use for decryption.
+     * @return The decrypted plaintext string.
+     * @throws Exception if decryption fails.
+     */
+    public static String decrypt(byte[] data, PrivateKey privateKey) throws Exception {
+        Cipher cipher = Cipher.getInstance(PADDING);
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return new String(cipher.doFinal(data), "UTF-8");
     }
-
 
     public static void main(String[] args) {
-        Task106 rsa = new Task106(1024); // Key size 1024 bits
+        try {
+            // 1. Generate Key Pair
+            KeyPair keyPair = generateKeyPair();
 
-        BigInteger message1 = new BigInteger("1234567890");
-        BigInteger ciphertext1 = rsa.encrypt(message1);
-        BigInteger decrypted1 = rsa.decrypt(ciphertext1);
-        System.out.println("Test case 1:");
-        System.out.println("Original message: " + message1);
-        System.out.println("Encrypted: " + ciphertext1);
-        System.out.println("Decrypted: " + decrypted1);
+            String[] testCases = {
+                "This is a test message.",
+                "RSA is a public-key cryptosystem.",
+                "Security is important.",
+                "12345!@#$%^&*()",
+                "A short message. Real-world applications use RSA to encrypt a symmetric key, not the data itself."
+            };
 
+            for (int i = 0; i < testCases.length; i++) {
+                System.out.println("--- Test Case " + (i + 1) + " ---");
+                String originalData = testCases[i];
+                System.out.println("Original: " + originalData);
 
-        BigInteger message2 = new BigInteger("9876543210");
-        BigInteger ciphertext2 = rsa.encrypt(message2);
-        BigInteger decrypted2 = rsa.decrypt(ciphertext2);
-        System.out.println("\nTest case 2:");
-        System.out.println("Original message: " + message2);
-        System.out.println("Encrypted: " + ciphertext2);
-        System.out.println("Decrypted: " + decrypted2);
+                // 2. Encrypt using the public key
+                byte[] encryptedData = encrypt(originalData, keyPair.getPublic());
+                System.out.println("Encrypted (Base64): " + Base64.getEncoder().encodeToString(encryptedData));
 
-        BigInteger message3 = new BigInteger("100");
-        BigInteger ciphertext3 = rsa.encrypt(message3);
-        BigInteger decrypted3 = rsa.decrypt(ciphertext3);
-        System.out.println("\nTest case 3:");
-        System.out.println("Original message: " + message3);
-        System.out.println("Encrypted: " + ciphertext3);
-        System.out.println("Decrypted: " + decrypted3);
+                // 3. Decrypt using the private key
+                String decryptedData = decrypt(encryptedData, keyPair.getPrivate());
+                System.out.println("Decrypted: " + decryptedData);
+                System.out.println("Status: " + (originalData.equals(decryptedData) ? "SUCCESS" : "FAILURE"));
+                System.out.println();
+            }
 
-
-        BigInteger message4 = new BigInteger("5555555");
-        BigInteger ciphertext4 = rsa.encrypt(message4);
-        BigInteger decrypted4 = rsa.decrypt(ciphertext4);
-        System.out.println("\nTest case 4:");
-        System.out.println("Original message: " + message4);
-        System.out.println("Encrypted: " + ciphertext4);
-        System.out.println("Decrypted: " + decrypted4);
-
-        BigInteger message5 = new BigInteger("1212121212");
-        BigInteger ciphertext5 = rsa.encrypt(message5);
-        BigInteger decrypted5 = rsa.decrypt(ciphertext5);
-        System.out.println("\nTest case 5:");
-        System.out.println("Original message: " + message5);
-        System.out.println("Encrypted: " + ciphertext5);
-        System.out.println("Decrypted: " + decrypted5);
-
+        } catch (Exception e) {
+            System.err.println("An error occurred during the RSA process:");
+            e.printStackTrace();
+        }
     }
 }

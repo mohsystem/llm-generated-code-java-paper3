@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task33 {
     public static int queueTime(int[] customers, int n) {
         int[] tills = new int[n];

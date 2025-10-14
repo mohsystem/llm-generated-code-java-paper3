@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task23 {
     public static int findNb(long m) {
         long volume = 0;

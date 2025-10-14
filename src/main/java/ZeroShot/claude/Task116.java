@@ -1,79 +1,107 @@
 package ZeroShot.claude;
 
 import java.io.*;
-import java.security.*;
+import java.util.*;
 
 public class Task116 {
-    private static final String ADMIN_USER = "admin";
-    private static boolean isPrivileged = false;
-    
-    public static boolean changeUserPassword(String username, String newPassword) {
-        if (!isPrivileged) {
-            System.err.println("Error: Insufficient privileges");
+    private static final int UNPRIVILEGED_UID = 1000;
+    private static final int UNPRIVILEGED_GID = 1000;
+
+    // Simulated privileged operation - change password
+    public static boolean changePassword(String username, String newPassword) {
+        if (username == null || username.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            System.out.println("Invalid username or password");
             return false;
         }
+
+        // Validate password strength
+        if (newPassword.length() < 8) {
+            System.out.println("Password must be at least 8 characters");
+            return false;
+        }
+
+        // Simulate privileged operation
+        System.out.println("Performing privileged operation: Changing password for user '" + username + "'");
         
         try {
-            // Simulate changing password securely
-            if (username == null || username.trim().isEmpty() || 
-                newPassword == null || newPassword.trim().isEmpty()) {
-                return false;
-            }
-
-            // Perform privileged operation
-            Runtime rt = Runtime.getRuntime();
-            String[] commands = {"chpasswd"};
-            Process proc = rt.exec(commands);
+            // In real implementation, this would call system commands with proper validation
+            // Example: Runtime.getRuntime().exec(new String[]{"passwd", username});
             
-            // Write username:password to process
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(proc.getOutputStream()));
-            writer.write(username + ":" + newPassword);
-            writer.close();
-
-            // Drop privileges immediately after operation
-            dropPrivileges();
-            
-            int exitVal = proc.waitFor();
-            return exitVal == 0;
-            
+            // Simulate password change
+            System.out.println("Password changed successfully for user: " + username);
+            return true;
         } catch (Exception e) {
-            System.err.println("Error changing password: " + e.getMessage());
-            dropPrivileges();
+            System.out.println("Error changing password: " + e.getMessage());
             return false;
         }
     }
-    
-    private static void dropPrivileges() {
-        isPrivileged = false;
-        // Reset to non-privileged user
+
+    // Drop privileges after privileged operation
+    public static void dropPrivileges() {
+        System.out.println("Dropping privileges...");
+        
         try {
-            String username = System.getProperty("user.name");
-            if (!username.equals(ADMIN_USER)) {
-                Runtime.getRuntime().exec("su " + username);
+            String os = System.getProperty("os.name").toLowerCase();
+            
+            if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+                // On Unix-like systems, attempt to drop privileges
+                // Note: This is a simulation - actual privilege dropping requires native calls
+                System.out.println("Simulating privilege drop to UID: " + UNPRIVILEGED_UID + 
+                                   ", GID: " + UNPRIVILEGED_GID);
+                
+                // In production, use JNI or JNA to call setuid/setgid
+                // Example with JNA:
+                // CLibrary.INSTANCE.setgid(UNPRIVILEGED_GID);
+                // CLibrary.INSTANCE.setuid(UNPRIVILEGED_UID);
+                
+                System.out.println("Privileges dropped successfully");
+            } else {
+                System.out.println("Privilege dropping not supported on this platform");
             }
         } catch (Exception e) {
-            System.err.println("Error dropping privileges: " + e.getMessage());
+            System.out.println("Error dropping privileges: " + e.getMessage());
+        }
+        
+        // Clear sensitive data
+        System.gc();
+    }
+
+    public static void performSecureOperation(String username, String password) {
+        boolean success = false;
+        
+        try {
+            // Perform privileged operation
+            success = changePassword(username, password);
+        } finally {
+            // Always drop privileges after privileged operation
+            dropPrivileges();
+        }
+        
+        if (success) {
+            System.out.println("Operation completed successfully");
+        } else {
+            System.out.println("Operation failed");
         }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        isPrivileged = true; // Simulating privileged access granted
-        
-        // Test 1: Valid change
-        System.out.println(changeUserPassword("testuser1", "newpass123")); 
-        
-        // Test 2: Empty username
-        System.out.println(changeUserPassword("", "newpass123"));
-        
-        // Test 3: Empty password
-        System.out.println(changeUserPassword("testuser2", ""));
-        
-        // Test 4: Null values
-        System.out.println(changeUserPassword(null, null));
-        
-        // Test 5: Without privileges
-        isPrivileged = false;
-        System.out.println(changeUserPassword("testuser3", "newpass123"));
+        System.out.println("===== Test Case 1: Valid password change =====");
+        performSecureOperation("testuser1", "SecurePass123!");
+        System.out.println();
+
+        System.out.println("===== Test Case 2: Another valid password change =====");
+        performSecureOperation("testuser2", "MyP@ssw0rd");
+        System.out.println();
+
+        System.out.println("===== Test Case 3: Weak password =====");
+        performSecureOperation("testuser3", "weak");
+        System.out.println();
+
+        System.out.println("===== Test Case 4: Empty username =====");
+        performSecureOperation("", "ValidPass123!");
+        System.out.println();
+
+        System.out.println("===== Test Case 5: Null password =====");
+        performSecureOperation("testuser5", null);
     }
 }

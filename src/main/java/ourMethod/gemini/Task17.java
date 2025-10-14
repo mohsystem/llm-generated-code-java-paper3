@@ -1,48 +1,55 @@
 package ourMethod.gemini;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import java.util.Objects;
 
 public class Task17 {
 
-    public static String toJadenCase(String phrase) {
+    /**
+     * Converts a string to Jaden Case.
+     *
+     * @param phrase The string to convert. Can be null.
+     * @return The Jaden-Cased string, or null if the input is null or empty.
+     */
+    public String toJadenCase(String phrase) {
         if (phrase == null || phrase.isEmpty()) {
             return null;
         }
 
-        StringBuilder jadenCase = new StringBuilder();
-        String[] words = phrase.split("\\s+"); // Split string by whitespace
+        char[] chars = phrase.toCharArray();
+        boolean capitalizeNext = true;
 
-        for (String word : words) {
-            jadenCase.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isWhitespace(chars[i])) {
+                capitalizeNext = true;
+            } else if (capitalizeNext && Character.isLetter(chars[i])) {
+                chars[i] = Character.toUpperCase(chars[i]);
+                capitalizeNext = false;
+            }
         }
-
-        return jadenCase.toString().trim();
+        return new String(chars);
     }
 
-
     public static void main(String[] args) {
-        List<String> testPhrases = Arrays.asList(
-                "How can mirrors be real if our eyes aren't real",
-                "most trees are blue",
-                "All The Rules In This World Were Made By Someone No Smarter Than You. So Make Your Own.",
-                "",
-                null
-        );
-        List<String> expected = Arrays.asList(
-                "How Can Mirrors Be Real If Our Eyes Aren't Real",
-                "Most Trees Are Blue",
-                "All The Rules In This World Were Made By Someone No Smarter Than You. So Make Your Own.",
-                null,
-                null);
+        Task17 jadenCaser = new Task17();
+        String[] testCases = {
+            "How can mirrors be real if our eyes aren't real",
+            "most trees are blue",
+            "",
+            "the quick brown fox jumps over the lazy dog.",
+            "a string   with   multiple   spaces"
+        };
 
-        for (int i = 0; i < testPhrases.size(); i++) {
-            String result = toJadenCase(testPhrases.get(i));
-            System.out.println("Test case " + (i + 1) + ": " + (result == null ? "null" : result));
-            System.out.println("Expected: " + (expected.get(i) == null ? "null" : expected.get(i)) );
-            System.out.println(result.equals(expected.get(i)));
-
+        System.out.println("Java Test Cases:");
+        for (String test : testCases) {
+            String result = jadenCaser.toJadenCase(test);
+            System.out.println("Original: \"" + test + "\"");
+            System.out.println("Jaden-Cased: \"" + result + "\"\n");
         }
+
+        // Test case for null input
+        String nullTest = null;
+        String nullResult = jadenCaser.toJadenCase(nullTest);
+        System.out.println("Original: null");
+        System.out.println("Jaden-Cased: " + nullResult + "\n");
     }
 }

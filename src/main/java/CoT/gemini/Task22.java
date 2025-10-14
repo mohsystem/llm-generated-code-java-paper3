@@ -1,40 +1,57 @@
 package CoT.gemini;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class Task22 {
 
-    public static List<Integer> filterList(List<?> mixedList) {
-        List<Integer> integerList = new ArrayList<>();
-        for (Object item : mixedList) {
-            if (item instanceof Integer) {
-                integerList.add((Integer) item);
-            }
-        }
-        return integerList;
+    /**
+     * Filters a list of objects, returning a new list containing only the integers.
+     *
+     * @param list The input list containing non-negative integers and strings.
+     * @return A new list containing only the integers from the input list.
+     */
+    public static List<Integer> filterList(final List<Object> list) {
+        // Using streams for a functional approach, which is concise and safe.
+        // The filter operation checks the type of each element.
+        // If the element is an instance of Integer, it is kept.
+        return list.stream()
+                   .filter(o -> o instanceof Integer)
+                   .map(o -> (Integer) o)
+                   .collect(Collectors.toList());
     }
 
     public static void main(String[] args) {
-        List<Object> test1 = new ArrayList<>(List.of(1, 2, "a", "b"));
-        List<Integer> result1 = filterList(test1);
-        System.out.println(result1); // Output: [1, 2]
+        // Test Case 1
+        List<Object> list1 = Arrays.asList(1, 2, "a", "b");
+        System.out.println("Test Case 1: " + list1);
+        System.out.println("Filtered: " + filterList(list1)); // Expected: [1, 2]
+        System.out.println();
 
-        List<Object> test2 = new ArrayList<>(List.of(1, "a", "b", 0, 15));
-        List<Integer> result2 = filterList(test2);
-        System.out.println(result2); // Output: [1, 0, 15]
+        // Test Case 2
+        List<Object> list2 = Arrays.asList(1, "a", "b", 0, 15);
+        System.out.println("Test Case 2: " + list2);
+        System.out.println("Filtered: " + filterList(list2)); // Expected: [1, 0, 15]
+        System.out.println();
 
-        List<Object> test3 = new ArrayList<>(List.of(1, 2, "a", "b", "aasf", "1", "123", 123));
-        List<Integer> result3 = filterList(test3);
-        System.out.println(result3); // Output: [1, 2, 123]
+        // Test Case 3
+        List<Object> list3 = Arrays.asList(1, 2, "aasf", "1", "123", 123);
+        System.out.println("Test Case 3: " + list3);
+        System.out.println("Filtered: " + filterList(list3)); // Expected: [1, 2, 123]
+        System.out.println();
+        
+        // Test Case 4: All strings
+        List<Object> list4 = Arrays.asList("hello", "world", "123");
+        System.out.println("Test Case 4: " + list4);
+        System.out.println("Filtered: " + filterList(list4)); // Expected: []
+        System.out.println();
 
-        List<Object> test4 = new ArrayList<>();
-        List<Integer> result4 = filterList(test4);
-        System.out.println(result4); // Output: []
-
-        List<Object> test5 = new ArrayList<>(List.of(1, 2, 3, 4, 5));
-        List<Integer> result5 = filterList(test5);
-        System.out.println(result5); // Output: [1, 2, 3, 4, 5]
-
-
+        // Test Case 5: Empty list
+        List<Object> list5 = new ArrayList<>();
+        System.out.println("Test Case 5: " + list5);
+        System.out.println("Filtered: " + filterList(list5)); // Expected: []
+        System.out.println();
     }
 }

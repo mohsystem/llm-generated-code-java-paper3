@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task104 {
     private static final int BUFFER_SIZE = 5;
     private String[] buffer;

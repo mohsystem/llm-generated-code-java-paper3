@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task148 {
     static class Stack {
         private int[] elements;

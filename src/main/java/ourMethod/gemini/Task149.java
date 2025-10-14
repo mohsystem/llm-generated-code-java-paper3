@@ -1,102 +1,139 @@
 package ourMethod.gemini;
-import java.util.LinkedList;
-import java.util.Queue;
+
+import java.util.NoSuchElementException;
 
 public class Task149 {
 
-    public static class MyQueue<T> {
-        private Queue<T> queue;
+    /**
+     * A simple Queue implementation using a linked list for integer data.
+     */
+    static class Queue {
+        private static class Node {
+            int data;
+            Node next;
 
-        public MyQueue() {
-            queue = new LinkedList<>();
-        }
-
-        public void enqueue(T item) {
-            queue.offer(item);
-        }
-
-        public T dequeue() {
-            if (queue.isEmpty()) {
-                return null; // Or throw an exception
+            Node(int data) {
+                this.data = data;
+                this.next = null;
             }
-            return queue.poll();
         }
 
-        public T peek() {
-            if (queue.isEmpty()) {
-                return null; // Or throw an exception
+        private Node front;
+        private Node rear;
+
+        /**
+         * Constructs an empty queue.
+         */
+        public Queue() {
+            this.front = null;
+            this.rear = null;
+        }
+
+        /**
+         * Checks if the queue is empty.
+         * @return true if the queue is empty, false otherwise.
+         */
+        public boolean isEmpty() {
+            return front == null;
+        }
+
+        /**
+         * Adds an element to the rear of the queue.
+         * @param data The integer to be added.
+         */
+        public void enqueue(int data) {
+            Node newNode = new Node(data);
+            if (isEmpty()) {
+                front = newNode;
+                rear = newNode;
+            } else {
+                rear.next = newNode;
+                rear = newNode;
             }
-            return queue.peek();
         }
 
+        /**
+         * Removes and returns the element at the front of the queue.
+         * @return The element at the front of the queue.
+         * @throws NoSuchElementException if the queue is empty.
+         */
+        public int dequeue() {
+            if (isEmpty()) {
+                throw new NoSuchElementException("Queue is empty. Cannot dequeue.");
+            }
+            int data = front.data;
+            front = front.next;
+            if (front == null) {
+                rear = null; // The queue is now empty
+            }
+            return data;
+        }
 
-        public boolean isEmpty(){
-            return queue.isEmpty();
+        /**
+         * Returns the element at the front of the queue without removing it.
+         * @return The element at the front of the queue.
+         * @throws NoSuchElementException if the queue is empty.
+         */
+        public int peek() {
+            if (isEmpty()) {
+                throw new NoSuchElementException("Queue is empty. Cannot peek.");
+            }
+            return front.data;
         }
     }
 
     public static void main(String[] args) {
+        System.out.println("--- Java Queue Test Cases ---");
 
-        MyQueue<Integer> queue1 = new MyQueue<>();
-        queue1.enqueue(10);
-        queue1.enqueue(20);
-        queue1.enqueue(30);
+        // Test Case 1: Basic enqueue and dequeue
+        System.out.println("\n--- Test Case 1: Basic Operations ---");
+        Queue q1 = new Queue();
+        q1.enqueue(10);
+        q1.enqueue(20);
+        System.out.println("Dequeued: " + q1.dequeue()); // Expected: 10
+        System.out.println("Peek: " + q1.peek());       // Expected: 20
+        System.out.println("Dequeued: " + q1.dequeue()); // Expected: 20
+        System.out.println("Is empty: " + q1.isEmpty()); // Expected: true
 
-        System.out.println("Peek :"+ queue1.peek());
-        System.out.println("Dequeue :"+ queue1.dequeue());
-        System.out.println("Peek :"+ queue1.peek());
+        // Test Case 2: Dequeue from an empty queue
+        System.out.println("\n--- Test Case 2: Dequeue from Empty Queue ---");
+        Queue q2 = new Queue();
+        try {
+            q2.dequeue();
+        } catch (NoSuchElementException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+        }
 
+        // Test Case 3: Peek at an empty queue
+        System.out.println("\n--- Test Case 3: Peek at Empty Queue ---");
+        try {
+            q2.peek();
+        } catch (NoSuchElementException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+        }
 
+        // Test Case 4: Enqueue after emptying the queue
+        System.out.println("\n--- Test Case 4: Enqueue after Emptying ---");
+        Queue q4 = new Queue();
+        q4.enqueue(1);
+        q4.enqueue(2);
+        q4.dequeue();
+        q4.dequeue();
+        q4.enqueue(3);
+        System.out.println("Peek: " + q4.peek()); // Expected: 3
+        System.out.println("Is empty: " + q4.isEmpty()); // Expected: false
 
-        MyQueue<String> queue2 = new MyQueue<>();
-
-        queue2.enqueue("apple");
-        queue2.enqueue("banana");
-        queue2.enqueue("cherry");
-
-        System.out.println("Peek :"+ queue2.peek());
-        System.out.println("Dequeue :"+ queue2.dequeue());
-        System.out.println("Peek :"+ queue2.peek());
-
-
-
-        MyQueue<Double> queue3 = new MyQueue<>();
-        queue3.enqueue(10.5);
-        queue3.enqueue(20.3);
-        queue3.enqueue(30.1);
-
-        System.out.println("Peek :"+ queue3.peek());
-        System.out.println("Dequeue :"+ queue3.dequeue());
-        System.out.println("Peek :"+ queue3.peek());
-
-
-
-
-        MyQueue<Integer> queue4 = new MyQueue<>();
-        System.out.println("Is queue4 Empty? "+ queue4.isEmpty());
-        queue4.enqueue(1);
-        queue4.enqueue(2);
-
-        System.out.println("Is queue4 Empty? "+ queue4.isEmpty());
-        System.out.println("Dequeue :"+ queue4.dequeue());
-
-        System.out.println("Is queue4 Empty? "+ queue4.isEmpty());
-        System.out.println("Dequeue :"+ queue4.dequeue());
-        System.out.println("Is queue4 Empty? "+ queue4.isEmpty());
-
-        System.out.println("Dequeue :"+ queue4.dequeue());
-
-
-
-
-        MyQueue<Character> queue5 = new MyQueue<>();
-        queue5.enqueue('a');
-        queue5.enqueue('b');
-        queue5.enqueue('c');
-        System.out.println("Peek :"+ queue5.peek());
-        System.out.println("Dequeue :"+ queue5.dequeue());
-        System.out.println("Peek :"+ queue5.peek());
-
-
+        // Test Case 5: Multiple operations
+        System.out.println("\n--- Test Case 5: Multiple Operations ---");
+        Queue q5 = new Queue();
+        q5.enqueue(100);
+        q5.enqueue(200);
+        q5.enqueue(300);
+        System.out.println("Dequeued: " + q5.dequeue()); // Expected: 100
+        q5.enqueue(400);
+        System.out.println("Peek: " + q5.peek());       // Expected: 200
+        System.out.println("Dequeued: " + q5.dequeue()); // Expected: 200
+        System.out.println("Dequeued: " + q5.dequeue()); // Expected: 300
+        System.out.println("Peek: " + q5.peek());       // Expected: 400
     }
 }

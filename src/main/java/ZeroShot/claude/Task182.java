@@ -2,47 +2,44 @@ package ZeroShot.claude;
 
 public class Task182 {
     public static String cleanPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        
         // Remove all non-digit characters
-        String cleaned = phoneNumber.replaceAll("[^0-9]", "");
+        String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
         
-        // Remove leading 1 if present
-        if (cleaned.startsWith("1") && cleaned.length() == 11) {
-            cleaned = cleaned.substring(1);
+        // Check if it starts with country code 1 and has 11 digits
+        if (digitsOnly.length() == 11 && digitsOnly.startsWith("1")) {
+            digitsOnly = digitsOnly.substring(1);
         }
         
-        // Validate length and first digit
-        if (cleaned.length() != 10) {
-            throw new IllegalArgumentException("Invalid phone number length");
+        // Validate the cleaned number
+        if (digitsOnly.length() != 10) {
+            return null;
         }
         
-        if (cleaned.charAt(0) < '2' || cleaned.charAt(0) > '9') {
-            throw new IllegalArgumentException("Area code must start with 2-9");
+        // Validate area code (first digit must be 2-9)
+        char areaCodeFirst = digitsOnly.charAt(0);
+        if (areaCodeFirst < '2' || areaCodeFirst > '9') {
+            return null;
         }
         
-        if (cleaned.charAt(3) < '2' || cleaned.charAt(3) > '9') {
-            throw new IllegalArgumentException("Exchange code must start with 2-9");
+        // Validate exchange code (first digit must be 2-9)
+        char exchangeFirst = digitsOnly.charAt(3);
+        if (exchangeFirst < '2' || exchangeFirst > '9') {
+            return null;
         }
         
-        return cleaned;
+        return digitsOnly;
     }
     
     public static void main(String[] args) {
-        String[] testCases = {
-            "+1 (613)-995-0253",
-            "613-995-0253",
-            "1 613 995 0253",
-            "613.995.0253",
-            "223-456-7890"
-        };
-        
-        for (String test : testCases) {
-            try {
-                System.out.println("Input: " + test);
-                System.out.println("Output: " + cleanPhoneNumber(test));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-            System.out.println();
-        }
+        // Test cases
+        System.out.println("Test 1: " + cleanPhoneNumber("+1 (613)-995-0253"));
+        System.out.println("Test 2: " + cleanPhoneNumber("613-995-0253"));
+        System.out.println("Test 3: " + cleanPhoneNumber("1 613 995 0253"));
+        System.out.println("Test 4: " + cleanPhoneNumber("613.995.0253"));
+        System.out.println("Test 5: " + cleanPhoneNumber("(234) 567-8901"));
     }
 }

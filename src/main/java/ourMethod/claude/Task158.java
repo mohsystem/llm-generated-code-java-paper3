@@ -1,64 +1,82 @@
 package ourMethod.claude;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Task158 {
-    // Pattern to validate input - only allow alphanumeric and basic punctuation
-    private static final Pattern SAFE_PATTERN = Pattern.compile("^[a-zA-Z0-9\\\\s._-]+$");
+    private static final Pattern SAFE_INPUT_PATTERN = Pattern.compile("^[a-zA-Z0-9_.-]+$");
+    private static final int MAX_INPUT_LENGTH = 100;
+    private static final List<String> ALLOWED_COMMANDS = Arrays.asList("echo", "date", "whoami");
     
-    public static String executeCommand(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return "Invalid input: Empty or null command";
+    public static String executeCommand(String command, String userInput) {
+        if (command == null || userInput == null) {
+            return "Error: Null input not allowed";
         }
         
-        // Validate input against safe pattern
-        if (!SAFE_PATTERN.matcher(input).matches()) {
-            return "Invalid input: Contains unsafe characters";
+        if (command.trim().isEmpty() || userInput.trim().isEmpty()) {
+            return "Error: Empty input not allowed";
         }
         
-        StringBuilder output = new StringBuilder();
+        if (!ALLOWED_COMMANDS.contains(command)) {
+            return "Error: Command not in whitelist";
+        }
+        
+        if (userInput.length() > MAX_INPUT_LENGTH) {
+            return "Error: Input exceeds maximum length";
+        }
+        
+        if (!SAFE_INPUT_PATTERN.matcher(userInput).matches()) {
+            return "Error: Input contains invalid characters";
+        }
+        
+        List<String> commandList = new ArrayList<>();
+        commandList.add(command);
+        commandList.add(userInput);
+        
         try {
-            // Create safe command array - prevents command injection
-            String[] command = new String[]{"dir", input}; // Windows example
+            ProcessBuilder pb = new ProcessBuilder(commandList);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
             
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
-            
+            StringBuilder output = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\\n");
+                    output.append(line).append(System.lineSeparator());
                 }
             }
             
             int exitCode = process.waitFor();
-            output.append("Exit Code: ").append(exitCode);
+            if (exitCode != 0) {
+                return "Error: Command failed with exit code " + exitCode;
+            }
             
-        } catch (IOException | InterruptedException e) {
-            return "Error executing command: " + e.getMessage();
+            return output.toString().trim();
+        } catch (Exception e) {
+            return "Error: " + e.getClass().getSimpleName();
         }
-        
-        return output.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] testInputs = {
-            "test.txt",
-            "documents",
-            "../dangerous",
-            "file; rm -rf /",
-            ""
-        };
+        System.out.println("Test 1 - Valid echo command:");
+        System.out.println(executeCommand("echo", "test123"));
         
-        for (String input : testInputs) {
-            System.out.println("\\nTest input: " + input);
-            System.out.println("Result: " + executeCommand(input));
-        }
+        System.out.println("\\nTest 2 - Valid input with dots:");
+        System.out.println(executeCommand("echo", "file.txt"));
+        
+        System.out.println("\\nTest 3 - Invalid command injection attempt:");
+        System.out.println(executeCommand("echo", "test;ls"));
+        
+        System.out.println("\\nTest 4 - Command not in whitelist:");
+        System.out.println(executeCommand("rm", "file.txt"));
+        
+        System.out.println("\\nTest 5 - Input too long:");
+        System.out.println(executeCommand("echo", "a".repeat(101)));
     }
 }

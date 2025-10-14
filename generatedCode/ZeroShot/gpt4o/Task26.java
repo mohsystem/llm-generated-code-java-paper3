@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task26 {
     public static int findOdd(int[] numbers) {
         int result = 0;

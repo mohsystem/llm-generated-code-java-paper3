@@ -1,68 +1,53 @@
 package Vanilla.gemini;
-import java.util.ArrayList;
-import java.util.List;
 
-class Task161 {
-    public static int knapsack(int capacity, List<Item> items) {
-        int n = items.size();
-        int[][] dp = new int[n + 1][capacity + 1];
+public class Task161 {
 
-        for (int i = 1; i <= n; i++) {
-            Item item = items.get(i - 1);
-            for (int w = 0; w <= capacity; w++) {
-                if (item.weight > w) {
-                    dp[i][w] = dp[i - 1][w];
-                } else {
-                    dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - item.weight] + item.value);
-                }
+    public static int knapsack(int capacity, int[] weights, int[] values) {
+        int n = values.length;
+        if (n == 0) {
+            return 0;
+        }
+
+        int[] dp = new int[capacity + 1];
+
+        for (int i = 0; i < n; i++) {
+            for (int w = capacity; w >= weights[i]; w--) {
+                dp[w] = Math.max(dp[w], values[i] + dp[w - weights[i]]);
             }
         }
 
-        return dp[n][capacity];
-    }
-
-    static class Item {
-        int weight;
-        int value;
-
-        public Item(int weight, int value) {
-            this.weight = weight;
-            this.value = value;
-        }
+        return dp[capacity];
     }
 
     public static void main(String[] args) {
-        List<Item> items1 = new ArrayList<>();
-        items1.add(new Item(10, 60));
-        items1.add(new Item(20, 100));
-        items1.add(new Item(30, 120));
-        System.out.println(knapsack(50, items1)); // Output: 220
+        // Test Case 1
+        int[] values1 = {60, 100, 120};
+        int[] weights1 = {10, 20, 30};
+        int capacity1 = 50;
+        System.out.println("Test Case 1: Maximum value = " + knapsack(capacity1, weights1, values1));
 
-        List<Item> items2 = new ArrayList<>();
-        items2.add(new Item(1, 1));
-        items2.add(new Item(3, 4));
-        items2.add(new Item(4, 5));
-        items2.add(new Item(5, 7));
-        System.out.println(knapsack(7, items2)); // Output: 9
+        // Test Case 2
+        int[] values2 = {10, 20, 30};
+        int[] weights2 = {5, 10, 15};
+        int capacity2 = 50;
+        System.out.println("Test Case 2: Maximum value = " + knapsack(capacity2, weights2, values2));
 
+        // Test Case 3
+        int[] values3 = {10, 40, 30, 50};
+        int[] weights3 = {5, 4, 6, 3};
+        int capacity3 = 10;
+        System.out.println("Test Case 3: Maximum value = " + knapsack(capacity3, weights3, values3));
+        
+        // Test Case 4
+        int[] values4 = {};
+        int[] weights4 = {};
+        int capacity4 = 10;
+        System.out.println("Test Case 4: Maximum value = " + knapsack(capacity4, weights4, values4));
 
-        List<Item> items3 = new ArrayList<>();
-        items3.add(new Item(10, 1));
-        items3.add(new Item(20, 2));
-        items3.add(new Item(30, 3));
-
-        System.out.println(knapsack(10, items3)); //1
-
-        List<Item> items4 = new ArrayList<>();
-        items4.add(new Item(1, 2));
-        items4.add(new Item(2, 5));
-        System.out.println(knapsack(3, items4)); //7
-
-
-        List<Item> items5 = new ArrayList<>();
-        items5.add(new Item(5, 10));
-        items5.add(new Item(10, 20));
-
-        System.out.println(knapsack(15, items5)); //30
+        // Test Case 5
+        int[] values5 = {60, 100, 120};
+        int[] weights5 = {10, 20, 30};
+        int capacity5 = 0;
+        System.out.println("Test Case 5: Maximum value = " + knapsack(capacity5, weights5, values5));
     }
 }

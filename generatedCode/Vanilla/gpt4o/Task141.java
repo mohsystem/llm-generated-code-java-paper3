@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task141 {
     public static String reverseString(String input) {
         return new StringBuilder(input).reverse().toString();

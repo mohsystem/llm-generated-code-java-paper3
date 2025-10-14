@@ -1,137 +1,217 @@
 package ourMethod.claude;
 
-public class Task152 {
-    private static class HashNode {
-        String key;
-        int value;
-        HashNode next;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
-        HashNode(String key, int value) {
+public class Task152 {
+    private static final int DEFAULT_CAPACITY = 16;
+    private static final double LOAD_FACTOR = 0.75;
+    private static final int MAX_CAPACITY = 1 << 30;
+
+    private static class Entry {
+        private final String key;
+        private String value;
+        private Entry next;
+
+        public Entry(String key, String value) {
+            if (key == null) {
+                throw new IllegalArgumentException("Key cannot be null");
+            }
             this.key = key;
             this.value = value;
             this.next = null;
         }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public Entry getNext() {
+            return next;
+        }
+
+        public void setNext(Entry next) {
+            this.next = next;
+        }
     }
 
-    private static class HashTable {
-        private HashNode[] buckets;
-        private int size;
-        private static final int INITIAL_CAPACITY = 16;
-        private static final double LOAD_FACTOR = 0.75;
+    private List<Entry> table;
+    private int size;
+    private int capacity;
 
-        public HashTable() {
-            this.buckets = new HashNode[INITIAL_CAPACITY];
-            this.size = 0;
+    public Task152() {
+        this.capacity = DEFAULT_CAPACITY;
+        this.table = new ArrayList<>(capacity);
+        for (int i = 0; i < capacity; i++) {
+            table.add(null);
+        }
+        this.size = 0;
+    }
+
+    private int hash(String key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+        int hash = 0;
+        for (byte b : bytes) {
+            hash = 31 * hash + (b & 0xFF);
+        }
+        return Math.abs(hash) % capacity;
+    }
+
+    public void insert(String key, String value) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Value cannot be null");
+        }
+        if (key.length() > 1000) {
+            throw new IllegalArgumentException("Key too long");
         }
 
-        private int getBucketIndex(String key) {
-            if (key == null) {
-                throw new IllegalArgumentException("Key cannot be null");
-            }
-            int hashCode = key.hashCode();
-            return Math.abs(hashCode % buckets.length);
+        if (size >= capacity * LOAD_FACTOR) {
+            resize();
         }
 
-        public void insert(String key, int value) {
-            if (key == null) {
-                throw new IllegalArgumentException("Key cannot be null");
-            }
-            
-            if ((double)size / buckets.length >= LOAD_FACTOR) {
-                resize();
-            }
+        int index = hash(key);
+        Entry head = table.get(index);
 
-            int bucketIndex = getBucketIndex(key);
-            HashNode head = buckets[bucketIndex];
-            
-            while (head != null) {
-                if (head.key.equals(key)) {
-                    head.value = value;
-                    return;
+        Entry current = head;
+        while (current != null) {
+            if (current.getKey().equals(key)) {
+                current.setValue(value);
+                return;
+            }
+            current = current.getNext();
+        }
+
+        Entry newEntry = new Entry(key, value);
+        newEntry.setNext(head);
+        table.set(index, newEntry);
+        size++;
+    }
+
+    public String search(String key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        if (key.length() > 1000) {
+            throw new IllegalArgumentException("Key too long");
+        }
+
+        int index = hash(key);
+        Entry current = table.get(index);
+
+        while (current != null) {
+            if (current.getKey().equals(key)) {
+                return current.getValue();
+            }
+            current = current.getNext();
+        }
+
+        return null;
+    }
+
+    public boolean delete(String key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        if (key.length() > 1000) {
+            throw new IllegalArgumentException("Key too long");
+        }
+
+        int index = hash(key);
+        Entry current = table.get(index);
+        Entry prev = null;
+
+        while (current != null) {
+            if (current.getKey().equals(key)) {
+                if (prev == null) {
+                    table.set(index, current.getNext());
+                } else {
+                    prev.setNext(current.getNext());
                 }
-                head = head.next;
+                size--;
+                return true;
             }
-
-            HashNode newNode = new HashNode(key, value);
-            newNode.next = buckets[bucketIndex];
-            buckets[bucketIndex] = newNode;
-            size++;
+            prev = current;
+            current = current.getNext();
         }
 
-        public Integer search(String key) {
-            if (key == null) {
-                throw new IllegalArgumentException("Key cannot be null");
-            }
+        return false;
+    }
 
-            int bucketIndex = getBucketIndex(key);
-            HashNode head = buckets[bucketIndex];
-
-            while (head != null) {
-                if (head.key.equals(key)) {
-                    return head.value;
-                }
-                head = head.next;
-            }
-            return null;
+    private void resize() {
+        if (capacity >= MAX_CAPACITY) {
+            return;
         }
 
-        public boolean delete(String key) {
-            if (key == null) {
-                throw new IllegalArgumentException("Key cannot be null");
-            }
-
-            int bucketIndex = getBucketIndex(key);
-            HashNode head = buckets[bucketIndex];
-            HashNode prev = null;
-
-            while (head != null) {
-                if (head.key.equals(key)) {
-                    if (prev == null) {
-                        buckets[bucketIndex] = head.next;
-                    } else {
-                        prev.next = head.next;
-                    }
-                    size--;
-                    return true;
-                }
-                prev = head;
-                head = head.next;
-            }
-            return false;
+        int newCapacity = capacity * 2;
+        if (newCapacity < 0 || newCapacity > MAX_CAPACITY) {
+            newCapacity = MAX_CAPACITY;
         }
 
-        private void resize() {
-            HashNode[] oldBuckets = buckets;
-            buckets = new HashNode[oldBuckets.length * 2];
-            size = 0;
+        List<Entry> oldTable = table;
+        int oldCapacity = capacity;
+        capacity = newCapacity;
+        table = new ArrayList<>(capacity);
+        for (int i = 0; i < capacity; i++) {
+            table.add(null);
+        }
+        size = 0;
 
-            for (HashNode head : oldBuckets) {
-                while (head != null) {
-                    insert(head.key, head.value);
-                    head = head.next;
-                }
+        for (int i = 0; i < oldCapacity; i++) {
+            Entry current = oldTable.get(i);
+            while (current != null) {
+                insert(current.getKey(), current.getValue());
+                current = current.getNext();
             }
         }
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public static void main(String[] args) {
-        HashTable table = new HashTable();
-        
-        // Test case 1: Insert and search
-        table.insert("one", 1);
-        System.out.println("Test 1: " + (table.search("one") == 1));
+        Task152 hashTable = new Task152();
 
-        // Test case 2: Update existing key
-        table.insert("one", 2);
-        System.out.println("Test 2: " + (table.search("one") == 2));
+        System.out.println("Test 1: Insert and search");
+        hashTable.insert("name", "Alice");
+        hashTable.insert("age", "30");
+        System.out.println("name: " + hashTable.search("name"));
+        System.out.println("age: " + hashTable.search("age"));
 
-        // Test case 3: Delete existing key
-        System.out.println("Test 3: " + table.delete("one"));
+        System.out.println("\\nTest 2: Update existing key");
+        hashTable.insert("name", "Bob");
+        System.out.println("name after update: " + hashTable.search("name"));
 
-        // Test case 4: Search non-existent key
-        System.out.println("Test 4: " + (table.search("one") == null));
+        System.out.println("\\nTest 3: Delete operation");
+        boolean deleted = hashTable.delete("age");
+        System.out.println("Deleted age: " + deleted);
+        System.out.println("age after delete: " + hashTable.search("age"));
 
-        // Test case 5: Delete non-existent key
-        System.out.println("Test 5: " + (!table.delete("one")));
+        System.out.println("\\nTest 4: Search non-existent key");
+        System.out.println("non-existent: " + hashTable.search("non-existent"));
+
+        System.out.println("\\nTest 5: Multiple operations");
+        hashTable.insert("city", "NYC");
+        hashTable.insert("country", "USA");
+        hashTable.insert("zip", "10001");
+        System.out.println("Size: " + hashTable.getSize());
+        System.out.println("city: " + hashTable.search("city"));
+        hashTable.delete("country");
+        System.out.println("Size after delete: " + hashTable.getSize());
     }
 }

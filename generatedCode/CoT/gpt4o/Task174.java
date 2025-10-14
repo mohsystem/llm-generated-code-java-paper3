@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task174 {
     public static String shortestPalindrome(String s) {
         if (s == null || s.length() <= 1) {

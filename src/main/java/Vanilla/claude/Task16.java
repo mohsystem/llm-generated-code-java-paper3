@@ -6,11 +6,19 @@ public class Task16 {
     }
     
     public static void main(String[] args) {
-        // Test cases
+        // Test case 1
         System.out.println(solution("abc", "bc")); // true
+        
+        // Test case 2
         System.out.println(solution("abc", "d")); // false
-        System.out.println(solution("samurai", "ai")); // true
-        System.out.println(solution("ninja", "ja")); // true
-        System.out.println(solution("sensei", "i")); // true
+        
+        // Test case 3
+        System.out.println(solution("hello world", "world")); // true
+        
+        // Test case 4
+        System.out.println(solution("test", "")); // true
+        
+        // Test case 5
+        System.out.println(solution("programming", "ing")); // true
     }
 }

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task5 {
     public static int persistence(int num) {
         int count = 0;

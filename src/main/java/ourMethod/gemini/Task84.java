@@ -1,33 +1,34 @@
 package ourMethod.gemini;
+
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Task84 {
 
+    private static final int SESSION_ID_BYTES = 32;
+
+    /**
+     * Generates a cryptographically secure, random and unique session ID.
+     * The ID is generated from 32 random bytes and encoded using URL-safe Base64.
+     *
+     * @return A URL-safe Base64 encoded string representing the session ID.
+     */
     public static String generateSessionId() {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] bytes = new byte[32]; // Use a sufficiently large byte array (e.g., 32 bytes)
-        secureRandom.nextBytes(bytes);
-        String sessionId = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-        return sessionId;
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[SESSION_ID_BYTES];
+        random.nextBytes(bytes);
+        // Using URL-safe Base64 encoder without padding for a clean, URL-friendly ID
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-
     public static void main(String[] args) {
-        Set<String> sessionIds = new HashSet<>();
-
-        // Test cases
+        System.out.println("Generating 5 random and unique session IDs:");
         for (int i = 0; i < 5; i++) {
             String sessionId = generateSessionId();
-            if (sessionIds.contains(sessionId)) {
-                System.out.println("Error: Duplicate session ID generated.");
-                return;
+            System.out.println("Session ID " + (i + 1) + ": " + sessionId);
+            if (sessionId == null || sessionId.isEmpty()) {
+                System.err.println("Test case " + (i + 1) + " failed: Generated session ID is null or empty.");
             }
-            sessionIds.add(sessionId);
-            System.out.println("Generated Session ID " + (i + 1) + ": " + sessionId);
         }
-
     }
 }

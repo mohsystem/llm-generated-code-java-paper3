@@ -1,82 +1,94 @@
 package Vanilla.gemini;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class Task173 {
+
+    private long modulus = (1L << 31) - 1;
+    private long base = 26;
+
     public String longestDupSubstring(String s) {
         int n = s.length();
-        if (n < 2) {
-            return "";
-        }
+        int low = 1, high = n;
+        int start = -1;
+        int len = 0;
 
-        int[] suffixArray = buildSuffixArray(s);
-        int[] lcp = buildLCP(s, suffixArray);
-
-        int maxLen = 0;
-        int startIndex = -1;
-
-        for (int i = 1; i < n; i++) {
-            if (lcp[i] > maxLen) {
-                maxLen = lcp[i];
-                startIndex = suffixArray[i];
-            }
-        }
-
-        return startIndex == -1 ? "" : s.substring(startIndex, startIndex + maxLen);
-    }
-
-    private int[] buildSuffixArray(String s) {
-        int n = s.length();
-        int[] suffixArray = new int[n];
-        for (int i = 0; i < n; i++) {
-            suffixArray[i] = i;
-        }
-        //todo no suitable method found for sort(int[],(a,b)->s.s[...]g(b)))
-        //method Arrays.<T#1>sort(T#1[],Comparator<? super T#1>) is not applicable
-        //(inference variable T#1 has incompatible bounds
-        //equality constraints: int
-        //lower bounds: Object)
-        //method Arrays.<T#2>sort(T#2[],int,int,Comparator<? super T#2>) is not applicable
-        //(cannot infer type-variable(s) T#2
-        //(actual and formal argument lists differ in length))
-        //where T#1,T#2 are type-variables:
-        //T#1 extends Object declared in method <T#1>sort(T#1[],Comparator<? super T#1>)
-        //T#2 extends Object declared in method <T#2>sort(T#2[],int,int,Comparator<? super T#2>)
-//        Arrays.sort(suffixArray, (a, b) -> s.substring(a).compareTo(s.substring(b)));
-        Arrays.sort(suffixArray);
-        return suffixArray;
-    }
-
-    private int[] buildLCP(String s, int[] suffixArray) {
-        int n = s.length();
-        int[] lcp = new int[n];
-        int[] rank = new int[n];
-        for (int i = 0; i < n; i++) {
-            rank[suffixArray[i]] = i;
-        }
-        int k = 0;
-        for (int i = 0; i < n; i++) {
-            if (rank[i] == n - 1) {
-                k = 0;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (mid == 0) {
+                low = mid + 1;
                 continue;
             }
-            int j = suffixArray[rank[i] + 1];
-            while (i + k < n && j + k < n && s.charAt(i + k) == s.charAt(j + k)) {
-                k++;
-            }
-            lcp[rank[i] + 1] = k;
-            if (k > 0) {
-                k--;
+            int foundStart = search(mid, n, s);
+            if (foundStart != -1) {
+                len = mid;
+                start = foundStart;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
-        return lcp;
+
+        return start != -1 ? s.substring(start, start + len) : "";
+    }
+    
+    private long power(long b, long exp) {
+        long res = 1;
+        b %= modulus;
+        while (exp > 0) {
+            if (exp % 2 == 1) res = (res * b) % modulus;
+            b = (b * b) % modulus;
+            exp /= 2;
+        }
+        return res;
     }
 
+    private int search(int L, int n, String s) {
+        if (L == 0) return 0;
+        
+        long h = power(base, L - 1);
+
+        long currentHash = 0;
+        for (int i = 0; i < L; i++) {
+            currentHash = (currentHash * base + (s.charAt(i) - 'a')) % modulus;
+        }
+
+        HashMap<Long, ArrayList<Integer>> seen = new HashMap<>();
+        seen.put(currentHash, new ArrayList<>(Collections.singletonList(0)));
+
+        for (int i = 1; i <= n - L; i++) {
+            long termToRemove = ((long)(s.charAt(i - 1) - 'a') * h) % modulus;
+            currentHash = (currentHash - termToRemove + modulus) % modulus;
+            currentHash = (currentHash * base) % modulus;
+            currentHash = (currentHash + (s.charAt(i + L - 1) - 'a')) % modulus;
+
+            if (seen.containsKey(currentHash)) {
+                for (int startIdx : seen.get(currentHash)) {
+                    if (s.substring(startIdx, startIdx + L).equals(s.substring(i, i + L))) {
+                        return i;
+                    }
+                }
+            }
+            seen.computeIfAbsent(currentHash, k -> new ArrayList<>()).add(i);
+        }
+        return -1;
+    }
+    
     public static void main(String[] args) {
-        Task173 task173 = new Task173();
-        System.out.println(task173.longestDupSubstring("banana")); // Output: ana
-        System.out.println(task173.longestDupSubstring("abcd"));   // Output: ""
-        System.out.println(task173.longestDupSubstring("aa"));    // Output: a
-        System.out.println(task173.longestDupSubstring("aabcaabdaab")); // Output: aab
-        System.out.println(task173.longestDupSubstring("bananaana")); // Output: ana
+        Task173 solver = new Task173();
+        String[] testCases = {
+            "banana",
+            "abcd",
+            "ababab",
+            "aaaaa",
+            "aabaaabaaaba"
+        };
+        for (String s : testCases) {
+            System.out.println("Input: \"" + s + "\"");
+            System.out.println("Output: \"" + solver.longestDupSubstring(s) + "\"");
+            System.out.println();
+        }
     }
 }

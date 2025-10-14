@@ -3,81 +3,107 @@ package ourMethod.claude;
 import java.util.*;
 
 public class Task180 {
-    static class Node {
-        int value;
-        List<Node> children;
+    static class Tree {
+        private final Map<Integer, List<Integer>> adjacencyList;
         
-        Node(int value) {
-            this.value = value;
-            this.children = new ArrayList<>();
-        }
-    }
-    
-    public static Node reparent(Map<Integer, List<Integer>> tree, int root) {
-        Map<Integer, Node> nodes = new HashMap<>();
-        Set<Integer> visited = new HashSet<>();
-        
-        // Create nodes
-        for (int key : tree.keySet()) {
-            nodes.putIfAbsent(key, new Node(key));
-            for (int child : tree.get(key)) {
-                nodes.putIfAbsent(child, new Node(child));
+        public Tree(Map<Integer, List<Integer>> adjacencyList) {
+            if (adjacencyList == null) {
+                throw new IllegalArgumentException("Adjacency list cannot be null");
+            }
+            this.adjacencyList = new HashMap<>();
+            for (Map.Entry<Integer, List<Integer>> entry : adjacencyList.entrySet()) {
+                if (entry.getKey() == null || entry.getValue() == null) {
+                    throw new IllegalArgumentException("Null keys or values not allowed");
+                }
+                this.adjacencyList.put(entry.getKey(), new ArrayList<>(entry.getValue()));
             }
         }
         
-        // Build new tree from root
-        return buildTree(nodes, tree, root, visited);
-    }
-    
-    private static Node buildTree(Map<Integer, Node> nodes, Map<Integer, List<Integer>> connections, 
-                                int current, Set<Integer> visited) {
-        visited.add(current);
-        Node currentNode = nodes.get(current);
+        public Tree reparent(int newRoot) {
+            if (!adjacencyList.containsKey(newRoot)) {
+                throw new IllegalArgumentException("Node not in tree");
+            }
+            
+            Map<Integer, List<Integer>> newAdjacencyList = new HashMap<>();
+            Set<Integer> visited = new HashSet<>();
+            
+            buildReparentedTree(newRoot, -1, visited, newAdjacencyList);
+            
+            return new Tree(newAdjacencyList);
+        }
         
-        List<Integer> neighbors = connections.get(current);
-        if (neighbors != null) {
+        private void buildReparentedTree(int current, int parent, Set<Integer> visited, 
+                                        Map<Integer, List<Integer>> newAdjacencyList) {
+            if (visited.contains(current)) {
+                return;
+            }
+            visited.add(current);
+            
+            newAdjacencyList.putIfAbsent(current, new ArrayList<>());
+            
+            List<Integer> neighbors = adjacencyList.getOrDefault(current, new ArrayList<>());
             for (int neighbor : neighbors) {
-                if (!visited.contains(neighbor)) {
-                    currentNode.children.add(buildTree(nodes, connections, neighbor, visited));
+                if (neighbor != parent && !visited.contains(neighbor)) {
+                    newAdjacencyList.get(current).add(neighbor);
+                    buildReparentedTree(neighbor, current, visited, newAdjacencyList);
                 }
             }
         }
         
-        for (Map.Entry<Integer, List<Integer>> entry : connections.entrySet()) {
-            if (entry.getValue().contains(current) && !visited.contains(entry.getKey())) {
-                currentNode.children.add(buildTree(nodes, connections, entry.getKey(), visited));
+        public Map<Integer, List<Integer>> getAdjacencyList() {
+            Map<Integer, List<Integer>> copy = new HashMap<>();
+            for (Map.Entry<Integer, List<Integer>> entry : adjacencyList.entrySet()) {
+                copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
             }
+            return copy;
         }
-        
-        return currentNode;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
+        // Test case 1: Simple tree reparenting
         Map<Integer, List<Integer>> tree1 = new HashMap<>();
         tree1.put(0, Arrays.asList(1, 2, 3));
-        tree1.put(1, Arrays.asList(4, 5));
-        tree1.put(2, Arrays.asList(6, 7));
-        tree1.put(3, Arrays.asList(8, 9));
+        tree1.put(1, Arrays.asList(0, 4, 5));
+        tree1.put(2, Arrays.asList(0, 6, 7));
+        tree1.put(3, Arrays.asList(0, 8, 9));
+        tree1.put(4, Arrays.asList(1));
+        tree1.put(5, Arrays.asList(1));
+        tree1.put(6, Arrays.asList(2));
+        tree1.put(7, Arrays.asList(2));
+        tree1.put(8, Arrays.asList(3));
+        tree1.put(9, Arrays.asList(3));
         
-        // Test case 1: Reparent from node 6
-        Node result1 = reparent(tree1, 6);
-        System.out.println("Test 1: Reparented from node 6");
+        Tree t1 = new Tree(tree1);
+        Tree reparented1 = t1.reparent(6);
+        System.out.println("Test 1 - Reparent on 6: " + reparented1.getAdjacencyList());
         
-        // Test case 2: Reparent from node 0 (original root)
-        Node result2 = reparent(tree1, 0);
-        System.out.println("Test 2: Reparented from node 0");
+        // Test case 2: Single node
+        Map<Integer, List<Integer>> tree2 = new HashMap<>();
+        tree2.put(0, new ArrayList<>());
+        Tree t2 = new Tree(tree2);
+        Tree reparented2 = t2.reparent(0);
+        System.out.println("Test 2 - Single node: " + reparented2.getAdjacencyList());
         
-        // Test case 3: Reparent from leaf node 9
-        Node result3 = reparent(tree1, 9);
-        System.out.println("Test 3: Reparented from node 9");
+        // Test case 3: Linear tree
+        Map<Integer, List<Integer>> tree3 = new HashMap<>();
+        tree3.put(0, Arrays.asList(1));
+        tree3.put(1, Arrays.asList(0, 2));
+        tree3.put(2, Arrays.asList(1));
+        Tree t3 = new Tree(tree3);
+        Tree reparented3 = t3.reparent(2);
+        System.out.println("Test 3 - Linear tree reparent on 2: " + reparented3.getAdjacencyList());
         
-        // Test case 4: Reparent from middle node 2
-        Node result4 = reparent(tree1, 2);
-        System.out.println("Test 4: Reparented from node 2");
+        // Test case 4: Reparent on original root
+        Tree reparented4 = t1.reparent(0);
+        System.out.println("Test 4 - Reparent on original root: " + reparented4.getAdjacencyList());
         
-        // Test case 5: Reparent from leaf node 4
-        Node result5 = reparent(tree1, 4);
-        System.out.println("Test 5: Reparented from node 4");
+        // Test case 5: Small tree
+        Map<Integer, List<Integer>> tree5 = new HashMap<>();
+        tree5.put(0, Arrays.asList(1, 2));
+        tree5.put(1, Arrays.asList(0));
+        tree5.put(2, Arrays.asList(0));
+        Tree t5 = new Tree(tree5);
+        Tree reparented5 = t5.reparent(1);
+        System.out.println("Test 5 - Small tree reparent on 1: " + reparented5.getAdjacencyList());
     }
 }

@@ -1,36 +1,45 @@
 package Vanilla.gemini;
-import org.w3c.dom.*;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.*;
-import java.io.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import java.io.StringReader;
 
 public class Task61 {
 
+    /**
+     * Parses an XML string to find the root element's name.
+     * @param xmlString The string containing the XML document.
+     * @return The name of the root element, or an error message if parsing fails.
+     */
     public static String getRootElement(String xmlString) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(xmlString));
             Document doc = builder.parse(is);
-            Element root = doc.getDocumentElement();
-            return root.getNodeName();
+            return doc.getDocumentElement().getNodeName();
         } catch (Exception e) {
-            return null; 
+            // In case of a parsing error, return an informative message.
+            return "Error parsing XML";
         }
     }
 
     public static void main(String[] args) {
-        String xml1 = "<note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>";
-        String xml2 = "<book><title>The Great Gatsby</title><author>F. Scott Fitzgerald</author></book>";
-        String xml3 = "<person><name>John Doe</name><age>30</age></person>";
-        String xml4 = "<empty />";
-        String xml5 = "<malformed><tag> </malformed>";
+        String[] testCases = {
+            "<root><child/></root>",
+            "<bookstore category=\"COOKING\"><book/></bookstore>",
+            "<?xml version=\"1.0\"?><note><to>Tove</to></note>",
+            "  <data>  </data>  ",
+            "<employees><employee><id>1</id></employee></employees>"
+        };
 
-        System.out.println(getRootElement(xml1)); // Output: note
-        System.out.println(getRootElement(xml2)); // Output: book
-        System.out.println(getRootElement(xml3)); // Output: person
-        System.out.println(getRootElement(xml4)); // Output: empty
-        System.out.println(getRootElement(xml5)); // Output: null (or handle the exception as needed)
+        System.out.println("Java Test Cases:");
+        for (String xml : testCases) {
+            System.out.println("Input: " + xml);
+            System.out.println("Root Element: " + getRootElement(xml));
+            System.out.println("---");
+        }
     }
 }

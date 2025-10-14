@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task23 {
     public static int findNb(long m) {
         long sum = 0;

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 

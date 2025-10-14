@@ -1,28 +1,43 @@
 package ZeroShot.gemini;
-class Task59 {
-    public String accum(String s) {
-        StringBuilder sb = new StringBuilder();
+
+public class Task59 {
+
+    /**
+     * Transforms a string based on the specified accumulation rule.
+     * Example: accum("abcd") -> "A-Bb-Ccc-Dddd"
+     *
+     * @param s The input string, containing only letters from a..z and A..Z.
+     * @return The transformed string.
+     */
+    public static String accum(String s) {
+        if (s == null) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            sb.append(Character.toUpperCase(c));
-            for (int j = 0; j < i; j++) {
-                sb.append(Character.toLowerCase(c));
+            if (i > 0) {
+                result.append("-");
             }
-            if (i < s.length() - 1) {
-                sb.append("-");
+            char c = s.charAt(i);
+            result.append(Character.toUpperCase(c));
+            for (int j = 0; j < i; j++) {
+                result.append(Character.toLowerCase(c));
             }
         }
-        return sb.toString();
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task59 task59 = new Task59();
-        System.out.println(task59.accum("abcd"));
-        System.out.println(task59.accum("RqaEzty"));
-        System.out.println(task59.accum("cwAt"));
-        System.out.println(task59.accum("xyz"));
-        System.out.println(task59.accum("ZpglnRxqenU"));
+        String[] testCases = {
+            "abcd",
+            "RqaEzty",
+            "cwAt",
+            "Z",
+            ""
+        };
 
-
+        for (String testCase : testCases) {
+            System.out.println("Input: \"" + testCase + "\" -> Output: \"" + accum(testCase) + "\"");
+        }
     }
 }

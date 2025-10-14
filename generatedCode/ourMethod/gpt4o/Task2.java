@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task2 {
     public static String createPhoneNumber(int[] numbers) {
         if (numbers == null || numbers.length != 10) {

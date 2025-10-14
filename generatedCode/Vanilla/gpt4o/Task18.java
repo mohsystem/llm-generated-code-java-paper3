@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task18 {
     public static int binaryArrayToInt(int[] binaryArray) {
         int result = 0;

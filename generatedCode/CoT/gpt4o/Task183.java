@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task183 {
     public static int largestProduct(String input, int span) {
         if (span > input.length() || span < 0) return 0;

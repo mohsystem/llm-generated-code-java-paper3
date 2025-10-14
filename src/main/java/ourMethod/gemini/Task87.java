@@ -1,21 +1,30 @@
 package ourMethod.gemini;
-import java.io.File;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class Task87 {
 
+    /**
+     * Performs a binary search on a sorted integer array.
+     *
+     * @param arr    the sorted array to search in. Must not be null.
+     * @param target the value to search for.
+     * @return the index of the target, or -1 if not found.
+     */
     public static int binarySearch(int[] arr, int target) {
         int low = 0;
         int high = arr.length - 1;
 
         while (low <= high) {
-            int mid = low + (high - low) / 2; // Avoid potential overflow
+            // Use `low + (high - low) / 2` to prevent potential overflow
+            // if `low + high` exceeds Integer.MAX_VALUE.
+            int mid = low + (high - low) / 2;
+
             if (arr[mid] == target) {
                 return mid;
             } else if (arr[mid] < target) {
@@ -24,40 +33,45 @@ public class Task87 {
                 high = mid - 1;
             }
         }
-
         return -1; // Target not found
     }
 
+    public static void main(String[] args) {
+        int[] sortedArray = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+        int[] testTargets = {23, 91, 2, 15, 100};
 
-    public static void main(String[] args) throws IOException {
-        int[][] testCases = {
-                {2, 5, 7, 8, 11, 12},
-                {2, 5, 7, 8, 11, 12},
-                {1, 2, 3, 4, 5, 6},
-                {1, 5},
-                {}
-        };
-        int[] targets = {12, 13, 4, 1, 5};
+        Path tempFile = null;
+        try {
+            // Securely create a temporary file.
+            tempFile = Files.createTempFile("task87_java_times_", ".txt");
+            System.out.println("Execution times will be written to: " + tempFile.toAbsolutePath());
 
-        for (int i = 0; i < testCases.length; i++) {
-            int[] arr = testCases[i];
-            Arrays.sort(arr); // Ensure the array is sorted
-            int target = targets[i];
+            // Use try-with-resources to ensure the writer is closed automatically.
+            try (BufferedWriter writer = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8)) {
+                for (int target : testTargets) {
+                    long startTime = System.nanoTime();
+                    int result = binarySearch(sortedArray, target);
+                    long endTime = System.nanoTime();
+                    long duration = endTime - startTime;
 
+                    System.out.println("Array: " + Arrays.toString(sortedArray));
+                    System.out.println("Searching for: " + target);
+                    if (result != -1) {
+                        System.out.println("Found at index: " + result);
+                    } else {
+                        System.out.println("Not found.");
+                    }
+                    System.out.println("Execution time: " + duration + " nanoseconds.\n");
 
-            Instant start = Instant.now();
-            int result = binarySearch(arr, target);
-            Instant end = Instant.now();
-            Duration timeElapsed = Duration.between(start, end);
-
-            Path tempFilePath = Files.createTempFile("binary_search_execution_time_", ".txt");
-            Files.writeString(tempFilePath, "Execution time: " + timeElapsed.toNanos() + " nanoseconds\n");
-
-            System.out.println("Test case " + (i + 1) + ": Target " + target + " found at index: " + result);
-            System.out.println("Execution time written to: " + tempFilePath);
-
-
+                    writer.write("Target: " + target + ", Time (ns): " + duration + "\n");
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("An error occurred while handling the temporary file.");
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            System.err.println("Security manager prevents creating a temporary file.");
+            e.printStackTrace();
         }
-
     }
 }

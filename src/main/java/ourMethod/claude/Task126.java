@@ -1,38 +1,49 @@
 package ourMethod.claude;
 
-public class Task126 {
-    public String redirectUser(String userInput) {
-        // Input validation
-        if (userInput == null || userInput.trim().isEmpty()) {
-            return "/error.html"; // Default error page
-        }
-        
-        // Sanitize input by removing special characters
-        String sanitizedInput = userInput.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-        
-        // Map of valid redirects
-        switch(sanitizedInput) {
-            case "home":
-                return "/home.html";
-            case "about": 
-                return "/about.html";
-            case "contact":
-                return "/contact.html";
-            case "products":
-                return "/products.html";
-            default:
-                return "/error.html";
-        }
-    }
+import java.util.*;
+import java.util.regex.Pattern;
 
-    public static void main(String[] args) {
-        Task126 task = new Task126();
+public class Task126 {
+    private static final Map<String, String> ALLOWED_PAGES = new HashMap<>();
+    private static final Pattern SAFE_PAGE_PATTERN = Pattern.compile("^[a-z0-9_-]+$");
+    
+    static {
+        ALLOWED_PAGES.put("home", "/pages/home.html");
+        ALLOWED_PAGES.put("about", "/pages/about.html");
+        ALLOWED_PAGES.put("contact", "/pages/contact.html");
+        ALLOWED_PAGES.put("products", "/pages/products.html");
+        ALLOWED_PAGES.put("services", "/pages/services.html");
+    }
+    
+    public static String redirectToPage(String userInput) {
+        if (userInput == null || userInput.isEmpty()) {
+            return "Error: Invalid input";
+        }
         
-        // Test cases
-        System.out.println(task.redirectUser("home")); // Should print /home.html
-        System.out.println(task.redirectUser("about")); // Should print /about.html 
-        System.out.println(task.redirectUser("")); // Should print /error.html
-        System.out.println(task.redirectUser("../admin")); // Should print /error.html
-        System.out.println(task.redirectUser("<script>alert(1)</script>")); // Should print /error.html
+        String sanitizedInput = userInput.trim().toLowerCase();
+        
+        if (sanitizedInput.length() > 50) {
+            return "Error: Input too long";
+        }
+        
+        if (!SAFE_PAGE_PATTERN.matcher(sanitizedInput).matches()) {
+            return "Error: Invalid page name format";
+        }
+        
+        String targetPage = ALLOWED_PAGES.get(sanitizedInput);
+        
+        if (targetPage == null) {
+            return "Error: Page not found";
+        }
+        
+        return "Redirect to: " + targetPage;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("Test Case 1: " + redirectToPage("home"));
+        System.out.println("Test Case 2: " + redirectToPage("about"));
+        System.out.println("Test Case 3: " + redirectToPage("invalid"));
+        System.out.println("Test Case 4: " + redirectToPage("../../../etc/passwd"));
+        System.out.println("Test Case 5: " + redirectToPage(null));
     }
 }

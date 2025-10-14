@@ -1,20 +1,21 @@
 package CoT.claude;
 
 public class Task19 {
-    public static String reverseWords(String str) {
-        if (str == null || str.trim().isEmpty()) {
-            return str;
+    public static String reverseWords(String input) {
+        if (input == null) {
+            return null;
         }
         
-        String[] words = str.split(" ");
+        String[] words = input.split(" ");
         StringBuilder result = new StringBuilder();
         
         for (int i = 0; i < words.length; i++) {
             if (words[i].length() >= 5) {
-                result.append(new StringBuilder(words[i]).reverse());
+                result.append(reverseString(words[i]));
             } else {
                 result.append(words[i]);
             }
+            
             if (i < words.length - 1) {
                 result.append(" ");
             }
@@ -23,12 +24,28 @@ public class Task19 {
         return result.toString();
     }
     
+    private static String reverseString(String str) {
+        StringBuilder reversed = new StringBuilder();
+        for (int i = str.length() - 1; i >= 0; i--) {
+            reversed.append(str.charAt(i));
+        }
+        return reversed.toString();
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(reverseWords("Hey fellow warriors"));  // "Hey wollef sroirraw"
-        System.out.println(reverseWords("This is a test"));      // "This is a test"
-        System.out.println(reverseWords("This is another test")); // "This is rehtona test"
-        System.out.println(reverseWords("Reverse"));             // "esreveR"
-        System.out.println(reverseWords(""));                    // ""
+        // Test case 1
+        System.out.println(reverseWords("Hey fellow warriors"));
+        
+        // Test case 2
+        System.out.println(reverseWords("This is a test"));
+        
+        // Test case 3
+        System.out.println(reverseWords("This is another test"));
+        
+        // Test case 4
+        System.out.println(reverseWords("Hello"));
+        
+        // Test case 5
+        System.out.println(reverseWords("Hi"));
     }
 }

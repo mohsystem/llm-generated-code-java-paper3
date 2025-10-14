@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

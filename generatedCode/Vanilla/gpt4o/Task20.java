@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task20 {
     public static int findK(int n, int p) {
         String numStr = String.valueOf(n);

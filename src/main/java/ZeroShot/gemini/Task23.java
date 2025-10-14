@@ -1,22 +1,32 @@
 package ZeroShot.gemini;
-public class Task23 {
 
+public class Task23 {
+    /**
+     * Finds the number of cubes n such that the sum of the first n cubes
+     * equals the given total volume m.
+     * The sum is n^3 + (n-1)^3 + ... + 1^3.
+     *
+     * @param m The total volume of the building.
+     * @return The number of cubes n, or -1 if no such n exists.
+     */
     public static long findNb(long m) {
         long n = 0;
-        long sum = 0;
-        while (sum < m) {
+        long currentVolume = m;
+        while (currentVolume > 0) {
             n++;
-            sum += n * n * n;
+            long cubeVolume = n * n * n;
+            currentVolume -= cubeVolume;
         }
-        return sum == m ? n : -1;
+
+        return (currentVolume == 0) ? n : -1;
     }
 
     public static void main(String[] args) {
-        System.out.println(findNb(1071225)); // Expected: 45
-        System.out.println(findNb(91716553919377L)); // Expected: -1
-        System.out.println(findNb(4183059834009L)); // Expected: 2022
-        System.out.println(findNb(247234522472345224L)); // Expected: -1
-        System.out.println(findNb(1)); // Expected: 1
-
+        // Test cases
+        System.out.println(findNb(1071225L));
+        System.out.println(findNb(91716553919377L));
+        System.out.println(findNb(4183059834009L));
+        System.out.println(findNb(1L));
+        System.out.println(findNb(24723578342962L));
     }
 }

@@ -1,77 +1,117 @@
 package CoT.claude;
 
-public class Task148 {
-    private int maxSize;
+import java.util.EmptyStackException;
+
+class Task148 {
+    private static final int DEFAULT_CAPACITY = 10;
     private int[] stackArray;
     private int top;
-    
-    public Task148(int size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("Stack size must be positive");
+    private int capacity;
+
+    public Task148() {
+        this(DEFAULT_CAPACITY);
+    }
+
+    public Task148(int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive");
         }
-        this.maxSize = size;
-        this.stackArray = new int[maxSize];
+        this.capacity = capacity;
+        this.stackArray = new int[capacity];
         this.top = -1;
     }
-    
+
     public void push(int value) {
-        if (top >= maxSize - 1) {
-            throw new IllegalStateException("Stack overflow");
+        if (isFull()) {
+            resize();
         }
         stackArray[++top] = value;
     }
-    
+
     public int pop() {
         if (isEmpty()) {
-            throw new IllegalStateException("Stack underflow");
+            throw new EmptyStackException();
         }
         return stackArray[top--];
     }
-    
+
     public int peek() {
         if (isEmpty()) {
-            throw new IllegalStateException("Stack is empty");
+            throw new EmptyStackException();
         }
         return stackArray[top];
     }
-    
+
     public boolean isEmpty() {
-        return (top == -1);
+        return top == -1;
     }
-    
+
     public boolean isFull() {
-        return (top == maxSize - 1);
+        return top == capacity - 1;
     }
-    
+
+    public int size() {
+        return top + 1;
+    }
+
+    private void resize() {
+        int newCapacity = capacity * 2;
+        int[] newArray = new int[newCapacity];
+        System.arraycopy(stackArray, 0, newArray, 0, capacity);
+        stackArray = newArray;
+        capacity = newCapacity;
+    }
+
     public static void main(String[] args) {
-        // Test case 1: Basic push and pop
-        Task148 stack1 = new Task148(5);
-        stack1.push(1);
-        stack1.push(2);
-        System.out.println("Test 1: " + (stack1.pop() == 2));
-        
-        // Test case 2: Peek operation
-        Task148 stack2 = new Task148(3);
-        stack2.push(10);
-        System.out.println("Test 2: " + (stack2.peek() == 10));
-        
-        // Test case 3: Empty stack check
-        Task148 stack3 = new Task148(2);
-        System.out.println("Test 3: " + stack3.isEmpty());
-        
-        // Test case 4: Full stack check
+        System.out.println("=== Test Case 1: Basic Push and Pop ===");
+        Task148 stack1 = new Task148();
+        stack1.push(10);
+        stack1.push(20);
+        stack1.push(30);
+        System.out.println("Peek: " + stack1.peek());
+        System.out.println("Pop: " + stack1.pop());
+        System.out.println("Pop: " + stack1.pop());
+        System.out.println("Size: " + stack1.size());
+
+        System.out.println("\\n=== Test Case 2: Empty Stack Check ===");
+        Task148 stack2 = new Task148();
+        System.out.println("Is Empty: " + stack2.isEmpty());
+        stack2.push(5);
+        System.out.println("Is Empty: " + stack2.isEmpty());
+        stack2.pop();
+        System.out.println("Is Empty after pop: " + stack2.isEmpty());
+
+        System.out.println("\\n=== Test Case 3: Multiple Operations ===");
+        Task148 stack3 = new Task148();
+        for (int i = 1; i <= 5; i++) {
+            stack3.push(i * 10);
+        }
+        System.out.println("Stack size: " + stack3.size());
+        System.out.println("Peek: " + stack3.peek());
+        while (!stack3.isEmpty()) {
+            System.out.println("Pop: " + stack3.pop());
+        }
+
+        System.out.println("\\n=== Test Case 4: Stack Resize ===");
         Task148 stack4 = new Task148(2);
         stack4.push(1);
         stack4.push(2);
-        System.out.println("Test 4: " + stack4.isFull());
-        
-        // Test case 5: Exception handling
-        Task148 stack5 = new Task148(1);
+        stack4.push(3);
+        stack4.push(4);
+        System.out.println("Size after resize: " + stack4.size());
+        System.out.println("Peek: " + stack4.peek());
+
+        System.out.println("\\n=== Test Case 5: Error Handling ===");
+        Task148 stack5 = new Task148();
         try {
             stack5.pop();
-            System.out.println("Test 5: Failed");
-        } catch (IllegalStateException e) {
-            System.out.println("Test 5: Passed");
+        } catch (EmptyStackException e) {
+            System.out.println("Caught exception: Cannot pop from empty stack");
+        }
+        try {
+            stack5.peek();
+        } catch (EmptyStackException e) {
+            System.out.println("Caught exception: Cannot peek empty stack");
         }
     }
 }

@@ -1,44 +1,37 @@
 package CoT.claude;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Task181 {
-    static class BankAccount {
-        private final ReentrantLock lock = new ReentrantLock();
-        private double balance;
-        private boolean isOpen;
+class Task181 {
+    private static class BankAccount {
         private final String accountId;
+        private long balance; // Using long to avoid overflow
+        private boolean isClosed;
+        private final ReentrantLock lock;
 
-        public BankAccount(String accountId, double initialBalance) {
+        public BankAccount(String accountId, long initialBalance) {
+            if (initialBalance < 0) {
+                throw new IllegalArgumentException("Initial balance cannot be negative");
+            }
             this.accountId = accountId;
             this.balance = initialBalance;
-            this.isOpen = true;
+            this.isClosed = false;
+            this.lock = new ReentrantLock();
         }
 
-        public boolean withdraw(double amount) {
-            lock.lock();
-            try {
-                if (!isOpen) {
-                    return false;
-                }
-                if (amount <= 0 || amount > balance) {
-                    return false;
-                }
-                balance -= amount;
-                return true;
-            } finally {
-                lock.unlock();
+        public boolean deposit(long amount) {
+            if (amount <= 0) {
+                return false;
             }
-        }
-
-        public boolean deposit(double amount) {
+            
             lock.lock();
             try {
-                if (!isOpen) {
+                if (isClosed) {
                     return false;
                 }
-                if (amount <= 0) {
+                // Check for overflow
+                if (balance > Long.MAX_VALUE - amount) {
                     return false;
                 }
                 balance += amount;
@@ -48,40 +41,71 @@ public class Task181 {
             }
         }
 
-        public boolean close() {
+        public boolean withdraw(long amount) {
+            if (amount <= 0) {
+                return false;
+            }
+            
             lock.lock();
             try {
-                if (!isOpen) {
+                if (isClosed) {
                     return false;
                 }
-                isOpen = false;
+                if (balance < amount) {
+                    return false;
+                }
+                balance -= amount;
                 return true;
             } finally {
                 lock.unlock();
             }
         }
 
-        public double getBalance() {
+        public long getBalance() {
             lock.lock();
             try {
-                if (!isOpen) {
-                    return -1;
+                return isClosed ? -1 : balance;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public boolean close() {
+            lock.lock();
+            try {
+                if (isClosed) {
+                    return false;
                 }
-                return balance;
+                isClosed = true;
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public boolean isOpen() {
+            lock.lock();
+            try {
+                return !isClosed;
             } finally {
                 lock.unlock();
             }
         }
     }
 
-    static class Bank {
-        private final ConcurrentHashMap<String, BankAccount> accounts = new ConcurrentHashMap<>();
+    private static class BankingSystem {
+        private final ConcurrentHashMap<String, BankAccount> accounts;
 
-        public boolean openAccount(String accountId, double initialBalance) {
-            if (initialBalance < 0) {
+        public BankingSystem() {
+            this.accounts = new ConcurrentHashMap<>();
+        }
+
+        public boolean openAccount(String accountId, long initialBalance) {
+            if (accountId == null || accountId.trim().isEmpty()) {
                 return false;
             }
-            return accounts.putIfAbsent(accountId, new BankAccount(accountId, initialBalance)) == null;
+            BankAccount newAccount = new BankAccount(accountId, initialBalance);
+            return accounts.putIfAbsent(accountId, newAccount) == null;
         }
 
         public boolean closeAccount(String accountId) {
@@ -89,52 +113,60 @@ public class Task181 {
             return account != null && account.close();
         }
 
-        public boolean withdraw(String accountId, double amount) {
-            BankAccount account = accounts.get(accountId);
-            return account != null && account.withdraw(amount);
-        }
-
-        public boolean deposit(String accountId, double amount) {
+        public boolean deposit(String accountId, long amount) {
             BankAccount account = accounts.get(accountId);
             return account != null && account.deposit(amount);
         }
 
-        public double getBalance(String accountId) {
+        public boolean withdraw(String accountId, long amount) {
+            BankAccount account = accounts.get(accountId);
+            return account != null && account.withdraw(amount);
+        }
+
+        public long getBalance(String accountId) {
             BankAccount account = accounts.get(accountId);
             return account != null ? account.getBalance() : -1;
         }
     }
 
     public static void main(String[] args) {
-        Bank bank = new Bank();
+        BankingSystem bank = new BankingSystem();
 
-        // Test case 1: Open account and deposit
-        System.out.println(bank.openAccount("ACC1", 1000)); // true
-        System.out.println(bank.deposit("ACC1", 500)); // true
-        System.out.println(bank.getBalance("ACC1")); // 1500
+        // Test Case 1: Open account and deposit
+        System.out.println("Test 1 - Open account and deposit:");
+        bank.openAccount("ACC001", 1000);
+        bank.deposit("ACC001", 500);
+        System.out.println("Balance: " + bank.getBalance("ACC001")); // Expected: 1500
 
-        // Test case 2: Withdraw
-        System.out.println(bank.withdraw("ACC1", 200)); // true
-        System.out.println(bank.getBalance("ACC1")); // 1300
+        // Test Case 2: Withdraw from account
+        System.out.println("\\nTest 2 - Withdraw:");
+        bank.withdraw("ACC001", 300);
+        System.out.println("Balance: " + bank.getBalance("ACC001")); // Expected: 1200
 
-        // Test case 3: Close account
-        System.out.println(bank.closeAccount("ACC1")); // true
-        System.out.println(bank.deposit("ACC1", 100)); // false
+        // Test Case 3: Close account and try operations
+        System.out.println("\\nTest 3 - Close account:");
+        bank.closeAccount("ACC001");
+        boolean depositResult = bank.deposit("ACC001", 100);
+        System.out.println("Deposit after close: " + depositResult); // Expected: false
+        System.out.println("Balance after close: " + bank.getBalance("ACC001")); // Expected: -1
 
-        // Test case 4: Invalid operations
-        System.out.println(bank.withdraw("ACC2", 100)); // false
-        System.out.println(bank.deposit("ACC1", -100)); // false
+        // Test Case 4: Insufficient funds
+        System.out.println("\\nTest 4 - Insufficient funds:");
+        bank.openAccount("ACC002", 100);
+        boolean withdrawResult = bank.withdraw("ACC002", 200);
+        System.out.println("Withdraw result: " + withdrawResult); // Expected: false
 
-        // Test case 5: Concurrent operations
-        bank.openAccount("ACC3", 1000);
+        // Test Case 5: Concurrent operations
+        System.out.println("\\nTest 5 - Concurrent operations:");
+        bank.openAccount("ACC003", 1000);
         Thread t1 = new Thread(() -> {
-            for(int i = 0; i < 100; i++) {
-                bank.deposit("ACC3", 10);
+            for (int i = 0; i < 100; i++) {
+                bank.deposit("ACC003", 10);
             }
         });
         Thread t2 = new Thread(() -> {
-            for(int i = 0; i < 100; i++) {
-                bank.withdraw("ACC3", 5);
+            for (int i = 0; i < 100; i++) {
+                bank.withdraw("ACC003", 5);
             }
         });
         t1.start();
@@ -145,6 +177,6 @@ public class Task181 {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(bank.getBalance("ACC3")); // 1500
+        System.out.println("Final balance: " + bank.getBalance("ACC003")); // Expected: 1500
     }
 }

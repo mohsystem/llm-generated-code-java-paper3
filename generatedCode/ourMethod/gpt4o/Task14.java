@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task14 {
     public static int findEqualSidesIndex(int[] arr) {
         int totalSum = 0, leftSum = 0;

@@ -1,68 +1,85 @@
 package Vanilla.claude;
 
+import java.util.concurrent.Semaphore;
+
 class Task188 {
     private int n;
-    private boolean isFoo = true;
+    private Semaphore fooSemaphore;
+    private Semaphore barSemaphore;
 
     public Task188(int n) {
         this.n = n;
+        this.fooSemaphore = new Semaphore(1);
+        this.barSemaphore = new Semaphore(0);
     }
 
-    public synchronized void foo() throws InterruptedException {
+    public void foo(Runnable printFoo) throws InterruptedException {
         for (int i = 0; i < n; i++) {
-            while (!isFoo) {
-                wait();
-            }
-            System.out.print("foo");
-            isFoo = false;
-            notify();
+            fooSemaphore.acquire();
+            printFoo.run();
+            barSemaphore.release();
         }
     }
 
-    public synchronized void bar() throws InterruptedException {
+    public void bar(Runnable printBar) throws InterruptedException {
         for (int i = 0; i < n; i++) {
-            while (isFoo) {
-                wait();
-            }
-            System.out.print("bar");
-            isFoo = true;
-            notify();
+            barSemaphore.acquire();
+            printBar.run();
+            fooSemaphore.release();
         }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        int[] testCases = {1, 2, 3, 4, 5};
+        // Test case 1: n = 1
+        System.out.println("Test case 1: n = 1");
+        testFooBar(1);
         
-        for (int n : testCases) {
-            System.out.println("\\nTest case n = " + n);
-            Task188 fb = new Task188(n);
-            
-            Thread t1 = new Thread(() -> {
-                try {
-                    fb.foo();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            
-            Thread t2 = new Thread(() -> {
-                try {
-                    fb.bar();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            
-            t1.start();
-            t2.start();
-            
+        // Test case 2: n = 2
+        System.out.println("\\nTest case 2: n = 2");
+        testFooBar(2);
+        
+        // Test case 3: n = 5
+        System.out.println("\\nTest case 3: n = 5");
+        testFooBar(5);
+        
+        // Test case 4: n = 10
+        System.out.println("\\nTest case 4: n = 10");
+        testFooBar(10);
+        
+        // Test case 5: n = 3
+        System.out.println("\\nTest case 5: n = 3");
+        testFooBar(3);
+    }
+
+    private static void testFooBar(int n) {
+        Task188 fooBar = new Task188(n);
+        
+        Thread threadA = new Thread(() -> {
             try {
-                t1.join();
-                t2.join();
+                fooBar.foo(() -> System.out.print("foo"));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        });
+        
+        Thread threadB = new Thread(() -> {
+            try {
+                fooBar.bar(() -> System.out.print("bar"));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        
+        threadA.start();
+        threadB.start();
+        
+        try {
+            threadA.join();
+            threadB.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        
+        System.out.println();
     }
 }

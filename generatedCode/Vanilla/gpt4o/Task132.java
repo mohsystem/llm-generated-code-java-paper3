@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task132 {
     public static void logSecurityEvent(String event) {
         System.out.println("Security Event: " + event);

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.nio.file.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;

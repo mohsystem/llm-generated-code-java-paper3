@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task149 {
     private static class Queue {
         private LinkedList<Integer> list = new LinkedList<>();

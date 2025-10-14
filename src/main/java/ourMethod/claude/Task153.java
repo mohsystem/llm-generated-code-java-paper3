@@ -3,75 +3,108 @@ package ourMethod.claude;
 import java.util.*;
 
 public class Task153 {
-    private static void bfs(Map<Integer, List<Integer>> graph, int start) {
-        if (graph == null || graph.isEmpty()) {
-            return;
+    private static final int MAX_NODES = 10000;
+    private static final int MAX_EDGES = 100000;
+    
+    public static class Graph {
+        private final Map<Integer, List<Integer>> adjacencyList;
+        private final int maxNodes;
+        
+        public Graph(int maxNodes) {
+            if (maxNodes <= 0 || maxNodes > MAX_NODES) {
+                throw new IllegalArgumentException("Invalid maxNodes");
+            }
+            this.maxNodes = maxNodes;
+            this.adjacencyList = new HashMap<>();
         }
         
-        Set<Integer> visited = new HashSet<>();
-        Queue<Integer> queue = new LinkedList<>();
-        
-        queue.offer(start);
-        visited.add(start);
-        
-        while (!queue.isEmpty()) {
-            int current = queue.poll();
-            System.out.print(current + " ");
-            
-            if (graph.containsKey(current)) {
-                for (int neighbor : graph.get(current)) {
-                    if (!visited.contains(neighbor)) {
-                        visited.add(neighbor);
-                        queue.offer(neighbor);
-                    }
-                }
+        public void addEdge(int from, int to) {
+            if (from < 0 || from >= maxNodes || to < 0 || to >= maxNodes) {
+                throw new IllegalArgumentException("Invalid node");
             }
+            adjacencyList.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
+        }
+        
+        public List<Integer> getNeighbors(int node) {
+            if (node < 0 || node >= maxNodes) {
+                throw new IllegalArgumentException("Invalid node");
+            }
+            return adjacencyList.getOrDefault(node, Collections.emptyList());
         }
     }
     
+    public static List<Integer> breadthFirstSearch(Graph graph, int startNode) {
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph cannot be null");
+        }
+        if (startNode < 0 || startNode >= graph.maxNodes) {
+            throw new IllegalArgumentException("Invalid start node");
+        }
+        
+        List<Integer> result = new ArrayList<>();
+        Set<Integer> visited = new HashSet<>();
+        Queue<Integer> queue = new LinkedList<>();
+        
+        queue.add(startNode);
+        visited.add(startNode);
+        
+        while (!queue.isEmpty()) {
+            Integer current = queue.poll();
+            result.add(current);
+            
+            for (Integer neighbor : graph.getNeighbors(current)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    queue.add(neighbor);
+                }
+            }
+        }
+        
+        return result;
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        System.out.print("Test 1: ");
-        bfs(graph1, 2);
-        System.out.println();
+        // Test case 1: Simple linear graph
+        Graph graph1 = new Graph(5);
+        graph1.addEdge(0, 1);
+        graph1.addEdge(1, 2);
+        graph1.addEdge(2, 3);
+        graph1.addEdge(3, 4);
+        List<Integer> result1 = breadthFirstSearch(graph1, 0);
+        System.out.println("Test 1: " + result1);
         
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(1, Arrays.asList(2, 3, 4));
-        graph2.put(2, Arrays.asList(1, 5));
-        graph2.put(3, Arrays.asList(1, 6));
-        graph2.put(4, Arrays.asList(1));
-        graph2.put(5, Arrays.asList(2));
-        graph2.put(6, Arrays.asList(3));
-        System.out.print("Test 2: ");
-        bfs(graph2, 1);
-        System.out.println();
+        // Test case 2: Tree structure
+        Graph graph2 = new Graph(7);
+        graph2.addEdge(0, 1);
+        graph2.addEdge(0, 2);
+        graph2.addEdge(1, 3);
+        graph2.addEdge(1, 4);
+        graph2.addEdge(2, 5);
+        graph2.addEdge(2, 6);
+        List<Integer> result2 = breadthFirstSearch(graph2, 0);
+        System.out.println("Test 2: " + result2);
         
-        Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        System.out.print("Test 3: ");
-        bfs(graph3, 1);
-        System.out.println();
+        // Test case 3: Graph with cycle
+        Graph graph3 = new Graph(4);
+        graph3.addEdge(0, 1);
+        graph3.addEdge(1, 2);
+        graph3.addEdge(2, 3);
+        graph3.addEdge(3, 1);
+        List<Integer> result3 = breadthFirstSearch(graph3, 0);
+        System.out.println("Test 3: " + result3);
         
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(1, Arrays.asList(2));
-        graph4.put(2, Arrays.asList(3));
-        graph4.put(3, Arrays.asList(4));
-        graph4.put(4, Arrays.asList(5));
-        graph4.put(5, new ArrayList<>());
-        System.out.print("Test 4: ");
-        bfs(graph4, 1);
-        System.out.println();
+        // Test case 4: Disconnected graph
+        Graph graph4 = new Graph(6);
+        graph4.addEdge(0, 1);
+        graph4.addEdge(1, 2);
+        graph4.addEdge(3, 4);
+        graph4.addEdge(4, 5);
+        List<Integer> result4 = breadthFirstSearch(graph4, 0);
+        System.out.println("Test 4: " + result4);
         
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(1, Arrays.asList(2, 3));
-        graph5.put(2, Arrays.asList(4, 5));
-        graph5.put(3, Arrays.asList(6, 7));
-        System.out.print("Test 5: ");
-        bfs(graph5, 1);
-        System.out.println();
+        // Test case 5: Single node
+        Graph graph5 = new Graph(1);
+        List<Integer> result5 = breadthFirstSearch(graph5, 0);
+        System.out.println("Test 5: " + result5);
     }
 }

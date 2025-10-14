@@ -1,90 +1,96 @@
 package ourMethod.gemini;
+
 import java.util.concurrent.Semaphore;
 import java.util.function.IntConsumer;
 
-class Task196 {
+public class Task196 {
 
-    private int n;
-    private Semaphore zeroSemaphore;
-    private Semaphore evenSemaphore;
-    private Semaphore oddSemaphore;
-    private int currentNumber;
+    static class ZeroEvenOdd {
+        private final int n;
+        private final Semaphore semZero = new Semaphore(1);
+        private final Semaphore semEven = new Semaphore(0);
+        private final Semaphore semOdd = new Semaphore(0);
 
-    public Task196(int n) {
-        this.n = n;
-        this.zeroSemaphore = new Semaphore(1);
-        this.evenSemaphore = new Semaphore(0);
-        this.oddSemaphore = new Semaphore(0);
-        this.currentNumber = 1;
-    }
+        public ZeroEvenOdd(int n) {
+            this.n = n;
+        }
 
-    // printNumber.accept(x) outputs "x", where x is an integer.
-    public void zero(IntConsumer printNumber) throws InterruptedException {
-        for (int i = 1; i <= n; i++) {
-            zeroSemaphore.acquire();
-            printNumber.accept(0);
-            if (currentNumber % 2 == 1) {
-                oddSemaphore.release();
-            } else {
-                evenSemaphore.release();
+        public void zero(IntConsumer printNumber) throws InterruptedException {
+            for (int i = 1; i <= n; i++) {
+                semZero.acquire();
+                printNumber.accept(0);
+                if (i % 2 == 0) {
+                    semEven.release();
+                } else {
+                    semOdd.release();
+                }
+            }
+        }
+
+        public void even(IntConsumer printNumber) throws InterruptedException {
+            for (int i = 2; i <= n; i += 2) {
+                semEven.acquire();
+                printNumber.accept(i);
+                semZero.release();
+            }
+        }
+
+        public void odd(IntConsumer printNumber) throws InterruptedException {
+            for (int i = 1; i <= n; i += 2) {
+                semOdd.acquire();
+                printNumber.accept(i);
+                semZero.release();
             }
         }
     }
 
-    public void even(IntConsumer printNumber) throws InterruptedException {
-        for (int i = 2; i <= n; i += 2) {
-            evenSemaphore.acquire();
-            printNumber.accept(i);
-            zeroSemaphore.release();
-            currentNumber++;
+    public static void main(String[] args) {
+        int[] testCases = {2, 5, 1, 6, 10};
+        for (int n : testCases) {
+            System.out.println("Testing with n = " + n);
+            runTest(n);
+            System.out.println("\n");
         }
     }
 
-    public void odd(IntConsumer printNumber) throws InterruptedException {
-        for (int i = 1; i <= n; i += 2) {
-            oddSemaphore.acquire();
-            printNumber.accept(i);
-            zeroSemaphore.release();
-            currentNumber++;
-        }
-    }
-
-
-    public static void main(String[] args) throws InterruptedException {
+    private static void runTest(int n) {
+        ZeroEvenOdd zeroEvenOdd = new ZeroEvenOdd(n);
         IntConsumer printNumber = System.out::print;
 
-        Task196 test1 = new Task196(2);
-        Thread t1_1 = new Thread(() -> {
+        Thread threadA = new Thread(() -> {
             try {
-                test1.zero(printNumber);
+                zeroEvenOdd.zero(printNumber);
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-        Thread t1_2 = new Thread(() -> {
-            try {
-                test1.even(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-        Thread t1_3 = new Thread(() -> {
-            try {
-                test1.odd(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
 
-        t1_1.start();
-        t1_2.start();
-        t1_3.start();
+        Thread threadB = new Thread(() -> {
+            try {
+                zeroEvenOdd.even(printNumber);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
 
-        t1_1.join();
-        t1_2.join();
-        t1_3.join();
-        System.out.println("");
+        Thread threadC = new Thread(() -> {
+            try {
+                zeroEvenOdd.odd(printNumber);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
 
+        threadA.start();
+        threadB.start();
+        threadC.start();
 
+        try {
+            threadA.join();
+            threadB.join();
+            threadC.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

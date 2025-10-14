@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import javax.naming.*;
 import javax.naming.directory.*;
 import java.util.Hashtable;

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task13 {
     public static boolean isValidWalk(char[] walk) {
         if (walk.length != 10) return false;

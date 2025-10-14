@@ -1,23 +1,28 @@
 package Vanilla.gemini;
-class Task24 {
-    public boolean validatePin(String pin) {
-        if (pin.length() != 4 && pin.length() != 6) {
-            return false;
-        }
-        for (char c : pin.toCharArray()) {
-            if (!Character.isDigit(c)) {
-                return false;
-            }
-        }
-        return true;
+
+public class Task24 {
+
+    /**
+     * Validates a PIN to be exactly 4 or 6 digits.
+     * @param pin The PIN string to validate.
+     * @return true if the PIN is valid, false otherwise.
+     */
+    public static boolean validatePin(String pin) {
+        // Use regex to check if the string contains exactly 4 or 6 digits.
+        // ^ asserts position at start of the string
+        // \\d{4} matches exactly four digits
+        // | is the OR operator
+        // \\d{6} matches exactly six digits
+        // $ asserts position at the end of the string
+        return pin.matches("^(\\d{4}|\\d{6})$");
     }
 
     public static void main(String[] args) {
-        Task24 task24 = new Task24();
-        System.out.println(task24.validatePin("1234"));
-        System.out.println(task24.validatePin("12345"));
-        System.out.println(task24.validatePin("a234"));
-        System.out.println(task24.validatePin("123456"));
-        System.out.println(task24.validatePin("123a"));
+        // 5 test cases
+        String[] testCases = {"1234", "12345", "a234", "123456", "123"};
+        
+        for (String pin : testCases) {
+            System.out.println("\"" + pin + "\"   -->  " + validatePin(pin));
+        }
     }
 }

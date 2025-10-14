@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task24 {
     public static boolean isValidPin(String pin) {
         return pin.matches("\\d{4}|\\d{6}");

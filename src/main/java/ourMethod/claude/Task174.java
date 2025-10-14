@@ -1,51 +1,77 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+
 public class Task174 {
     public static String shortestPalindrome(String s) {
-        if (s == null || s.length() <= 1) {
-            return s;
+        // Input validation
+        if (s == null) {
+            throw new IllegalArgumentException("Input string cannot be null");
         }
         
-        // Create a new string with special character to avoid overlapping
-        String temp = s + "#" + new StringBuilder(s).reverse().toString();
-        int[] lps = new int[temp.length()];
+        // Validate length constraint
+        if (s.length() > 50000) {
+            throw new IllegalArgumentException("Input string length exceeds maximum allowed (50000)");
+        }
         
-        // Compute KMP pattern array
-        for (int i = 1, len = 0; i < temp.length();) {
-            if (temp.charAt(i) == temp.charAt(len)) {
-                lps[i++] = ++len;
+        // Validate that string contains only lowercase English letters
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c < 'a' || c > 'z') {
+                throw new IllegalArgumentException("Input string must contain only lowercase English letters");
+            }
+        }
+        
+        if (s.isEmpty()) {
+            return "";
+        }
+        
+        // Find the longest palindrome prefix
+        String rev = new StringBuilder(s).reverse().toString();
+        String combined = s + "#" + rev;
+        
+        int[] lps = computeLPS(combined);
+        int longestPalindromePrefix = lps[combined.length() - 1];
+        
+        // Add the suffix in reverse to the front
+        String suffix = s.substring(longestPalindromePrefix);
+        String prefix = new StringBuilder(suffix).reverse().toString();
+        
+        return prefix + s;
+    }
+    
+    private static int[] computeLPS(String pattern) {
+        int n = pattern.length();
+        int[] lps = new int[n];
+        int len = 0;
+        int i = 1;
+        
+        while (i < n) {
+            if (pattern.charAt(i) == pattern.charAt(len)) {
+                len++;
+                lps[i] = len;
+                i++;
             } else {
-                if (len > 0) {
+                if (len != 0) {
                     len = lps[len - 1];
                 } else {
-                    lps[i++] = 0;
+                    lps[i] = 0;
+                    i++;
                 }
             }
         }
         
-        // Get the length of longest palindrome starting from beginning
-        int longest = lps[temp.length() - 1];
-        
-        // Add remaining characters in front
-        return new StringBuilder(s.substring(longest))
-            .reverse()
-            .append(s)
-            .toString();
+        return lps;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "aacecaaa",
-            "abcd",
-            "",
-            "a",
-            "aa"
-        };
+        List<String> testCases = Arrays.asList("aacecaaa", "abcd", "", "a", "racecar");
         
-        for (String test : tests) {
-            System.out.println("Input: " + test);
-            System.out.println("Output: " + shortestPalindrome(test));
+        for (String testCase : testCases) {
+            System.out.println("Input: \"" + testCase + "\"");
+            System.out.println("Output: \"" + shortestPalindrome(testCase) + "\"");
             System.out.println();
         }
     }

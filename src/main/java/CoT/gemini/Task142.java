@@ -1,19 +1,40 @@
 package CoT.gemini;
-class Task142 {
-    public static int gcd(int a, int b) {
+
+public class Task142 {
+
+    /**
+     * Finds the greatest common divisor (GCD) of two integers using the Euclidean algorithm.
+     *
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The greatest common divisor of a and b.
+     */
+    public static int findGCD(int a, int b) {
+        // The Euclidean algorithm
         while (b != 0) {
             int temp = b;
             b = a % b;
             a = temp;
         }
-        return a;
+        // The GCD is conventionally a non-negative number.
+        return Math.abs(a);
     }
 
     public static void main(String[] args) {
-        System.out.println(gcd(48, 18)); // Expected: 6
-        System.out.println(gcd(12, 8));  // Expected: 4
-        System.out.println(gcd(15, 25)); // Expected: 5
-        System.out.println(gcd(7, 11));  // Expected: 1
-        System.out.println(gcd(0, 5));   // Expected: 5
+        // 5 Test Cases
+        int[][] testCases = {
+            {54, 24},     // Basic case with two positive numbers
+            {100, 0},     // Case with zero
+            {-48, 18},    // Case with a negative number
+            {17, 23},     // Case with two prime numbers
+            {0, 0}        // Case where both numbers are zero
+        };
+
+        for (int[] testCase : testCases) {
+            int num1 = testCase[0];
+            int num2 = testCase[1];
+            int result = findGCD(num1, num2);
+            System.out.println("The GCD of " + num1 + " and " + num2 + " is: " + result);
+        }
     }
 }

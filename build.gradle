@@ -88,6 +88,9 @@ dependencies {
 springBoot {
     mainClass = 'gemini.task135.Task135_GEMINI_gemini_1_5_pro_001'
 }
+bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 test {
     useJUnitPlatform()
 }

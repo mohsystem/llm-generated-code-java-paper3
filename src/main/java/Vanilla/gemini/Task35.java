@@ -1,29 +1,53 @@
 package Vanilla.gemini;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Task35 {
-    public static int peopleOnBus(int[][] stops) {
-        int people = 0;
+
+    /**
+     * Calculates the number of people still on the bus after the last bus stop.
+     *
+     * @param stops A list of integer pairs. Each pair represents [people_on, people_off].
+     * @return The number of people remaining on the bus.
+     */
+    public static int countPassengers(ArrayList<int[]> stops) {
+        int passengers = 0;
         for (int[] stop : stops) {
-            people += stop[0] - stop[1];
+            passengers += stop[0];
+            passengers -= stop[1];
         }
-        return people;
+        return passengers;
     }
 
     public static void main(String[] args) {
-        int[][] test1 = {{10, 0}, {3, 5}, {5, 8}};
-        System.out.println(peopleOnBus(test1)); // 2
+        // Test Case 1
+        ArrayList<int[]> test1 = new ArrayList<>(Arrays.asList(new int[]{10, 0}, new int[]{3, 5}, new int[]{5, 8}));
+        System.out.println("Test 1: " + countPassengers(test1)); // Expected: 5
 
-        int[][] test2 = {{3, 0}, {9, 1}, {4, 10}, {12, 2}, {6, 1}, {7, 10}};
-        System.out.println(peopleOnBus(test2)); // 17
+        // Test Case 2
+        ArrayList<int[]> test2 = new ArrayList<>(Arrays.asList(
+                new int[]{3, 0}, new int[]{9, 1}, new int[]{4, 10},
+                new int[]{12, 2}, new int[]{6, 1}, new int[]{7, 10}
+        ));
+        System.out.println("Test 2: " + countPassengers(test2)); // Expected: 17
 
-        int[][] test3 = {{3, 0}, {9, 1}, {4, 8}, {12, 2}, {6, 1}, {7, 8}};
-        System.out.println(peopleOnBus(test3)); // 21
+        // Test Case 3
+        ArrayList<int[]> test3 = new ArrayList<>(Arrays.asList(
+                new int[]{3, 0}, new int[]{9, 1}, new int[]{4, 8},
+                new int[]{12, 2}, new int[]{6, 1}, new int[]{7, 8}
+        ));
+        System.out.println("Test 3: " + countPassengers(test3)); // Expected: 21
 
-        int[][] test4 = {{0, 0}};
-        System.out.println(peopleOnBus(test4)); //0
-
-        int[][] test5 = {{10,3},{5,2},{7,5},{1,1}};
-        System.out.println(peopleOnBus(test5)); //8
-
-
+        // Test Case 4
+        ArrayList<int[]> test4 = new ArrayList<>(Arrays.asList(new int[]{0, 0}));
+        System.out.println("Test 4: " + countPassengers(test4)); // Expected: 0
+        
+        // Test Case 5
+        ArrayList<int[]> test5 = new ArrayList<>(Arrays.asList(
+                new int[]{10, 0}, new int[]{1, 1}, new int[]{2, 2},
+                new int[]{3, 3}, new int[]{4, 10}
+        ));
+        System.out.println("Test 5: " + countPassengers(test5)); // Expected: 4
     }
 }

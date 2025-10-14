@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 // Java code: Task40.java
 import java.util.HashMap;
 import java.util.Map;

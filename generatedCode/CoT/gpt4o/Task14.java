@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task14 {
     public static int findEqualSumIndex(int[] arr) {
         int totalSum = 0;

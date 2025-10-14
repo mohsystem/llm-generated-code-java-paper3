@@ -1,63 +1,95 @@
 package CoT.gemini;
-import java.util.ArrayList;
-import java.util.List;
 
-class Task148 {
+public class Task148 {
 
-    private static class Stack<T> {
-        private final List<T> list;
+    // Stack implementation class
+    static class Stack {
+        private int maxSize;
+        private int[] stackArray;
+        private int top;
 
-        public Stack() {
-            list = new ArrayList<>();
+        // Constructor
+        public Stack(int size) {
+            maxSize = size;
+            stackArray = new int[maxSize];
+            top = -1; // Stack is initially empty
         }
 
-        public void push(T item) {
-            list.add(item);
-        }
-
-        public T pop() {
-            if (isEmpty()) {
-                throw new IllegalStateException("Stack is empty");
+        // Push an item onto the top of the stack
+        public void push(int value) {
+            if (isFull()) {
+                System.err.println("Error: Stack overflow. Cannot push " + value);
+                return;
             }
-            return list.remove(list.size() - 1);
+            stackArray[++top] = value;
+            System.out.println("Pushed " + value + " to stack.");
         }
 
-        public T peek() {
+        // Pop an item from the top of the stack
+        public int pop() {
             if (isEmpty()) {
-                throw new IllegalStateException("Stack is empty");
+                System.err.println("Error: Stack underflow. Cannot pop.");
+                return -1; // Return a sentinel value for error
             }
-            return list.get(list.size() - 1);
+            int value = stackArray[top--];
+            System.out.println("Popped " + value + " from stack.");
+            return value;
         }
 
+        // Peek at the top item of the stack without removing it
+        public int peek() {
+            if (isEmpty()) {
+                System.err.println("Error: Stack is empty. Cannot peek.");
+                return -1; // Return a sentinel value for error
+            }
+            return stackArray[top];
+        }
+
+        // Check if the stack is empty
         public boolean isEmpty() {
-            return list.isEmpty();
+            return (top == -1);
+        }
+
+        // Check if the stack is full
+        public boolean isFull() {
+            return (top == maxSize - 1);
         }
     }
 
     public static void main(String[] args) {
-        Stack<Integer> stack = new Stack<>();
-        stack.push(1);
-        stack.push(2);
-        stack.push(3);
-        System.out.println(stack.peek()); // Output: 3
-        System.out.println(stack.pop()); // Output: 3
-        System.out.println(stack.pop()); // Output: 2
-        System.out.println(stack.isEmpty()); // Output: false
-        System.out.println(stack.pop()); // Output: 1
-        System.out.println(stack.isEmpty()); // Output: true
+        System.out.println("Initializing a stack with capacity 5.");
+        Stack stack = new Stack(5);
 
+        // Test Case 1: Push items and peek
+        System.out.println("\n--- Test Case 1: Push and Peek ---");
+        stack.push(10);
+        stack.push(20);
+        stack.push(30);
+        System.out.println("Top element is (peek): " + stack.peek());
+        
+        // Test Case 2: Pop all items
+        System.out.println("\n--- Test Case 2: Pop All Items ---");
+        stack.pop();
+        stack.pop();
+        stack.pop();
 
-        Stack<String> stringStack = new Stack<>();
-        stringStack.push("apple");
-        stringStack.push("banana");
-        System.out.println(stringStack.peek());  // Output: banana
-        stringStack.push("cherry");
-        System.out.println(stringStack.pop());  // Output: cherry
-        System.out.println(stringStack.pop());  // Output: banana
-        System.out.println(stringStack.pop());  // Output: apple
-        //System.out.println(stringStack.pop());  // Throws IllegalStateException: Stack is empty
+        // Test Case 3: Pop from an empty stack (underflow)
+        System.out.println("\n--- Test Case 3: Pop from Empty Stack ---");
+        System.out.println("Is stack empty? " + stack.isEmpty());
+        stack.pop(); // This should cause an underflow error
 
+        // Test Case 4: Push until the stack is full
+        System.out.println("\n--- Test Case 4: Fill the Stack ---");
+        stack.push(11);
+        stack.push(22);
+        stack.push(33);
+        stack.push(44);
+        stack.push(55);
+        System.out.println("Is stack full? " + stack.isFull());
 
-
+        // Test Case 5: Push to a full stack (overflow)
+        System.out.println("\n--- Test Case 5: Push to Full Stack ---");
+        stack.push(66); // This should cause an overflow error
+        System.out.println("Top element is (peek): " + stack.peek());
     }
 }

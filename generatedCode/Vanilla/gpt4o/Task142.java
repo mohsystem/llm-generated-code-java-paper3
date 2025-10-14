@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 class Task142 {
     public static int gcd(int a, int b) {
         if (b == 0) {

@@ -1,66 +1,81 @@
 package Vanilla.claude;
 
-class Task92 {
-    static class SharedResource {
-        private int currentCounter = 0;
-        private final int maxCounter;
-        private final Object lock = new Object();
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-        public SharedResource(int maxCounter) {
-            this.maxCounter = maxCounter;
-        }
-
-        public void accessResource(String threadName) {
-            if (currentCounter <= maxCounter) {
-                synchronized (lock) {
-                    if (currentCounter <= maxCounter) {
-                        currentCounter++;
-                        System.out.println("Thread " + threadName + " accessing counter: " + currentCounter);
-                    }
+public class Task92 {
+    private int currentCounter = 0;
+    private int maxCounter;
+    private Lock lock = new ReentrantLock();
+    
+    public Task92(int maxCounter) {
+        this.maxCounter = maxCounter;
+    }
+    
+    public void accessSharedResource(String threadName) {
+        if (currentCounter <= maxCounter) {
+            lock.lock();
+            try {
+                if (currentCounter <= maxCounter) {
+                    currentCounter++;
+                    System.out.println(threadName + " is accessing currentCounter: " + currentCounter);
                 }
+            } finally {
+                lock.unlock();
             }
         }
     }
-
+    
+    public int getCurrentCounter() {
+        return currentCounter;
+    }
+    
     public static void main(String[] args) {
-        SharedResource resource = new SharedResource(10);
-        
-        // Test case 1: Single thread
-        Thread t1 = new Thread(() -> resource.accessResource("T1"));
-        t1.start();
-        
-        // Test case 2: Multiple threads accessing simultaneously
-        for(int i=0; i<5; i++) {
-            final int num = i;
-            new Thread(() -> resource.accessResource("T"+num)).start();
+        // Test case 1: Basic test with 5 threads and max counter 10
+        System.out.println("Test Case 1:");
+        Task92 test1 = new Task92(10);
+        for (int i = 1; i <= 5; i++) {
+            final int threadNum = i;
+            new Thread(() -> test1.accessSharedResource("Thread-" + threadNum)).start();
         }
         
-        // Test case 3: Thread accessing after max limit
-        SharedResource resource2 = new SharedResource(2);
-        for(int i=0; i<5; i++) {
-            final int num = i;
-            new Thread(() -> resource2.accessResource("T"+num)).start();
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        // Test case 2: Multiple threads with smaller max counter
+        System.out.println("\\nTest Case 2:");
+        Task92 test2 = new Task92(3);
+        for (int i = 1; i <= 5; i++) {
+            final int threadNum = i;
+            new Thread(() -> test2.accessSharedResource("Worker-" + threadNum)).start();
         }
         
-        // Test case 4: Multiple threads with sleep
-        SharedResource resource3 = new SharedResource(5);
-        for(int i=0; i<3; i++) {
-            final int num = i;
-            new Thread(() -> {
-                try {
-                    Thread.sleep(100);
-                    resource3.accessResource("T"+num);
-                } catch(InterruptedException e) {}
-            }).start();
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        // Test case 3: Single thread
+        System.out.println("\\nTest Case 3:");
+        Task92 test3 = new Task92(1);
+        new Thread(() -> test3.accessSharedResource("SingleThread")).start();
+        
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        // Test case 4: Max counter is 0
+        System.out.println("\\nTest Case 4:");
+        Task92 test4 = new Task92(0);
+        for (int i = 1; i <= 3; i++) {
+            final int threadNum = i;
+            new Thread(() -> test4.accessSharedResource("Thread-" + threadNum)).start();
         }
         
-        // Test case 5: Single thread multiple access
-        SharedResource resource4 = new SharedResource(3);
-        Thread t5 = new Thread(() -> {
-            for(int i=0; i<4; i++) {
-                resource4.accessResource("T5");
-            }
-        });
-        t5.start();
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        // Test case 5: Many threads with moderate max counter
+        System.out.println("\\nTest Case 5:");
+        Task92 test5 = new Task92(7);
+        for (int i = 1; i <= 10; i++) {
+            final int threadNum = i;
+            new Thread(() -> test5.accessSharedResource("Task-" + threadNum)).start();
+        }
+        
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
     }
 }

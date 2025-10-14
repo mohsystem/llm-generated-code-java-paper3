@@ -1,22 +1,41 @@
 package ZeroShot.gemini;
-import java.util.Arrays;
 
-class Task168 {
-    public String tweakLetters(String str, int[] arr) {
-        char[] chars = str.toCharArray();
-        for (int i = 0; i < arr.length && i < chars.length; i++) {
-            chars[i] = (char) (chars[i] + arr[i]);
+public class Task168 {
+
+    /**
+     * Tweaks letters in a string based on an array of integer shifts.
+     *
+     * @param str The input string.
+     * @param tweaks An array of integers representing the shift for each character.
+     * @return The tweaked string, or an error message if inputs are invalid.
+     */
+    public static String tweakLetters(String str, int[] tweaks) {
+        if (str == null || tweaks == null || str.length() != tweaks.length) {
+            // In a real-world scenario, throwing an IllegalArgumentException
+            // would be more appropriate than returning an error string.
+            return "Invalid input";
         }
-        return new String(chars);
+
+        StringBuilder result = new StringBuilder(str.length());
+        for (int i = 0; i < str.length(); i++) {
+            char originalChar = str.charAt(i);
+            int tweakValue = tweaks[i];
+            char tweakedChar = (char) (originalChar + tweakValue);
+            result.append(tweakedChar);
+        }
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task168 task = new Task168();
-        System.out.println(task.tweakLetters("apple", new int[]{0, 1, -1, 0, -1})); // aqold
-        System.out.println(task.tweakLetters("many", new int[]{0, 0, 0, -1})); // manx
-        System.out.println(task.tweakLetters("rhino", new int[]{1, 1, 1, 1, 1})); // sijop
-        System.out.println(task.tweakLetters("xyz", new int[]{1, 1, 1})); // yza
-        System.out.println(task.tweakLetters("abc", new int[]{-1, -1, -1})); // zab
-
+        // Test Case 1
+        System.out.println(tweakLetters("apple", new int[]{0, 1, -1, 0, -1}));
+        // Test Case 2
+        System.out.println(tweakLetters("many", new int[]{0, 0, 0, -1}));
+        // Test Case 3
+        System.out.println(tweakLetters("rhino", new int[]{1, 1, 1, 1, 1}));
+        // Test Case 4
+        System.out.println(tweakLetters("abc", new int[]{-1, 0, 1}));
+        // Test Case 5
+        System.out.println(tweakLetters("z", new int[]{1}));
     }
 }

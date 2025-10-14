@@ -1,65 +1,63 @@
 package CoT.claude;
 
-import java.util.Stack;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class Task61 {
-    public static String findXMLRoot(String xml) {
-        if (xml == null || xml.trim().isEmpty()) {
-            return "";
+    public static String parseAndGetRootElement(String xmlString) {
+        if (xmlString == null || xmlString.trim().isEmpty()) {
+            return "Error: Empty or null XML string";
         }
         
-        // Remove whitespace and comments
-        xml = xml.trim().replaceAll("<!--.*?-->", "");
-        
-        Stack<String> tags = new Stack<>();
-        String root = "";
-        int i = 0;
-        
-        while (i < xml.length()) {
-            if (xml.charAt(i) == '<') {
-                if (xml.charAt(i + 1) == '/') {
-                    // Closing tag
-                    i += 2;
-                    StringBuilder tag = new StringBuilder();
-                    while (i < xml.length() && xml.charAt(i) != '>') {
-                        tag.append(xml.charAt(i));
-                        i++;
-                    }
-                    if (!tags.isEmpty() && tags.peek().equals(tag.toString())) {
-                        tags.pop();
-                    }
-                } else {
-                    // Opening tag
-                    i++;
-                    StringBuilder tag = new StringBuilder();
-                    while (i < xml.length() && xml.charAt(i) != '>' && !Character.isWhitespace(xml.charAt(i))) {
-                        tag.append(xml.charAt(i));
-                        i++;
-                    }
-                    if (tags.isEmpty()) {
-                        root = tag.toString();
-                    }
-                    tags.push(tag.toString());
-                    while (i < xml.length() && xml.charAt(i) != '>') i++;
-                }
-            }
-            i++;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            
+            // Security: Disable XXE attacks
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            factory.setXIncludeAware(false);
+            factory.setExpandEntityReferences(false);
+            
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            ByteArrayInputStream input = new ByteArrayInputStream(
+                xmlString.getBytes(StandardCharsets.UTF_8)
+            );
+            
+            Document document = builder.parse(input);
+            Element rootElement = document.getDocumentElement();
+            
+            return rootElement.getNodeName();
+            
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
-        return root;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String xml1 = "<root><child>value</child></root>";
-        String xml2 = "<document><header>Title</header><body>Content</body></document>";
-        String xml3 = "<book id='1'><title>XML Basics</title></book>";
-        String xml4 = "<!-- comment --><data><item>1</item></data>";
-        String xml5 = "<root attr='val'/>";
-
-        System.out.println("Root 1: " + findXMLRoot(xml1));  // Expected: root
-        System.out.println("Root 2: " + findXMLRoot(xml2));  // Expected: document
-        System.out.println("Root 3: " + findXMLRoot(xml3));  // Expected: book
-        System.out.println("Root 4: " + findXMLRoot(xml4));  // Expected: data
-        System.out.println("Root 5: " + findXMLRoot(xml5));  // Expected: root
+        // Test case 1: Simple XML
+        String test1 = "<?xml version=\"1.0\"?><root><child>data</child></root>";
+        System.out.println("Test 1 - Root element: " + parseAndGetRootElement(test1));
+        
+        // Test case 2: Complex XML
+        String test2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><books><book id=\"1\"><title>Java</title></book></books>";
+        System.out.println("Test 2 - Root element: " + parseAndGetRootElement(test2));
+        
+        // Test case 3: Different root element
+        String test3 = "<catalog><item>Product</item></catalog>";
+        System.out.println("Test 3 - Root element: " + parseAndGetRootElement(test3));
+        
+        // Test case 4: Malformed XML
+        String test4 = "<root><unclosed>";
+        System.out.println("Test 4 - Root element: " + parseAndGetRootElement(test4));
+        
+        // Test case 5: Empty string
+        String test5 = "";
+        System.out.println("Test 5 - Root element: " + parseAndGetRootElement(test5));
     }
 }

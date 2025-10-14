@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;

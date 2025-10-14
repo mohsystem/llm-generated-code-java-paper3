@@ -1,43 +1,82 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.List;
 
-class Task183 {
-    public static long largestProduct(String digits, int span) {
-        if (span < 0 || span > digits.length()) {
-            throw new IllegalArgumentException("Span must be between 0 and the length of the digits string.");
+import java.util.regex.Pattern;
+
+public class Task183 {
+
+    /**
+     * Computes the largest product of a series of adjacent digits.
+     *
+     * @param input The sequence of digits to analyze.
+     * @param span The number of digits in each series.
+     * @return The largest product.
+     * @throws IllegalArgumentException if the input is invalid.
+     */
+    public static long largestProduct(String input, int span) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input string cannot be null.");
         }
-        if (digits.isEmpty() || span == 0)
-            return 0;
+        if (span < 0) {
+            throw new IllegalArgumentException("Span cannot be negative.");
+        }
+        if (span > input.length()) {
+            throw new IllegalArgumentException("Span cannot be larger than the input string length.");
+        }
+        if (!Pattern.matches("\\d*", input)) {
+            throw new IllegalArgumentException("Input string must contain only digits.");
+        }
 
+        if (span == 0) {
+            return 1;
+        }
 
-        long largestProd = 0;
-        for (int i = 0; i <= digits.length() - span; i++) {
-            long currentProd = 1;
-            String series = digits.substring(i, i + span);
-            for (char digitChar : series.toCharArray()) {
-                int digit = Character.getNumericValue(digitChar);
-                if (digit < 0 || digit > 9) {
-                    throw new IllegalArgumentException("Input string must contain only digits.");
-                }
-                currentProd *= digit;
+        long maxProduct = 0;
 
-
+        for (int i = 0; i <= input.length() - span; i++) {
+            long currentProduct = 1;
+            for (int j = 0; j < span; j++) {
+                // Character.getNumericValue is safer than 'char' - '0'
+                currentProduct *= Character.getNumericValue(input.charAt(i + j));
             }
-            largestProd = Math.max(largestProd, currentProd);
+            if (currentProduct > maxProduct) {
+                maxProduct = currentProduct;
+            }
         }
 
-        return largestProd;
+        return maxProduct;
     }
 
-
     public static void main(String[] args) {
-        List<String> testDigits = new ArrayList<>(List.of("12345", "63915", "99999", "10203", "00000"));
-        List<Integer> testSpans = new ArrayList<>(List.of(3, 3, 2, 1, 3));
+        // Test Case 1: Example from prompt
+        String input1 = "63915";
+        int span1 = 3;
+        System.out.println("Input: \"" + input1 + "\", Span: " + span1 + ", Largest Product: " + largestProduct(input1, span1)); // Expected: 162
 
-        for (int i = 0; i < testDigits.size(); i++) {
-            System.out.println("Input: \"" + testDigits.get(i) + "\", span: " + testSpans.get(i) +
-                    ", Largest Product: " + largestProduct(testDigits.get(i), testSpans.get(i)));
+        // Test Case 2: Contains a zero
+        String input2 = "1027839564";
+        int span2 = 5;
+        System.out.println("Input: \"" + input2 + "\", Span: " + span2 + ", Largest Product: " + largestProduct(input2, span2)); // Expected: 22680 (3*9*5*6*4)
+
+        // Test Case 3: Span equals string length
+        String input3 = "73167176531330624919225119674426574742355349194934";
+        int span3 = 6;
+        System.out.println("Input: \"" + input3.substring(0,10) + "...\", Span: " + span3 + ", Largest Product: " + largestProduct(input3, span3)); // Expected: 23520
+
+        // Test Case 4: Span is 0
+        String input4 = "123";
+        int span4 = 0;
+        System.out.println("Input: \"" + input4 + "\", Span: " + span4 + ", Largest Product: " + largestProduct(input4, span4)); // Expected: 1
+
+        // Test Case 5: Span is 1
+        String input5 = "18395";
+        int span5 = 1;
+        System.out.println("Input: \"" + input5 + "\", Span: " + span5 + ", Largest Product: " + largestProduct(input5, span5)); // Expected: 9
+        
+        // Test Case 6: Invalid input (demonstrating exception handling)
+        try {
+            largestProduct("123a45", 3);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
         }
     }
 }

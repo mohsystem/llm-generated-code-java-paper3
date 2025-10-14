@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task6 {
     public static double findUniq(double[] arr) {
         double a = arr[0], b = arr[1], c = arr[2];

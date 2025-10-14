@@ -1,63 +1,115 @@
 package ourMethod.claude;
 
-interface MountainArray {
-    public int get(int index);
-    public int length();
+class MountainArray {
+    private int[] arr;
+    
+    public MountainArray(int[] arr) {
+        this.arr = arr;
+    }
+    
+    public int get(int index) {
+        if (index < 0 || index >= arr.length) {
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
+        return arr[index];
+    }
+    
+    public int length() {
+        return arr.length;
+    }
 }
 
 class Task175 {
-    public int findInMountainArray(int target, MountainArray mountainArr) {
+    public static int findInMountainArray(int target, MountainArray mountainArr) {
+        if (mountainArr == null) {
+            return -1;
+        }
+        
         int length = mountainArr.length();
-        int peakIndex = findPeakIndex(mountainArr, 0, length - 1);
+        if (length < 3) {
+            return -1;
+        }
         
-        // Search in the increasing part
-        int result = binarySearch(mountainArr, target, 0, peakIndex, true);
-        if (result != -1) return result;
+        int peakIndex = findPeak(mountainArr, length);
         
-        // Search in the decreasing part
-        return binarySearch(mountainArr, target, peakIndex + 1, length - 1, false);
+        int result = binarySearchAscending(mountainArr, target, 0, peakIndex);
+        if (result != -1) {
+            return result;
+        }
+        
+        return binarySearchDescending(mountainArr, target, peakIndex + 1, length - 1);
     }
     
-    private int findPeakIndex(MountainArray mountainArr, int left, int right) {
+    private static int findPeak(MountainArray mountainArr, int length) {
+        int left = 0;
+        int right = length - 1;
+        
         while (left < right) {
             int mid = left + (right - left) / 2;
-            if (mountainArr.get(mid) < mountainArr.get(mid + 1)) {
+            int midVal = mountainArr.get(mid);
+            int nextVal = mountainArr.get(mid + 1);
+            
+            if (midVal < nextVal) {
                 left = mid + 1;
             } else {
                 right = mid;
             }
         }
+        
         return left;
     }
     
-    private int binarySearch(MountainArray mountainArr, int target, int left, int right, boolean increasing) {
+    private static int binarySearchAscending(MountainArray mountainArr, int target, int left, int right) {
         while (left <= right) {
             int mid = left + (right - left) / 2;
             int midVal = mountainArr.get(mid);
             
             if (midVal == target) {
                 return mid;
-            }
-            
-            if (increasing) {
-                if (midVal < target) {
-                    left = mid + 1;
-                } else {
-                    right = mid - 1;
-                }
+            } else if (midVal < target) {
+                left = mid + 1;
             } else {
-                if (midVal < target) {
-                    right = mid - 1;
-                } else {
-                    left = mid + 1;
-                }
+                right = mid - 1;
             }
         }
+        
         return -1;
     }
-
+    
+    private static int binarySearchDescending(MountainArray mountainArr, int target, int left, int right) {
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int midVal = mountainArr.get(mid);
+            
+            if (midVal == target) {
+                return mid;
+            } else if (midVal > target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return -1;
+    }
+    
     public static void main(String[] args) {
-        // Test cases cannot be implemented as MountainArray is an interface
-        System.out.println("Test cases would need actual implementation of MountainArray interface");
+        int[][] testArrays = {
+            {1, 2, 3, 4, 5, 3, 1},
+            {0, 1, 2, 4, 2, 1},
+            {1, 5, 2},
+            {0, 5, 3, 1},
+            {1, 2, 3, 5, 3}
+        };
+        int[] targets = {3, 3, 2, 1, 3};
+        int[] expected = {2, -1, 2, 3, 2};
+        
+        for (int i = 0; i < testArrays.length; i++) {
+            MountainArray mountainArr = new MountainArray(testArrays[i]);
+            int result = findInMountainArray(targets[i], mountainArr);
+            System.out.println("Test " + (i + 1) + ": target=" + targets[i] + 
+                             ", result=" + result + ", expected=" + expected[i] + 
+                             ", " + (result == expected[i] ? "PASS" : "FAIL"));
+        }
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 // Java code block
 import java.io.*;
 import javax.servlet.*;

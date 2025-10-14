@@ -3,70 +3,73 @@ package Vanilla.claude;
 import java.util.concurrent.Semaphore;
 
 class Task187 {
-    private Semaphore hydrogen = new Semaphore(2);
-    private Semaphore oxygen = new Semaphore(1);
-    private Semaphore barrier = new Semaphore(0);
-    private int hydrogenCount = 0;
-    private int oxygenCount = 0;
+    private Semaphore hydrogenSemaphore;
+    private Semaphore oxygenSemaphore;
+    private Semaphore mutex;
+    private int hydrogenCount;
 
-    public void releaseHydrogen() throws InterruptedException {
-        hydrogen.acquire();
-        synchronized(this) {
-            hydrogenCount++;
-            if (hydrogenCount == 2 && oxygenCount == 1) {
-                hydrogenCount = 0;
-                oxygenCount = 0;
-                barrier.release(3);
-            }
-        }
-        barrier.acquire();
-        System.out.print("H");
-        hydrogen.release();
+    public Task187() {
+        hydrogenSemaphore = new Semaphore(2);
+        oxygenSemaphore = new Semaphore(0);
+        mutex = new Semaphore(1);
+        hydrogenCount = 0;
     }
 
-    public void releaseOxygen() throws InterruptedException {
-        oxygen.acquire();
-        synchronized(this) {
-            oxygenCount++;
-            if (hydrogenCount == 2 && oxygenCount == 1) {
-                hydrogenCount = 0;
-                oxygenCount = 0;
-                barrier.release(3);
-            }
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        hydrogenSemaphore.acquire();
+        
+        mutex.acquire();
+        hydrogenCount++;
+        if (hydrogenCount == 2) {
+            oxygenSemaphore.release();
         }
-        barrier.acquire();
-        System.out.print("O");
-        oxygen.release();
+        mutex.release();
+        
+        releaseHydrogen.run();
+    }
+
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        oxygenSemaphore.acquire();
+        
+        releaseOxygen.run();
+        
+        mutex.acquire();
+        hydrogenCount = 0;
+        mutex.release();
+        
+        hydrogenSemaphore.release(2);
     }
 
     public static void main(String[] args) {
-        String[] testCases = {"HOH", "OOHHHH", "HOHHHO", "OHHHHO", "HHOHOH"};
-        Task187 task = new Task187();
+        String[] testCases = {"HOH", "OOHHHH", "HHOHHO", "HHHHHHOOO", "OHHHOH"};
         
         for (String water : testCases) {
-            System.out.println("\\nInput: " + water);
-            System.out.print("Output: ");
+            System.out.println("Input: " + water);
+            Task187 h2o = new Task187();
+            StringBuilder result = new StringBuilder();
             
             Thread[] threads = new Thread[water.length()];
             for (int i = 0; i < water.length(); i++) {
                 final char c = water.charAt(i);
-                if (c == 'H') {
-                    threads[i] = new Thread(() -> {
-                        try {
-                            task.releaseHydrogen();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                threads[i] = new Thread(() -> {
+                    try {
+                        if (c == 'H') {
+                            h2o.hydrogen(() -> {
+                                synchronized (result) {
+                                    result.append('H');
+                                }
+                            });
+                        } else {
+                            h2o.oxygen(() -> {
+                                synchronized (result) {
+                                    result.append('O');
+                                }
+                            });
                         }
-                    });
-                } else {
-                    threads[i] = new Thread(() -> {
-                        try {
-                            task.releaseOxygen();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
                 threads[i].start();
             }
             
@@ -77,6 +80,9 @@ class Task187 {
                     e.printStackTrace();
                 }
             }
+            
+            System.out.println("Output: " + result.toString());
+            System.out.println();
         }
     }
 }

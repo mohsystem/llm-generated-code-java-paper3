@@ -1,36 +1,38 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-class Task141 {
-    public String reverseString(String input) {
-        List<Character> charList = new ArrayList<>();
-        for (char c : input.toCharArray()) {
-            charList.add(c);
+import java.util.Objects;
+
+public class Task141 {
+
+    /**
+     * Reverses a given string.
+     *
+     * @param str The string to be reversed.
+     * @return The reversed string, or null if the input is null.
+     */
+    public static String reverseString(String str) {
+        if (str == null) {
+            return null;
         }
-        Collections.reverse(charList);
-        StringBuilder reversedString = new StringBuilder();
-        for (char c : charList) {
-            reversedString.append(c);
-        }
-        return reversedString.toString();
+        // Using StringBuilder is efficient for string manipulation in Java.
+        // Its reverse() method correctly handles Unicode characters (surrogate pairs).
+        return new StringBuilder(str).reverse().toString();
     }
 
     public static void main(String[] args) {
-        Task141 task = new Task141();
-
         String[] testCases = {
-                "hello",
-                "world",
-                "12345",
-                "racecar",
-                ""
+            "Hello, World!",
+            "madam",
+            "12345",
+            "",
+            "a"
         };
 
         for (String testCase : testCases) {
-            String reversed = task.reverseString(testCase);
-            System.out.println("Input: " + testCase + ", Reversed: " + reversed);
+            System.out.println("Original: \"" + testCase + "\"");
+            String reversed = reverseString(testCase);
+            System.out.println("Reversed: \"" + reversed + "\"");
+            System.out.println();
         }
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.util.PriorityQueue;
 import java.util.Collections;
 

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task71 {
     public static Integer convertStringToInt(String input) {
         try {

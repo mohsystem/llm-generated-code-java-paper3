@@ -1,48 +1,65 @@
 package Vanilla.gemini;
+
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class Task72 {
 
-    private static final byte[] IV = new byte[16]; // Static IV
+    // 1. Create a static initialization vector (IV). AES block size is 16 bytes.
+    private static final byte[] STATIC_IV = "abcdefghijklmnop".getBytes(StandardCharsets.UTF_8);
+    // A secret key is also required for AES. Using a 128-bit key (16 bytes).
+    private static final byte[] SECRET_KEY = "0123456789abcdef".getBytes(StandardCharsets.UTF_8);
 
-    static {
-        new SecureRandom().nextBytes(IV); // Initialize IV with random bytes
-    }
-
-
-    public static String encrypt(String data, String keyString) throws Exception {
-        // Generate SecretKey from keyString
-        byte[] keyBytes = keyString.getBytes();
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-
+    /**
+     * Encrypts data using AES/CBC/PKCS5Padding.
+     *
+     * @param plainText The string to encrypt.
+     * @param key The encryption key (16 bytes for AES-128).
+     * @param iv The initialization vector (16 bytes).
+     * @return The encrypted data as a byte array.
+     * @throws Exception if encryption fails.
+     */
+    public static byte[] encrypt(String plainText, byte[] key, byte[] iv) throws Exception {
+        // 2. Initialize a cipher using AES in CBC mode with the static IV.
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        IvParameterSpec iv = new IvParameterSpec(IV);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        // 3. Pad the input data to match the block size required by the cipher.
+        // PKCS5Padding handles this automatically.
+        byte[] plainTextBytes = plainText.getBytes(StandardCharsets.UTF_8);
 
+        // 4. Encrypt the padded data using the cipher.
+        byte[] encryptedData = cipher.doFinal(plainTextBytes);
 
-        byte[] encrypted = cipher.doFinal(data.getBytes());
-
-        return Base64.getEncoder().encodeToString(encrypted);
+        // 5. Return the encrypted data.
+        return encryptedData;
     }
 
+    public static void main(String[] args) {
+        String[] testCases = {
+            "",
+            "Hello",
+            "16-byte message!", // Exactly 16 bytes, will add a full padding block
+            "This is a longer test message for AES encryption.",
+            "!@#$%^&*()_+"
+        };
 
-    public static void main(String[] args) throws Exception {
-        String key = "MySuperSecretKey1"; // Example key (should be 16, 24, or 32 bytes for AES)
-
-        String[] testCases = {"Hello", "World", "This is a test", "Another test case", "A longer string to test padding"};
-
-        for (String testCase : testCases) {
-            String encrypted = encrypt(testCase, key);
-            System.out.println("Original: " + testCase);
-            System.out.println("Encrypted: " + encrypted);
+        System.out.println("Java AES/CBC Encryption Test Cases:");
+        for (int i = 0; i < testCases.length; i++) {
+            try {
+                byte[] encrypted = encrypt(testCases[i], SECRET_KEY, STATIC_IV);
+                System.out.println("Test Case " + (i + 1) + ":");
+                System.out.println("  Plaintext:  \"" + testCases[i] + "\"");
+                System.out.println("  Encrypted (Base64): " + Base64.getEncoder().encodeToString(encrypted));
+                System.out.println();
+            } catch (Exception e) {
+                System.err.println("Error during encryption for test case " + (i + 1) + ": " + e.getMessage());
+            }
         }
     }
 }

@@ -1,65 +1,102 @@
 package ourMethod.gemini;
+
 import java.util.*;
 
-public class Task153 {
-    public static List<Integer> breadthFirstSearch(Map<Integer, List<Integer>> graph, int startNode) {
-        List<Integer> visited = new ArrayList<>();
+class Graph {
+    private int numVertices;
+    private List<List<Integer>> adj;
+
+    public Graph(int vertices) {
+        if (vertices < 0) {
+            throw new IllegalArgumentException("Number of vertices cannot be negative");
+        }
+        this.numVertices = vertices;
+        adj = new ArrayList<>(vertices);
+        for (int i = 0; i < vertices; i++) {
+            adj.add(new LinkedList<>());
+        }
+    }
+
+    public void addEdge(int src, int dest) {
+        if (src < 0 || src >= numVertices || dest < 0 || dest >= numVertices) {
+            System.err.println("Error: Invalid vertex for edge (" + src + ", " + dest + ")");
+            return;
+        }
+        adj.get(src).add(dest);
+    }
+
+    public List<Integer> bfs(int startNode) {
+        List<Integer> result = new ArrayList<>();
+        if (startNode < 0 || startNode >= numVertices) {
+            System.err.println("Error: Start node " + startNode + " is out of bounds.");
+            return result;
+        }
+
+        boolean[] visited = new boolean[numVertices];
         Queue<Integer> queue = new LinkedList<>();
 
-        visited.add(startNode);
-        queue.offer(startNode);
+        visited[startNode] = true;
+        queue.add(startNode);
 
         while (!queue.isEmpty()) {
             int currentNode = queue.poll();
+            result.add(currentNode);
 
-            if (!graph.containsKey(currentNode)) {
-                continue; // Handle cases where the start node has no neighbors
-            }
-            
-            for (int neighbor : graph.get(currentNode)) {
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    queue.offer(neighbor);
+            for (Integer neighbor : adj.get(currentNode)) {
+                if (neighbor >= 0 && neighbor < numVertices && !visited[neighbor]) {
+                    visited[neighbor] = true;
+                    queue.add(neighbor);
                 }
             }
         }
-
-        return visited;
+        return result;
     }
+}
 
+public class Task153 {
     public static void main(String[] args) {
-        // Test cases
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        System.out.println(breadthFirstSearch(graph1, 2)); // Expected: [2, 0, 3, 1]
+        // Test Case 1: Simple connected graph
+        System.out.println("Test Case 1: Simple connected graph");
+        Graph g1 = new Graph(6);
+        g1.addEdge(0, 1);
+        g1.addEdge(0, 2);
+        g1.addEdge(1, 3);
+        g1.addEdge(2, 4);
+        g1.addEdge(3, 5);
+        System.out.println("BFS starting from node 0: " + g1.bfs(0));
 
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(0, Arrays.asList(1, 2));
-        graph2.put(1, Arrays.asList(0,3,4));
-        graph2.put(2, new ArrayList<>());
-        graph2.put(3, Arrays.asList(1));
-        graph2.put(4, Arrays.asList(1));
-        System.out.println(breadthFirstSearch(graph2, 0)); // Expected: [0, 1, 2, 3, 4]
+        // Test Case 2: Start from a different node
+        System.out.println("\nTest Case 2: Start from a different node");
+        Graph g2 = new Graph(4);
+        g2.addEdge(0, 1);
+        g2.addEdge(0, 2);
+        g2.addEdge(1, 2);
+        g2.addEdge(2, 0);
+        g2.addEdge(2, 3);
+        g2.addEdge(3, 3);
+        System.out.println("BFS starting from node 2: " + g2.bfs(2));
 
-        Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        System.out.println(breadthFirstSearch(graph3, 0)); // Expected: [0]
-        
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(0, Arrays.asList(1,2));
-        System.out.println(breadthFirstSearch(graph4, 0)); // Expected: [0, 1, 2]
+        // Test Case 3: Graph with a cycle
+        System.out.println("\nTest Case 3: Graph with a cycle");
+        Graph g3 = new Graph(3);
+        g3.addEdge(0, 1);
+        g3.addEdge(1, 2);
+        g3.addEdge(2, 0);
+        System.out.println("BFS starting from node 0: " + g3.bfs(0));
 
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(0, Arrays.asList(1, 2, 3));
-        graph5.put(1, Arrays.asList(0, 4));
-        graph5.put(2, Arrays.asList(0, 5));
-        graph5.put(3, Arrays.asList(0, 6));
-        graph5.put(4, Arrays.asList(1));
-        graph5.put(5, Arrays.asList(2));
-        graph5.put(6, Arrays.asList(3));
-        System.out.println(breadthFirstSearch(graph5, 0)); // Expected: [0, 1, 2, 3, 4, 5, 6]
+        // Test Case 4: Disconnected graph
+        System.out.println("\nTest Case 4: Disconnected graph");
+        Graph g4 = new Graph(5);
+        g4.addEdge(0, 1);
+        g4.addEdge(1, 2);
+        g4.addEdge(3, 4);
+        System.out.println("BFS starting from node 0: " + g4.bfs(0));
+        System.out.println("BFS starting from node 3: " + g4.bfs(3));
 
+        // Test Case 5: Invalid start node
+        System.out.println("\nTest Case 5: Invalid start node");
+        Graph g5 = new Graph(3);
+        g5.addEdge(0, 1);
+        System.out.println("BFS starting from node 5: " + g5.bfs(5));
     }
 }

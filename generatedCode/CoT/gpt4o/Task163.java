@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task163 {
 
     public static int longestRun(int[] numbers) {

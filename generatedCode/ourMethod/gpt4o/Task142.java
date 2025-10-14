@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task142 {
     public static int gcd(int a, int b) {
         if (b == 0) {

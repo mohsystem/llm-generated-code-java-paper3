@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task57 {
     public static long factorial(int n) {
         if (n < 0) throw new IllegalArgumentException("Negative numbers are not allowed.");

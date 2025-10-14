@@ -1,50 +1,53 @@
 package ourMethod.gemini;
-import java.util.Scanner;
+
+import java.util.Map;
+import java.util.HashMap;
 
 public class Task126 {
 
-    public static String redirect(String input) {
-        if (input == null) {
-            return "Invalid input";
-        }
+    private static final Map<String, String> URL_MAP;
+    private static final String DEFAULT_URL = "https://example.com/404";
 
-        String redirectPage;
-        switch (input.toLowerCase()) {
-            case "home":
-                redirectPage = "/home";
-                break;
-            case "profile":
-                redirectPage = "/profile";
-                break;
-            case "settings":
-                redirectPage = "/settings";
-                break;
-            default:
-                redirectPage = "/error";
-        }
-        return redirectPage;
+    static {
+        URL_MAP = new HashMap<>();
+        URL_MAP.put("home", "https://example.com/home");
+        URL_MAP.put("profile", "https://example.com/user/profile");
+        URL_MAP.put("settings", "https://example.com/user/settings");
+        URL_MAP.put("login", "https://example.com/auth/login");
     }
 
+    /**
+     * Returns a redirect URL based on a predefined safe list.
+     * This prevents open redirect vulnerabilities by never using the input
+     * to construct the URL.
+     *
+     * @param pageKey A string key representing the desired page.
+     * @return A hardcoded, safe URL string.
+     */
+    public static String getRedirectUrl(String pageKey) {
+        if (pageKey == null || pageKey.isEmpty()) {
+            return DEFAULT_URL;
+        }
+        // Use getOrDefault to safely return a pre-approved URL or the default.
+        return URL_MAP.getOrDefault(pageKey, DEFAULT_URL);
+    }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your input: ");
+        // Test cases
+        String[] testInputs = {
+            "home",
+            "settings",
+            "dashboard", // Invalid key
+            "",          // Empty key
+            "//malicious-site.com" // Malicious input attempt
+        };
 
-        String input1 = scanner.nextLine();
-        System.out.println("Redirect page for " + input1 + ": " + redirect(input1));
+        System.out.println("Running test cases for getRedirectUrl:");
+        for (String input : testInputs) {
+            System.out.printf("Input: \"%s\" -> Redirect URL: %s%n", input, getRedirectUrl(input));
+        }
 
-        String input2 = "profile";
-        System.out.println("Redirect page for " + input2 + ": " + redirect(input2));
-
-        String input3 = "SETTINGS";
-        System.out.println("Redirect page for " + input3 + ": " + redirect(input3));
-
-        String input4 = "invalid";
-        System.out.println("Redirect page for " + input4 + ": " + redirect(input4));
-        
-        String input5 = null;
-        System.out.println("Redirect page for " + input5 + ": " + redirect(input5));
-
-        scanner.close();
+        // Test case for null input
+        System.out.printf("Input: null -> Redirect URL: %s%n", getRedirectUrl(null));
     }
 }

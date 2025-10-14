@@ -1,46 +1,73 @@
 package Vanilla.gemini;
+
 import java.io.File;
 import java.io.IOException;
 
-class Task69 {
+public class Task69 {
+
+    /**
+     * Deletes a file at the given file path.
+     *
+     * @param filePath The path of the file to delete.
+     * @return true if the file was successfully deleted, false otherwise.
+     */
     public static boolean deleteFile(String filePath) {
         File file = new File(filePath);
         if (file.exists()) {
             return file.delete();
         }
+        // File doesn't exist, so it cannot be deleted.
         return false;
     }
 
     public static void main(String[] args) {
+        // If a command-line argument is provided, use it as the file path.
         if (args.length > 0) {
-            for (String arg : args) {
-                if (deleteFile(arg)) {
-                    System.out.println("File deleted successfully: " + arg);
+            String filePath = args[0];
+            System.out.println("Attempting to delete file from command line: " + filePath);
+            if (deleteFile(filePath)) {
+                System.out.println("File deleted successfully.");
+            } else {
+                System.out.println("Failed to delete the file. It may not exist or you may not have permission.");
+            }
+        } else {
+            // If no arguments, run the built-in test cases.
+            runTestCases();
+        }
+    }
+
+    /**
+     * Creates and runs 5 test cases for the deleteFile function.
+     */
+    public static void runTestCases() {
+        System.out.println("No command line arguments provided. Running test cases...");
+        String[] testFiles = {"test1.tmp", "test2.tmp", "test3.tmp", "test4.tmp", "test5.tmp"};
+        
+        // Test Cases 1-5: Create and then delete a file.
+        for (int i = 0; i < testFiles.length; i++) {
+            String fileName = testFiles[i];
+            System.out.println("\n--- Test Case " + (i + 1) + ": Delete " + fileName + " ---");
+            
+            // 1. Create a dummy file for the test.
+            try {
+                File testFile = new File(fileName);
+                if (testFile.createNewFile()) {
+                    System.out.println("  [Setup] Created temporary file: " + fileName);
                 } else {
-                    System.out.println("Failed to delete file: " + arg);
+                    System.out.println("  [Setup] Could not create temporary file: " + fileName);
+                    continue; // Skip this test if setup fails
                 }
+            } catch (IOException e) {
+                System.out.println("  [Setup] An error occurred while creating file: " + e.getMessage());
+                continue;
             }
 
-        } else {
-             System.out.println("No file path provided.");
-           
-             // Test cases (when no command-line arguments are provided)
-             System.out.println(deleteFile("test1.txt")); // Create and delete test1.txt 
-             try {
-                 new File("test2.txt").createNewFile();
-             } catch (IOException e) {
-                 System.out.println("Failed to create test file: " + e.getMessage());
-             }
-             System.out.println(deleteFile("test2.txt"));
-             System.out.println(deleteFile("non_existent_file.txt"));
-             System.out.println(deleteFile("test_directory")); // Try to delete a directory (should fail)
-             try {
-                new File("test_directory").mkdir(); 
-                new File("test_directory/test3.txt").createNewFile();
-             } catch (IOException e) {
-                 System.out.println("Failed to create test directory/file: " + e.getMessage());
-             }
-             System.out.println(deleteFile("test_directory/test3.txt"));
+            // 2. Attempt to delete the file.
+            if (deleteFile(fileName)) {
+                System.out.println("  [Result] SUCCESS: File deleted.");
+            } else {
+                System.out.println("  [Result] FAILED: File not deleted.");
+            }
         }
     }
 }

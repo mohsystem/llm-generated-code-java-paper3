@@ -1,58 +1,128 @@
 package CoT.gemini;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-class Task42 {
+public class Task42 {
 
-    private static final Map<String, String> users = new HashMap<>();
+    // In-memory storage for user credentials. In a real application, use a database.
+    private static final Map<String, UserCredentials> userStore = new HashMap<>();
+    private static final int SALT_LENGTH = 16; // 16 bytes salt
 
-    public static boolean authenticate(String username, String password) {
-        String storedHashedPassword = users.get(username);
-        if (storedHashedPassword == null) {
-            return false; // Username not found
+    private static class UserCredentials {
+        private final byte[] salt;
+        private final byte[] hashedPassword;
+
+        public UserCredentials(byte[] salt, byte[] hashedPassword) {
+            this.salt = salt;
+            this.hashedPassword = hashedPassword;
         }
-        String hashedPassword = hashPassword(password);
-        return storedHashedPassword.equals(hashedPassword);
+
+        public byte[] getSalt() {
+            return salt;
+        }
+
+        public byte[] getHashedPassword() {
+            return hashedPassword;
+        }
     }
 
-    private static String hashPassword(String password) {
+    /**
+     * Generates a random salt.
+     * @return A byte array containing the salt.
+     */
+    private static byte[] generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[SALT_LENGTH];
+        random.nextBytes(salt);
+        return salt;
+    }
+
+    /**
+     * Hashes the password with a given salt using SHA-256.
+     * @param password The password to hash.
+     * @param salt The salt to use.
+     * @return The hashed password as a byte array.
+     */
+    private static byte[] hashPassword(String password, byte[] salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes());
-            byte[] hash = md.digest();
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
+            md.update(salt);
+            return md.digest(password.getBytes());
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("Error hashing password: " + e.getMessage());
-            return null;
+            // This should never happen for SHA-256
+            throw new RuntimeException(e);
         }
     }
 
-    public static void addUser(String username, String password) {
-        String hashedPassword = hashPassword(password);
-        users.put(username, hashedPassword);
+    /**
+     * Registers a new user.
+     * @param username The username.
+     * @param password The password.
+     * @return true if registration is successful, false if the user already exists.
+     */
+    public static boolean registerUser(String username, String password) {
+        if (userStore.containsKey(username)) {
+            return false; // User already exists
+        }
+        byte[] salt = generateSalt();
+        byte[] hashedPassword = hashPassword(password, salt);
+        userStore.put(username, new UserCredentials(salt, hashedPassword));
+        return true;
     }
 
-
+    /**
+     * Authenticates a user.
+     * @param username The username.
+     * @param password The password.
+     * @return true if authentication is successful, false otherwise.
+     */
+    public static boolean loginUser(String username, String password) {
+        if (!userStore.containsKey(username)) {
+            return false; // User not found
+        }
+        UserCredentials credentials = userStore.get(username);
+        byte[] providedPasswordHash = hashPassword(password, credentials.getSalt());
+        
+        // Use constant-time comparison to prevent timing attacks
+        return MessageDigest.isEqual(credentials.getHashedPassword(), providedPasswordHash);
+    }
 
     public static void main(String[] args) {
-        addUser("user1", "password123");
-        addUser("user2", "securepass");
-        addUser("admin", "adminpass");
+        System.out.println("--- Java User Authentication System Test ---");
 
-        System.out.println(authenticate("user1", "password123")); // True
-        System.out.println(authenticate("user2", "wrongpass"));   // False
-        System.out.println(authenticate("user3", "anypass"));   // False
-        System.out.println(authenticate("admin", "adminpass"));  // True
-        System.out.println(authenticate("user1", "password12")); //False
+        // Test Case 1: Successful registration
+        System.out.println("Test 1: Registering a new user 'alice'.");
+        boolean regSuccess = registerUser("alice", "Password123!");
+        System.out.println("Registration successful: " + regSuccess);
+        System.out.println();
 
+        // Test Case 2: Successful login
+        System.out.println("Test 2: 'alice' attempts to log in with correct password.");
+        boolean loginSuccess = loginUser("alice", "Password123!");
+        System.out.println("Login successful: " + loginSuccess);
+        System.out.println();
 
+        // Test Case 3: Failed login (wrong password)
+        System.out.println("Test 3: 'alice' attempts to log in with incorrect password.");
+        boolean loginFailWrongPass = loginUser("alice", "WrongPassword!");
+        System.out.println("Login successful: " + loginFailWrongPass);
+        System.out.println();
+
+        // Test Case 4: Failed login (non-existent user)
+        System.out.println("Test 4: Non-existent user 'bob' attempts to log in.");
+        boolean loginFailNoUser = loginUser("bob", "SomePassword");
+        System.out.println("Login successful: " + loginFailNoUser);
+        System.out.println();
+
+        // Test Case 5: Failed registration (duplicate username)
+        System.out.println("Test 5: Attempting to register 'alice' again.");
+        boolean regFailDuplicate = registerUser("alice", "AnotherPassword");
+        System.out.println("Registration successful: " + regFailDuplicate);
+        System.out.println();
     }
 }

@@ -1,8 +1,17 @@
 package Vanilla.gemini;
-class Task57 {
+
+public class Task57 {
+
+    /**
+     * Calculates the factorial of a non-negative integer.
+     *
+     * @param n The number to calculate the factorial of.
+     * @return The factorial of n, or -1 if n is negative.
+     */
     public static long factorial(int n) {
         if (n < 0) {
-            return -1; // Factorial is not defined for negative numbers
+            // Factorial is not defined for negative numbers
+            return -1;
         }
         if (n == 0) {
             return 1;
@@ -15,10 +24,10 @@ class Task57 {
     }
 
     public static void main(String[] args) {
-        System.out.println(factorial(5));
-        System.out.println(factorial(0));
-        System.out.println(factorial(10));
-        System.out.println(factorial(1));
-        System.out.println(factorial(-5));
+        System.out.println("Java Factorial Test Cases:");
+        int[] testCases = {0, 1, 5, 10, 15};
+        for (int test : testCases) {
+            System.out.println("Factorial of " + test + " is " + factorial(test));
+        }
     }
 }

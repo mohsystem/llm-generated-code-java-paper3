@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task171 {
     public static void main(String[] args) {
         int[] test1 = {1, 3, 2, 3, 1};

@@ -46,7 +46,7 @@ public class Task63 {
         try {
             // Test case 1: Valid JSON object
             String test1 = Base64.getEncoder().encodeToString(
-                "{\\"name\\":\\"test\\",\\"value\\":123}".getBytes(StandardCharsets.UTF_8));
+                "{\"name\":\"test\",\"value\":123}".getBytes(StandardCharsets.UTF_8));
             System.out.println("Test 1 Result: " + processRequest(test1));
 
             // Test case 2: Valid JSON array 
@@ -56,7 +56,7 @@ public class Task63 {
 
             // Test case 3: Valid nested JSON
             String test3 = Base64.getEncoder().encodeToString(
-                "{\\"obj\\":{\\"arr\\":[1,2,3]}}".getBytes(StandardCharsets.UTF_8));
+                "{\"obj\":{\"arr\":[1,2,3]}}".getBytes(StandardCharsets.UTF_8));
             System.out.println("Test 3 Result: " + processRequest(test3));
 
             // Test case 4: Empty object

@@ -1,31 +1,36 @@
 package CoT.gemini;
-import java.util.Arrays;
 
 public class Task8 {
 
     public static char findMissingLetter(char[] array) {
-        char expected = array[0];
         for (int i = 1; i < array.length; i++) {
-            expected++;
-            if (array[i] != expected) {
-                return expected;
+            if (array[i] != array[i-1] + 1) {
+                return (char)(array[i-1] + 1);
             }
         }
-        return ' '; // Should never reach here as per problem statement
+        // This part should not be reachable given the problem constraints
+        return ' '; 
     }
 
     public static void main(String[] args) {
+        // Test Case 1
         char[] test1 = {'a', 'b', 'c', 'd', 'f'};
+        System.out.println("Test Case 1: ['a','b','c','d','f'] -> " + findMissingLetter(test1));
+
+        // Test Case 2
         char[] test2 = {'O', 'Q', 'R', 'S'};
-        char[] test3 = {'w', 'x', 'y', 'z'};
-        char[] test4 = {'A', 'B', 'D'};
-        char[] test5 = {'p', 'q', 'r', 's', 't', 'v'};
+        System.out.println("Test Case 2: ['O','Q','R','S'] -> " + findMissingLetter(test2));
 
-        System.out.println("Test 1: " + findMissingLetter(test1)); // Expected: e
-        System.out.println("Test 2: " + findMissingLetter(test2)); // Expected: P
-        System.out.println("Test 3: " + findMissingLetter(test3)); // Expected:  (no missing letter but should not happen)
-        System.out.println("Test 4: " + findMissingLetter(test4)); // Expected: C
-        System.out.println("Test 5: " + findMissingLetter(test5)); // Expected: u
+        // Test Case 3
+        char[] test3 = {'x', 'z'};
+        System.out.println("Test Case 3: ['x','z'] -> " + findMissingLetter(test3));
 
+        // Test Case 4
+        char[] test4 = {'g', 'h', 'i', 'j', 'l'};
+        System.out.println("Test Case 4: ['g','h','i','j','l'] -> " + findMissingLetter(test4));
+
+        // Test Case 5
+        char[] test5 = {'A', 'B', 'C', 'E'};
+        System.out.println("Test Case 5: ['A','B','C','E'] -> " + findMissingLetter(test5));
     }
 }

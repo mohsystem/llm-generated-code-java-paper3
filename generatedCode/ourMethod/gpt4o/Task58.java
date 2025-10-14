@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task58 {
     public static boolean XO(String str) {
         int countX = 0;

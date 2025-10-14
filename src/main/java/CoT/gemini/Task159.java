@@ -1,53 +1,54 @@
 package CoT.gemini;
-import java.util.Scanner;
+
+import java.util.Optional;
 
 public class Task159 {
 
-    public static String readBufferAtIndex(int[] buffer, int index) {
-        if (index >= 0 && index < buffer.length) {
-            return String.valueOf(buffer[index]);
+    /**
+     * Reads data from a buffer at a given index.
+     *
+     * @param buffer The dynamically allocated buffer (represented by an array).
+     * @param size The size of the buffer.
+     * @param index The index from which to read data.
+     * @return An Optional containing the data at the index if valid, otherwise an empty Optional.
+     */
+    public static Optional<Integer> readFromBuffer(int[] buffer, int size, int index) {
+        // Security: Check if the index is within the valid bounds [0, size-1].
+        // This prevents ArrayIndexOutOfBoundsException.
+        if (index >= 0 && index < size) {
+            return Optional.of(buffer[index]);
         } else {
-            return "Index out of bounds";
+            // Index is out of bounds, return an empty Optional to indicate failure.
+            return Optional.empty();
         }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        final int BUFFER_SIZE = 10;
+        // 1. Dynamically allocate a memory buffer (in Java, arrays are dynamically allocated).
+        int[] buffer = new int[BUFFER_SIZE];
 
-        // Test cases
-        int[] buffer1 = {1, 2, 3, 4, 5};
-        System.out.println(readBufferAtIndex(buffer1, 2)); // Output: 3
-        System.out.println(readBufferAtIndex(buffer1, 5)); // Output: Index out of bounds
-
-        int[] buffer2 = {10, 20, 30};
-        System.out.println(readBufferAtIndex(buffer2, 0)); // Output: 10
-        System.out.println(readBufferAtIndex(buffer2, -1)); // Output: Index out of bounds
-
-        int[] buffer3 = new int[0];
-        System.out.println(readBufferAtIndex(buffer3, 0)); // Output: Index out of bounds
-
-
-        // Example usage with dynamic allocation and user input
-        System.out.print("Enter the size of the buffer: ");
-        int size = scanner.nextInt();
-
-        if (size <= 0) {
-            System.out.println("Invalid buffer size");
-            return;
+        // 2. Fill the buffer with some data.
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            buffer[i] = i * 10; // e.g., 0, 10, 20, ...
         }
 
+        System.out.println("Java Test Cases:");
+        
+        // 3. Test cases to read from the buffer.
+        int[] testIndices = {3, 0, 9, 10, -1};
 
-        int[] buffer = new int[size];
-        System.out.print("Enter the buffer elements: ");
-        for (int i = 0; i < size; i++) {
-            buffer[i] = scanner.nextInt();
+        for (int i = 0; i < testIndices.length; i++) {
+            int index = testIndices[i];
+            System.out.print("Test " + (i + 1) + ": Reading at index " + index + "... ");
+            
+            Optional<Integer> result = readFromBuffer(buffer, BUFFER_SIZE, index);
+
+            if (result.isPresent()) {
+                System.out.println("Success! Value: " + result.get());
+            } else {
+                System.out.println("Error: Index is out of bounds.");
+            }
         }
-
-        System.out.print("Enter the index to read: ");
-        int index = scanner.nextInt();
-
-        System.out.println(readBufferAtIndex(buffer, index));
-
-        scanner.close();
     }
 }

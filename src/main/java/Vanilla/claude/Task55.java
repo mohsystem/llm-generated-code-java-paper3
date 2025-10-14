@@ -1,43 +1,35 @@
 package Vanilla.claude;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 public class Task55 {
     public static boolean isValidEmail(String email) {
-        if (email == null || email.isEmpty())
+        if (email == null || email.isEmpty()) {
             return false;
-            
-        // Check for @ and . symbols
-        int atIndex = email.indexOf('@');
-        int lastDotIndex = email.lastIndexOf('.');
-        
-        if (atIndex < 1 || lastDotIndex < atIndex + 2 || lastDotIndex == email.length() - 1)
-            return false;
-            
-        // Check local part and domain
-        String localPart = email.substring(0, atIndex);
-        String domain = email.substring(atIndex + 1);
-        
-        // Check for valid characters
-        String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_@";
-        for (char c : email.toCharArray()) {
-            if (allowedChars.indexOf(c) == -1)
-                return false;
         }
         
-        return true;
+        // Regular expression for email validation
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        
+        return matcher.matches();
     }
-
+    
     public static void main(String[] args) {
         // Test cases
-        String[] emails = {
-            "test@example.com",
-            "invalid.email@com",
-            "no@dot",
-            "@nocontent.com",
-            "test.email@domain.co.uk"
+        String[] testEmails = {
+            "user@example.com",
+            "john.doe@company.co.uk",
+            "invalid.email@",
+            "@invalid.com",
+            "valid_email123@test-domain.org"
         };
         
-        for (String email : emails) {
-            System.out.println(email + " is " + (isValidEmail(email) ? "valid" : "invalid"));
+        System.out.println("Email Validation Results:");
+        for (String email : testEmails) {
+            System.out.println(email + " : " + (isValidEmail(email) ? "Valid" : "Invalid"));
         }
     }
 }

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

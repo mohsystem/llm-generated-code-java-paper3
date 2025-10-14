@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task17 {
     public static void main(String[] args) {
         System.out.println(toJadenCase("How can mirrors be real if our eyes aren't real"));

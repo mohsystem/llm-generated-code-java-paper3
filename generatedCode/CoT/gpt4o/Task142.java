@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task142 {
 
     public static int gcd(int a, int b) {

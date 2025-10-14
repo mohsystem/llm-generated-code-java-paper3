@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 

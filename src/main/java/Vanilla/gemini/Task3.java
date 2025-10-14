@@ -1,24 +1,53 @@
 package Vanilla.gemini;
-import java.util.HashSet;
-import java.util.Set;
 
-class Task3 {
-    public boolean checkPangram(String sentence) {
-        Set<Character> alphabet = new HashSet<>();
-        for (char c : sentence.toLowerCase().toCharArray()) {
+public class Task3 {
+
+    /**
+     * Checks if a given string is a pangram.
+     * A pangram is a sentence containing every letter of the English alphabet at least once.
+     * The check is case-insensitive and ignores numbers and punctuation.
+     *
+     * @param s The input string.
+     * @return true if the string is a pangram, false otherwise.
+     */
+    public static boolean isPangram(String s) {
+        if (s == null) {
+            return false;
+        }
+
+        boolean[] seen = new boolean[26];
+        int count = 0;
+
+        for (char c : s.toCharArray()) {
             if (Character.isLetter(c)) {
-                alphabet.add(c);
+                int index = Character.toLowerCase(c) - 'a';
+                if (!seen[index]) {
+                    seen[index] = true;
+                    count++;
+                }
+            }
+            if (count == 26) {
+                return true;
             }
         }
-        return alphabet.size() == 26;
+        
+        return count == 26;
     }
 
     public static void main(String[] args) {
-        Task3 task3 = new Task3();
-        System.out.println(task3.checkPangram("The quick brown fox jumps over the lazy dog")); // True
-        System.out.println(task3.checkPangram("This is not a pangram.")); // False
-        System.out.println(task3.checkPangram("Waltz, bad nymph, for quick jigs vex.")); // True
-        System.out.println(task3.checkPangram("Glib jocks quiz nymph to vex dwarf.")); // True
-        System.out.println(task3.checkPangram("Sphinx of black quartz, judge my vow.")); // True
+        String[] testCases = {
+            "The quick brown fox jumps over the lazy dog",
+            "Pack my box with five dozen liquor jugs.",
+            "This is not a pangram",
+            "The quick brown fox jumps over the lazy do",
+            ""
+        };
+
+        System.out.println("Running Java Test Cases:");
+        for (String test : testCases) {
+            System.out.println("Input: \"" + test + "\"");
+            System.out.println("Is Pangram: " + isPangram(test));
+            System.out.println();
+        }
     }
 }

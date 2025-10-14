@@ -2,79 +2,79 @@ package Vanilla.claude;
 
 import java.util.*;
 
-class Task153 {
-    private int V;
-    private LinkedList<Integer>[] adj;
-
-    @SuppressWarnings("unchecked")
-    Task153(int v) {
-        V = v;
-        adj = new LinkedList[v];
-        for (int i = 0; i < v; ++i)
-            adj[i] = new LinkedList<>();
-    }
-
-    void addEdge(int v, int w) {
-        adj[v].add(w);
-    }
-
-    ArrayList<Integer> BFS(int start) {
-        boolean[] visited = new boolean[V];
-        ArrayList<Integer> result = new ArrayList<>();
-        LinkedList<Integer> queue = new LinkedList<>();
-
-        visited[start] = true;
-        queue.add(start);
-
-        while (!queue.isEmpty()) {
-            start = queue.poll();
-            result.add(start);
-
-            for (int n : adj[start]) {
-                if (!visited[n]) {
-                    visited[n] = true;
-                    queue.add(n);
-                }
+public class Task153 {
+    static class Graph {
+        private int vertices;
+        private List<List<Integer>> adjacencyList;
+        
+        public Graph(int vertices) {
+            this.vertices = vertices;
+            adjacencyList = new ArrayList<>();
+            for (int i = 0; i < vertices; i++) {
+                adjacencyList.add(new ArrayList<>());
             }
         }
-        return result;
+        
+        public void addEdge(int source, int destination) {
+            adjacencyList.get(source).add(destination);
+        }
+        
+        public List<Integer> bfs(int startNode) {
+            List<Integer> result = new ArrayList<>();
+            boolean[] visited = new boolean[vertices];
+            Queue<Integer> queue = new LinkedList<>();
+            
+            visited[startNode] = true;
+            queue.offer(startNode);
+            
+            while (!queue.isEmpty()) {
+                int current = queue.poll();
+                result.add(current);
+                
+                for (int neighbor : adjacencyList.get(current)) {
+                    if (!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+            
+            return result;
+        }
     }
-
+    
+    public static List<Integer> breadthFirstSearch(int vertices, int[][] edges, int startNode) {
+        Graph graph = new Graph(vertices);
+        for (int[] edge : edges) {
+            graph.addEdge(edge[0], edge[1]);
+        }
+        return graph.bfs(startNode);
+    }
+    
     public static void main(String[] args) {
-        // Test Case 1
-        Task153 g1 = new Task153(4);
-        g1.addEdge(0, 1);
-        g1.addEdge(0, 2);
-        g1.addEdge(1, 2);
-        g1.addEdge(2, 0);
-        g1.addEdge(2, 3);
-        g1.addEdge(3, 3);
-        System.out.println("Test 1: " + g1.BFS(2));
-
-        // Test Case 2
-        Task153 g2 = new Task153(3);
-        g2.addEdge(0, 1);
-        g2.addEdge(1, 2);
-        System.out.println("Test 2: " + g2.BFS(0));
-
-        // Test Case 3
-        Task153 g3 = new Task153(5);
-        g3.addEdge(0, 1);
-        g3.addEdge(0, 2);
-        g3.addEdge(1, 3);
-        g3.addEdge(2, 4);
-        System.out.println("Test 3: " + g3.BFS(0));
-
-        // Test Case 4
-        Task153 g4 = new Task153(4);
-        g4.addEdge(0, 1);
-        g4.addEdge(1, 2);
-        g4.addEdge(2, 3);
-        g4.addEdge(3, 0);
-        System.out.println("Test 4: " + g4.BFS(0));
-
-        // Test Case 5
-        Task153 g5 = new Task153(1);
-        System.out.println("Test 5: " + g5.BFS(0));
+        // Test Case 1: Simple linear graph
+        System.out.println("Test Case 1:");
+        int[][] edges1 = {{0, 1}, {1, 2}, {2, 3}};
+        System.out.println(breadthFirstSearch(4, edges1, 0));
+        
+        // Test Case 2: Graph with multiple branches
+        System.out.println("\\nTest Case 2:");
+        int[][] edges2 = {{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}};
+        System.out.println(breadthFirstSearch(6, edges2, 0));
+        
+        // Test Case 3: Disconnected graph
+        System.out.println("\\nTest Case 3:");
+        int[][] edges3 = {{0, 1}, {2, 3}};
+        System.out.println(breadthFirstSearch(4, edges3, 0));
+        
+        // Test Case 4: Graph with cycles
+        System.out.println("\\nTest Case 4:");
+        int[][] edges4 = {{0, 1}, {0, 2}, {1, 2}, {2, 0}, {2, 3}};
+        System.out.println(breadthFirstSearch(4, edges4, 0));
+        
+        // Test Case 5: Single node
+        System.out.println("\\nTest Case 5:");
+        int[][] edges5 = {};
+        System.out.println(breadthFirstSearch(1, edges5, 0));
     }
 }

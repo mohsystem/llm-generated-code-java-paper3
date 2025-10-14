@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task191 {
     public static int longestValidParentheses(String s) {
         int maxLen = 0;

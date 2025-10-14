@@ -1,54 +1,103 @@
 package Vanilla.gemini;
+
 import java.util.ArrayList;
 import java.util.List;
 
 class ProductOfNumbers {
-    List<Integer> prefixProducts;
+    private List<Integer> prefixProducts;
 
     public ProductOfNumbers() {
         prefixProducts = new ArrayList<>();
-        prefixProducts.add(1); // Initialize with 1 for easier calculations
+        prefixProducts.add(1);
     }
 
     public void add(int num) {
         if (num == 0) {
-            prefixProducts = new ArrayList<>();
+            // If a zero is added, reset the prefix products.
+            // Any product including this zero will be 0.
+            prefixProducts.clear();
             prefixProducts.add(1);
         } else {
+            // Append the new prefix product.
             prefixProducts.add(prefixProducts.get(prefixProducts.size() - 1) * num);
         }
     }
 
     public int getProduct(int k) {
         int n = prefixProducts.size();
+        // If k is greater than or equal to the number of elements since the last zero,
+        // it means a zero is included in the range of the last k numbers.
         if (k >= n) {
-            return 0; // Or throw an exception if k is out of bounds
+            return 0;
         }
-        return prefixProducts.get(n - 1) / prefixProducts.get(n - 1 - k);
+        // The product of the last k numbers is P[n-1] / P[n-1-k].
+        int lastProduct = prefixProducts.get(n - 1);
+        int productBeforeK = prefixProducts.get(n - 1 - k);
+        return lastProduct / productBeforeK;
     }
+}
 
+public class Task176 {
     public static void main(String[] args) {
-        ProductOfNumbers productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(3);
-        productOfNumbers.add(0);
-        productOfNumbers.add(2);
-        productOfNumbers.add(5);
-        productOfNumbers.add(4);
-        System.out.println(productOfNumbers.getProduct(2)); // 20
-        System.out.println(productOfNumbers.getProduct(3)); // 40
-        System.out.println(productOfNumbers.getProduct(4)); // 0
-        productOfNumbers.add(8);
-        System.out.println(productOfNumbers.getProduct(2)); // 32
+        // Test Case 1 (from example)
+        System.out.println("Test Case 1:");
+        ProductOfNumbers p1 = new ProductOfNumbers();
+        p1.add(3);
+        p1.add(0);
+        p1.add(2);
+        p1.add(5);
+        p1.add(4);
+        System.out.println("getProduct(2): " + p1.getProduct(2));
+        System.out.println("getProduct(3): " + p1.getProduct(3));
+        System.out.println("getProduct(4): " + p1.getProduct(4));
+        p1.add(8);
+        System.out.println("getProduct(2): " + p1.getProduct(2));
+        System.out.println();
 
+        // Test Case 2: No zeros
+        System.out.println("Test Case 2:");
+        ProductOfNumbers p2 = new ProductOfNumbers();
+        p2.add(1);
+        p2.add(2);
+        p2.add(3);
+        p2.add(4);
+        System.out.println("getProduct(1): " + p2.getProduct(1));
+        System.out.println("getProduct(4): " + p2.getProduct(4));
+        System.out.println();
 
-        ProductOfNumbers productOfNumbers2 = new ProductOfNumbers();
-        productOfNumbers2.add(1);
-        System.out.println(productOfNumbers2.getProduct(1)); //1
+        // Test Case 3: Starts with zero
+        System.out.println("Test Case 3:");
+        ProductOfNumbers p3 = new ProductOfNumbers();
+        p3.add(0);
+        p3.add(5);
+        p3.add(10);
+        System.out.println("getProduct(1): " + p3.getProduct(1));
+        System.out.println("getProduct(2): " + p3.getProduct(2));
+        System.out.println("getProduct(3): " + p3.getProduct(3));
+        System.out.println();
 
-        ProductOfNumbers productOfNumbers3 = new ProductOfNumbers();
-        productOfNumbers3.add(10);
-        productOfNumbers3.add(5);
-        productOfNumbers3.add(2);
-        System.out.println(productOfNumbers3.getProduct(3));//100
+        // Test Case 4: Multiple zeros
+        System.out.println("Test Case 4:");
+        ProductOfNumbers p4 = new ProductOfNumbers();
+        p4.add(5);
+        p4.add(6);
+        p4.add(0);
+        p4.add(7);
+        p4.add(0);
+        p4.add(8);
+        p4.add(9);
+        System.out.println("getProduct(1): " + p4.getProduct(1));
+        System.out.println("getProduct(2): " + p4.getProduct(2));
+        System.out.println("getProduct(3): " + p4.getProduct(3));
+        System.out.println();
+
+        // Test Case 5: k equals the number of elements
+        System.out.println("Test Case 5:");
+        ProductOfNumbers p5 = new ProductOfNumbers();
+        p5.add(10);
+        p5.add(20);
+        p5.add(30);
+        System.out.println("getProduct(3): " + p5.getProduct(3));
+        System.out.println();
     }
 }

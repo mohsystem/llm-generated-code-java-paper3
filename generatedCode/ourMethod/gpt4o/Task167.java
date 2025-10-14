@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task167 {
     public static double cubeDiagonal(double volume) {
         double sideLength = Math.cbrt(volume);

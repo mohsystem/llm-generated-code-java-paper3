@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import spark.Request;
 import spark.Response;
 import spark.Route;

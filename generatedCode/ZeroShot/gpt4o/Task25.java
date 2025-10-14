@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task25 {
     public static void main(String[] args) {
         // Test cases

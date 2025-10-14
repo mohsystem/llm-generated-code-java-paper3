@@ -1,29 +1,41 @@
 package Vanilla.gemini;
-import java.util.Arrays;
-import java.util.List;
 
-class Task28 {
+public class Task28 {
+
     public static String whoLikesIt(String... names) {
-        int len = names.length;
-        switch (len) {
+        switch (names.length) {
             case 0:
                 return "no one likes this";
             case 1:
-                return names[0] + " likes this";
+                return String.format("%s likes this", names[0]);
             case 2:
-                return names[0] + " and " + names[1] + " like this";
+                return String.format("%s and %s like this", names[0], names[1]);
             case 3:
-                return names[0] + ", " + names[1] + " and " + names[2] + " like this";
+                return String.format("%s, %s and %s like this", names[0], names[1], names[2]);
             default:
-                return names[0] + ", " + names[1] + " and " + (len - 2) + " others like this";
+                return String.format("%s, %s and %d others like this", names[0], names[1], names.length - 2);
         }
     }
 
     public static void main(String[] args) {
-        System.out.println(whoLikesIt());
-        System.out.println(whoLikesIt("Peter"));
-        System.out.println(whoLikesIt("Jacob", "Alex"));
-        System.out.println(whoLikesIt("Max", "John", "Mark"));
-        System.out.println(whoLikesIt("Alex", "Jacob", "Mark", "Max"));
+        // Test Case 1
+        String[] test1 = {};
+        System.out.println(whoLikesIt(test1)); // Expected: "no one likes this"
+
+        // Test Case 2
+        String[] test2 = {"Peter"};
+        System.out.println(whoLikesIt(test2)); // Expected: "Peter likes this"
+
+        // Test Case 3
+        String[] test3 = {"Jacob", "Alex"};
+        System.out.println(whoLikesIt(test3)); // Expected: "Jacob and Alex like this"
+
+        // Test Case 4
+        String[] test4 = {"Max", "John", "Mark"};
+        System.out.println(whoLikesIt(test4)); // Expected: "Max, John and Mark like this"
+
+        // Test Case 5
+        String[] test5 = {"Alex", "Jacob", "Mark", "Max"};
+        System.out.println(whoLikesIt(test5)); // Expected: "Alex, Jacob and 2 others like this"
     }
 }

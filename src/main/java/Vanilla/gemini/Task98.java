@@ -1,24 +1,35 @@
 package Vanilla.gemini;
-import java.util.Scanner;
 
 public class Task98 {
-    public static int convertToInt(String input) {
+
+    /**
+     * Attempts to convert a given string to an integer and prints the outcome.
+     *
+     * @param input The string to be converted.
+     */
+    public static void attemptConversion(String input) {
         try {
-            return Integer.parseInt(input);
+            // trim() removes leading and trailing whitespace before parsing.
+            int number = Integer.parseInt(input.trim());
+            System.out.println("Input: \"" + input + "\" -> Success! Converted to integer: " + number);
         } catch (NumberFormatException e) {
-            return -1; // Or throw an exception, depending on desired behavior
+            System.out.println("Input: \"" + input + "\" -> Failed. Not a valid integer.");
         }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Array of 5 test cases to demonstrate the functionality.
+        String[] testCases = {
+            "123",      // Valid positive integer
+            "-45",      // Valid negative integer
+            "  99  ",   // Valid integer with whitespace
+            "abc",      // Invalid string
+            "12a34"     // Invalid string with mixed characters
+        };
 
-        System.out.println(convertToInt("123"));
-        System.out.println(convertToInt("456.7"));
-        System.out.println(convertToInt("abc"));
-        System.out.println(convertToInt("-789"));
-        System.out.println(convertToInt("0"));
-
-
+        System.out.println("--- Java: Testing Integer Conversion ---");
+        for (String test : testCases) {
+            attemptConversion(test);
+        }
     }
 }

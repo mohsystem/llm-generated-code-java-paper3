@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task149 {
     private static class Queue {
         private int[] elements;

@@ -2,17 +2,21 @@ package CoT.claude;
 
 public class Task34 {
     public static boolean isNarcissistic(int number) {
-        if (number <= 0) return false;
+        // Input validation - ensure positive integer
+        if (number < 0) {
+            return false;
+        }
         
+        // Convert to string to get digits and count
         String numStr = String.valueOf(number);
-        int len = numStr.length();
-        int sum = 0;
-        int temp = number;
+        int numDigits = numStr.length();
         
-        while (temp > 0) {
-            int digit = temp % 10;
-            sum += Math.pow(digit, len);
-            temp /= 10;
+        // Calculate sum of digits raised to power of digit count
+        int sum = 0;
+        for (int i = 0; i < numDigits; i++) {
+            int digit = Character.getNumericValue(numStr.charAt(i));
+            // Use Math.pow and cast to int to avoid overflow for reasonable inputs
+            sum += (int) Math.pow(digit, numDigits);
         }
         
         return sum == number;
@@ -20,10 +24,10 @@ public class Task34 {
     
     public static void main(String[] args) {
         // Test cases
-        System.out.println(isNarcissistic(153));  // true
-        System.out.println(isNarcissistic(1652)); // false
-        System.out.println(isNarcissistic(370));  // true
-        System.out.println(isNarcissistic(407));  // true
-        System.out.println(isNarcissistic(1634)); // true
+        System.out.println("Test 1 - 153: " + isNarcissistic(153)); // true
+        System.out.println("Test 2 - 1652: " + isNarcissistic(1652)); // false
+        System.out.println("Test 3 - 9: " + isNarcissistic(9)); // true
+        System.out.println("Test 4 - 9474: " + isNarcissistic(9474)); // true
+        System.out.println("Test 5 - 370: " + isNarcissistic(370)); // true
     }
 }

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task5 {
     public static int persistence(int num) {
         int count = 0;

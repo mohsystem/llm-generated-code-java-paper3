@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task10 {
     public static int sumBetween(int a, int b) {
         int sum = 0;

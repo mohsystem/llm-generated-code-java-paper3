@@ -4,100 +4,108 @@ import java.sql.*;
 
 public class Task67 {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/customerdb";
-    private static final String USER = "dbuser";
-    private static final String PASS = "dbpassword";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "password";
     
-    public static Customer getCustomerInfo(String username) {
-        Customer customer = null;
+    static class Customer {
+        private int id;
+        private String username;
+        private String email;
+        private String fullName;
         
-        // Input validation
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
+        public Customer(int id, String username, String email, String fullName) {
+            this.id = id;
+            this.username = username;
+            this.email = email;
+            this.fullName = fullName;
         }
         
-        // SQL using prepared statement to prevent SQL injection
-        String sql = "SELECT * FROM customer WHERE customerusername = ?";
+        @Override
+        public String toString() {
+            return "Customer{id=" + id + ", username='" + username + 
+                   "', email='" + email + "', fullName='" + fullName + "'}";
+        }
+    }
+    
+    public static Customer getCustomerByUsername(String customerUsername) {
+        // Input validation
+        if (customerUsername == null || customerUsername.trim().isEmpty()) {
+            System.err.println("Error: Username cannot be null or empty");
+            return null;
+        }
         
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Sanitize input (allow only alphanumeric and underscore)
+        if (!customerUsername.matches("^[a-zA-Z0-9_]{1,50}$")) {
+            System.err.println("Error: Invalid username format");
+            return null;
+        }
+        
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Customer customer = null;
+        
+        try {
+            // Secure database connection
+            conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             
-            pstmt.setString(1, username);
+            // Use parameterized query to prevent SQL injection
+            String query = "SELECT id, username, email, full_name FROM customer WHERE username = ?";
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, customerUsername);
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    customer = new Customer(
-                        rs.getInt("id"),
-                        rs.getString("customerusername"),
-                        rs.getString("firstname"),
-                        rs.getString("lastname"),
-                        rs.getString("email")
-                    );
-                }
+            rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                customer = new Customer(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("full_name")
+                );
+            } else {
+                System.out.println("No customer found with username: " + customerUsername);
             }
+            
         } catch (SQLException e) {
-            throw new RuntimeException("Database error occurred", e);
+            // Secure error handling - don't expose sensitive details
+            System.err.println("Database error occurred while retrieving customer information");
+            e.printStackTrace();
+        } finally {
+            // Proper resource cleanup
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing database resources");
+            }
         }
         
         return customer;
     }
     
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Please provide customer username as argument");
-            return;
-        }
+        // Test cases
+        String[] testUsernames = {"john_doe", "jane_smith", "admin123", "test_user", "nonexistent"};
         
-        try {
-            // Test cases
-            String[] testUsernames = {
-                args[0],
-                "john_doe",
-                "jane_smith", 
-                "invalid_user",
-                "test_user"
-            };
-            
-            for (String username : testUsernames) {
-                try {
-                    Customer customer = getCustomerInfo(username);
-                    if (customer != null) {
-                        System.out.println("Customer found: " + customer);
-                    } else {
-                        System.out.println("No customer found for username: " + username);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error processing username " + username + ": " + e.getMessage());
-                }
+        if (args.length > 0) {
+            // Use command line argument
+            Customer customer = getCustomerByUsername(args[0]);
+            if (customer != null) {
+                System.out.println("Retrieved: " + customer);
             }
-            
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+        } else {
+            // Run test cases
+            System.out.println("Running test cases...\\n");
+            for (String username : testUsernames) {
+                System.out.println("Testing username: " + username);
+                Customer customer = getCustomerByUsername(username);
+                if (customer != null) {
+                    System.out.println("Result: " + customer);
+                }
+                System.out.println("---");
+            }
         }
-    }
-}
-
-class Customer {
-    private int id;
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String email;
-    
-    public Customer(int id, String username, String firstName, String lastName, String email) {
-        this.id = id;
-        this.username = username;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-    }
-    
-    @Override
-    public String toString() {
-        return "Customer{id=" + id + 
-               ", username='" + username + '\'' +
-               ", firstName='" + firstName + '\'' +
-               ", lastName='" + lastName + '\'' +
-               ", email='" + email + '\'' +
-               '}';
     }
 }

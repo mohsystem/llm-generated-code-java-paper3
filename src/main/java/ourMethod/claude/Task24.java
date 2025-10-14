@@ -1,30 +1,45 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+
 public class Task24 {
-    public static boolean validatePIN(String pin) {
+    public static boolean validatePin(String pin) {
+        // Validate input is not null
         if (pin == null) {
             return false;
         }
         
-        if (pin.length() != 4 && pin.length() != 6) {
+        // Check length is exactly 4 or 6
+        int length = pin.length();
+        if (length != 4 && length != 6) {
             return false;
         }
         
-        for (char c : pin.toCharArray()) {
-            if (!Character.isDigit(c)) {
+        // Validate each character is a digit
+        for (int i = 0; i < length; i++) {
+            char c = pin.charAt(i);
+            if (c < '0' || c > '9') {
                 return false;
             }
         }
         
         return true;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(validatePIN("1234"));     // true
-        System.out.println(validatePIN("12345"));    // false  
-        System.out.println(validatePIN("a234"));     // false
-        System.out.println(validatePIN(""));         // false
-        System.out.println(validatePIN("123456"));   // true
+        // Test case 1: Valid 4-digit PIN
+        System.out.println(validatePin("1234")); // true
+        
+        // Test case 2: Invalid 5-digit PIN
+        System.out.println(validatePin("12345")); // false
+        
+        // Test case 3: Invalid PIN with letter
+        System.out.println(validatePin("a234")); // false
+        
+        // Test case 4: Valid 6-digit PIN
+        System.out.println(validatePin("123456")); // true
+        
+        // Test case 5: Null input
+        System.out.println(validatePin(null)); // false
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task125 {
 
     public static String accessResource(String userInput) {

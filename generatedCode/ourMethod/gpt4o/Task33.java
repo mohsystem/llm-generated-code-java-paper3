@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task33 {
     public static int queueTime(int[] customers, int n) {
         if (customers == null || customers.length == 0 || n <= 0) {

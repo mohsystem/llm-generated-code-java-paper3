@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task9 {
     public static String oddOrEven(int[] array) {
         int sum = 0;

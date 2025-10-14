@@ -2,75 +2,71 @@ package ZeroShot.claude;
 
 import java.util.*;
 
-class Task169 {
-    public static int[] countSmaller(int[] nums) {
-        int n = nums.length;
-        int[] counts = new int[n];
-        int[] indices = new int[n];
-        for (int i = 0; i < n; i++) {
-            indices[i] = i;
+public class Task169 {
+    private static class TreeNode {
+        int val;
+        int count;
+        int leftSize;
+        TreeNode left;
+        TreeNode right;
+        
+        TreeNode(int val) {
+            this.val = val;
+            this.count = 1;
+            this.leftSize = 0;
         }
-        mergeSort(nums, indices, counts, 0, n - 1);
-        return counts;
     }
     
-    private static void mergeSort(int[] nums, int[] indices, int[] counts, int start, int end) {
-        if (start >= end) return;
+    public static List<Integer> countSmaller(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return new ArrayList<>();
+        }
         
-        int mid = start + (end - start) / 2;
-        mergeSort(nums, indices, counts, start, mid);
-        mergeSort(nums, indices, counts, mid + 1, end);
-        merge(nums, indices, counts, start, mid, end);
+        Integer[] result = new Integer[nums.length];
+        TreeNode root = null;
+        
+        for (int i = nums.length - 1; i >= 0; i--) {
+            root = insert(root, nums[i], result, i, 0);
+        }
+        
+        return Arrays.asList(result);
     }
     
-    private static void merge(int[] nums, int[] indices, int[] counts, int start, int mid, int end) {
-        int[] merged = new int[end - start + 1];
-        int[] mergedIndices = new int[end - start + 1];
-        int left = start, right = mid + 1, idx = 0, rightCount = 0;
-        
-        while (left <= mid && right <= end) {
-            if (nums[indices[right]] < nums[indices[left]]) {
-                rightCount++;
-                mergedIndices[idx] = indices[right];
-                merged[idx++] = nums[indices[right++]];
-            } else {
-                counts[indices[left]] += rightCount;
-                mergedIndices[idx] = indices[left];
-                merged[idx++] = nums[indices[left++]];
-            }
+    private static TreeNode insert(TreeNode node, int val, Integer[] result, int index, int preSum) {
+        if (node == null) {
+            node = new TreeNode(val);
+            result[index] = preSum;
+        } else if (node.val == val) {
+            node.count++;
+            result[index] = preSum + node.leftSize;
+        } else if (node.val > val) {
+            node.leftSize++;
+            node.left = insert(node.left, val, result, index, preSum);
+        } else {
+            node.right = insert(node.right, val, result, index, preSum + node.leftSize + node.count);
         }
-        
-        while (left <= mid) {
-            counts[indices[left]] += rightCount;
-            mergedIndices[idx] = indices[left];
-            merged[idx++] = nums[indices[left++]];
-        }
-        
-        while (right <= end) {
-            mergedIndices[idx] = indices[right];
-            merged[idx++] = nums[indices[right++]];
-        }
-        
-        System.arraycopy(merged, 0, nums, start, merged.length);
-        System.arraycopy(mergedIndices, 0, indices, start, mergedIndices.length);
+        return node;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        int[][] testCases = {
-            {5, 2, 6, 1},
-            {-1},
-            {-1, -1},
-            {1, 2, 3, 4},
-            {4, 3, 2, 1}
-        };
-
-        for (int[] test : testCases) {
-            System.out.print("Input: ");
-            System.out.println(Arrays.toString(test));
-            System.out.print("Output: ");
-            System.out.println(Arrays.toString(countSmaller(test)));
-            System.out.println();
-        }
+        // Test case 1
+        int[] nums1 = {5, 2, 6, 1};
+        System.out.println("Test 1: " + countSmaller(nums1));
+        
+        // Test case 2
+        int[] nums2 = {-1};
+        System.out.println("Test 2: " + countSmaller(nums2));
+        
+        // Test case 3
+        int[] nums3 = {-1, -1};
+        System.out.println("Test 3: " + countSmaller(nums3));
+        
+        // Test case 4
+        int[] nums4 = {1, 2, 3, 4, 5};
+        System.out.println("Test 4: " + countSmaller(nums4));
+        
+        // Test case 5
+        int[] nums5 = {5, 4, 3, 2, 1};
+        System.out.println("Test 5: " + countSmaller(nums5));
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;

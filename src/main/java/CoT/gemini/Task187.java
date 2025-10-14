@@ -1,88 +1,100 @@
 package CoT.gemini;
+
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.TimeUnit;
 
-class Task187 {
+class H2O {
+    private final Semaphore hSem;
+    private final Semaphore oSem;
+    private final CyclicBarrier barrier;
 
-    private int hydrogenCount = 0;
-    private int oxygenCount = 0;
-    private Lock lock = new ReentrantLock();
-    private Condition condition = lock.newCondition();
+    public H2O() {
+        // Semaphore for hydrogen allows 2 permits.
+        hSem = new Semaphore(2);
+        // Semaphore for oxygen allows 1 permit.
+        oSem = new Semaphore(1);
 
-    public void releaseHydrogen() throws InterruptedException {
-        lock.lock();
-        try {
-            hydrogenCount++;
-            while (hydrogenCount < 2 || oxygenCount == 0) {
-                condition.await();
-            }
-            hydrogenCount -= 2;
-            oxygenCount--;
-            condition.signalAll(); // Signal oxygen and other hydrogen
-        } finally {
-            lock.unlock();
-        }
-        // System.out.print("H"); // Indicate bond formation
+        // A barrier for 3 threads (2H + 1O). When the barrier is tripped,
+        // it resets the semaphores for the next molecule.
+        barrier = new CyclicBarrier(3, () -> {
+            hSem.release(2);
+            oSem.release(1);
+        });
     }
 
-    public void releaseOxygen() throws InterruptedException {
-        lock.lock();
-        try {
-            oxygenCount++;
-            while (hydrogenCount < 2) {
-                condition.await();
-            }
-            oxygenCount--;
-            hydrogenCount -= 2;
-            condition.signalAll(); // Signal hydrogen
-        } finally {
-            lock.unlock();
-        }
-        // System.out.print("O"); // Indicate bond formation
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException, BrokenBarrierException {
+        hSem.acquire();
+        // releaseHydrogen.run() outputs "H".
+        releaseHydrogen.run();
+        barrier.await();
     }
 
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException, BrokenBarrierException {
+        oSem.acquire();
+        // releaseOxygen.run() outputs "O".
+        releaseOxygen.run();
+        barrier.await();
+    }
+}
+
+public class Task187 {
+
+    public static String runWaterSimulation(String water) {
+        H2O h2o = new H2O();
+        StringBuilder result = new StringBuilder();
+        ExecutorService executor = Executors.newFixedThreadPool(water.length());
+
+        for (char atom : water.toCharArray()) {
+            if (atom == 'H') {
+                executor.submit(() -> {
+                    try {
+                        h2o.hydrogen(() -> result.append('H'));
+                    } catch (InterruptedException | BrokenBarrierException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            } else if (atom == 'O') {
+                 executor.submit(() -> {
+                    try {
+                        h2o.oxygen(() -> result.append('O'));
+                    } catch (InterruptedException | BrokenBarrierException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            }
+        }
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+
+        return result.toString();
+    }
 
     public static void main(String[] args) {
-        Task187 h2o = new Task187();
-        String[] inputs = {"HOH", "OOHHHH", "HOHOHO", "HHHOOO", "OHHHOO"};
-        for (String input : inputs) {
-            final String water = input;
-            Thread[] threads = new Thread[water.length()];
-            for (int i = 0; i < water.length(); i++) {
-                char c = water.charAt(i);
-                final int index = i;
-                if (c == 'H') {
-                    threads[i] = new Thread(() -> {
-                        try {
-                            h2o.releaseHydrogen();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } else {
-                    threads[i] = new Thread(() -> {
-                        try {
-                            h2o.releaseOxygen();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-            for (Thread thread : threads) {
-                thread.start();
-            }
-            for (Thread thread : threads) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            System.out.println(); // Separate output for each test case
+        String[] testCases = {
+            "HOH",
+            "OOHHHH",
+            "HHOHHO",
+            "HHHHHHOOO",
+            "OHHOHHOHH"
+        };
 
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Input: " + testCases[i]);
+            String output = runWaterSimulation(testCases[i]);
+            System.out.println("Output: " + output);
+            System.out.println("--------------------");
         }
     }
 }

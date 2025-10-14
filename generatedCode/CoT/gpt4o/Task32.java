@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task32 {
     public static int calculateYears(double principal, double interest, double tax, double desired) {
         int years = 0;

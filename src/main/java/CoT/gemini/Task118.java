@@ -1,28 +1,71 @@
 package CoT.gemini;
-import java.util.regex.Matcher;
+
 import java.util.regex.Pattern;
 
 class Task118 {
-
-    public boolean isValidIP(String ip) {
+    /**
+     * Validates if the given string is a valid IPv4 address.
+     *
+     * @param ip The string to validate.
+     * @return true if the string is a valid IPv4 address, false otherwise.
+     */
+    public static boolean isValidIP(String ip) {
         if (ip == null || ip.isEmpty()) {
             return false;
         }
 
-        String regex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(ip);
-        return matcher.matches();
+        // The split method with a negative limit ensures that trailing empty strings are not discarded.
+        // For example, "1.2.3." would split into ["1", "2", "3", ""], which will be correctly identified as invalid.
+        String[] parts = ip.split("\\.", -1);
 
+        if (parts.length != 4) {
+            return false;
+        }
+
+        for (String part : parts) {
+            // Each part must not be empty and must have at most 3 digits.
+            if (part.isEmpty() || part.length() > 3) {
+                return false;
+            }
+
+            // Each part must contain only digits.
+            for (char c : part.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+
+            // A part cannot have leading zeros unless it is "0" itself.
+            if (part.length() > 1 && part.startsWith("0")) {
+                return false;
+            }
+
+            try {
+                int num = Integer.parseInt(part);
+                // The number must be in the range [0, 255].
+                if (num < 0 || num > 255) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                // This should not happen due to the isDigit check, but serves as a safeguard.
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static void main(String[] args) {
-        Task118 task118 = new Task118();
-        System.out.println(task118.isValidIP("0.0.0.0")); // true
-        System.out.println(task118.isValidIP("255.255.255.255")); // true
-        System.out.println(task118.isValidIP("192.168.1.1")); // true
-        System.out.println(task118.isValidIP("256.256.256.256")); // false
-        System.out.println(task118.isValidIP("192.168.1.256")); // false
+        String[] testCases = {
+            "127.0.0.1",       // Valid
+            "256.0.0.0",       // Invalid - range
+            "192.168.01.1",    // Invalid - leading zero
+            "1.2.3",           // Invalid - format/parts count
+            "a.b.c.d"          // Invalid - non-numeric
+        };
 
+        for (String testCase : testCases) {
+            System.out.println("IP: \"" + testCase + "\" is " + (isValidIP(testCase) ? "Valid" : "Invalid"));
+        }
     }
 }

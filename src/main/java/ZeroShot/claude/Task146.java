@@ -1,32 +1,39 @@
 package ZeroShot.claude;
 
 public class Task146 {
-    public static int findMissing(int[] nums) {
-        if (nums == null || nums.length == 0) return 1;
+    public static int findMissingNumber(int[] arr, int n) {
+        // Calculate expected sum of 1 to n
+        int expectedSum = n * (n + 1) / 2;
         
-        int n = nums.length + 1;
-        int expectedSum = (n * (n + 1)) / 2;
+        // Calculate actual sum of array elements
         int actualSum = 0;
-        
-        for (int num : nums) {
+        for (int num : arr) {
             actualSum += num;
         }
         
+        // Missing number is the difference
         return expectedSum - actualSum;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        int[] test1 = {1, 2, 4, 5}; // missing 3
-        int[] test2 = {1, 3, 4}; // missing 2
-        int[] test3 = {2, 3, 4, 5}; // missing 1
-        int[] test4 = {1, 2, 3, 5, 6}; // missing 4
-        int[] test5 = {1, 2, 3, 4, 6, 7}; // missing 5
+        // Test case 1: Missing number is 5
+        int[] test1 = {1, 2, 3, 4, 6, 7, 8, 9, 10};
+        System.out.println("Test 1 - Missing number: " + findMissingNumber(test1, 10));
         
-        System.out.println("Missing number: " + findMissing(test1)); // 3
-        System.out.println("Missing number: " + findMissing(test2)); // 2
-        System.out.println("Missing number: " + findMissing(test3)); // 1
-        System.out.println("Missing number: " + findMissing(test4)); // 4
-        System.out.println("Missing number: " + findMissing(test5)); // 5
+        // Test case 2: Missing number is 1
+        int[] test2 = {2, 3, 4, 5};
+        System.out.println("Test 2 - Missing number: " + findMissingNumber(test2, 5));
+        
+        // Test case 3: Missing number is 10
+        int[] test3 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        System.out.println("Test 3 - Missing number: " + findMissingNumber(test3, 10));
+        
+        // Test case 4: Missing number is 3
+        int[] test4 = {1, 2, 4, 5, 6};
+        System.out.println("Test 4 - Missing number: " + findMissingNumber(test4, 6));
+        
+        // Test case 5: Missing number is 7
+        int[] test5 = {1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12};
+        System.out.println("Test 5 - Missing number: " + findMissingNumber(test5, 12));
     }
 }

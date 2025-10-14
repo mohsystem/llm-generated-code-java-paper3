@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task172 {
     public static int countDistinctConcatenatedSubstrings(String text) {
         int n = text.length();

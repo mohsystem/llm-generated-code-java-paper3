@@ -1,91 +1,198 @@
 package ourMethod.claude;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.security.spec.KeySpec;
+import java.util.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.security.*;
 
 public class Task131 {
-    // Whitelist of allowed classes that can be deserialized
-    private static final List<String> ALLOWED_CLASSES = new ArrayList<>();
-    static {
-        ALLOWED_CLASSES.add("java.util.ArrayList");
-        ALLOWED_CLASSES.add("java.lang.String");
-        ALLOWED_CLASSES.add("java.lang.Integer");
+    private static final String MAGIC = "ENC1";
+    private static final int VERSION = 1;
+    private static final int SALT_SIZE = 16;
+    private static final int IV_SIZE = 12;
+    private static final int TAG_SIZE = 16;
+    private static final int MAX_DATA_SIZE = 1024 * 1024; // 1MB limit
+    
+    public static class SecureData implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final String data;
+        private final long timestamp;
+        
+        public SecureData(String data) {
+            if (data == null || data.length() > 10000) {
+                throw new IllegalArgumentException("Invalid data");
+            }
+            this.data = data;
+            this.timestamp = System.currentTimeMillis();
+        }
+        
+        public String getData() { return data; }
+        public long getTimestamp() { return timestamp; }
+        
+        @Override
+        public String toString() {
+            return "SecureData{data='" + data + "', timestamp=" + timestamp + "}";
+        }
     }
     
-    public static Object deserializeData(byte[] data) throws IOException, ClassNotFoundException {
-        if (data == null || data.length == 0) {
-            throw new IllegalArgumentException("Input data cannot be null or empty");
+    public static byte[] serializeData(SecureData data, String passphrase) throws Exception {
+        if (data == null || passphrase == null || passphrase.length() < 8) {
+            throw new IllegalArgumentException("Invalid input");
         }
-
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(data);
-             ObjectInputStream ois = new ObjectInputStream(bais) {
-                 @Override
-                 protected Class<?> resolveClass(ObjectStreamClass desc) 
-                         throws IOException, ClassNotFoundException {
-                     String className = desc.getName();
-                     if (!ALLOWED_CLASSES.contains(className)) {
-                         throw new InvalidClassException(
-                             "Unauthorized deserialization attempt: " + className);
-                     }
-                     return super.resolveClass(desc);
-                 }
-             }) {
-            return ois.readObject();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(MAGIC.getBytes(StandardCharsets.UTF_8));
+        baos.write(VERSION);
+        
+        byte[] salt = new byte[SALT_SIZE];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(salt);
+        baos.write(salt);
+        
+        SecretKeySpec key = deriveKey(passphrase, salt);
+        byte[] iv = new byte[IV_SIZE];
+        random.nextBytes(iv);
+        baos.write(iv);
+        
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE * 8, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key, spec);
+        
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(dataStream)) {
+            oos.writeObject(data);
+        }
+        byte[] plaintext = dataStream.toByteArray();
+        
+        byte[] ciphertext = cipher.doFinal(plaintext);
+        baos.write(ciphertext);
+        
+        return baos.toByteArray();
+    }
+    
+    public static SecureData deserializeData(byte[] encryptedData, String passphrase) throws Exception {
+        if (encryptedData == null || passphrase == null || passphrase.length() < 8) {
+            throw new IllegalArgumentException("Invalid input");
+        }
+        
+        if (encryptedData.length > MAX_DATA_SIZE) {
+            throw new IllegalArgumentException("Data too large");
+        }
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(encryptedData);
+        
+        byte[] magic = new byte[4];
+        if (bais.read(magic) != 4 || !Arrays.equals(magic, MAGIC.getBytes(StandardCharsets.UTF_8))) {
+            throw new SecurityException("Invalid magic");
+        }
+        
+        int version = bais.read();
+        if (version != VERSION) {
+            throw new SecurityException("Invalid version");
+        }
+        
+        byte[] salt = new byte[SALT_SIZE];
+        if (bais.read(salt) != SALT_SIZE) {
+            throw new SecurityException("Invalid salt");
+        }
+        
+        byte[] iv = new byte[IV_SIZE];
+        if (bais.read(iv) != IV_SIZE) {
+            throw new SecurityException("Invalid IV");
+        }
+        
+        byte[] ciphertext = bais.readAllBytes();
+        if (ciphertext.length < TAG_SIZE) {
+            throw new SecurityException("Invalid ciphertext");
+        }
+        
+        SecretKeySpec key = deriveKey(passphrase, salt);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE * 8, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key, spec);
+        
+        byte[] plaintext = cipher.doFinal(ciphertext);
+        
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(plaintext)) {
+            @Override
+            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                if (!desc.getName().equals(SecureData.class.getName())) {
+                    throw new SecurityException("Unauthorized deserialization attempt");
+                }
+                return super.resolveClass(desc);
+            }
+        }) {
+            Object obj = ois.readObject();
+            if (!(obj instanceof SecureData)) {
+                throw new SecurityException("Invalid object type");
+            }
+            return (SecureData) obj;
         }
     }
-
+    
+    private static SecretKeySpec deriveKey(String passphrase, byte[] salt) throws Exception {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(passphrase.toCharArray(), salt, 100000, 256);
+        SecretKey tmp = factory.generateSecret(spec);
+        return new SecretKeySpec(tmp.getEncoded(), "AES");
+    }
+    
     public static void main(String[] args) {
-        // Test cases
         try {
-            // Test 1: Valid ArrayList<String>
-            ArrayList<String> list = new ArrayList<>();
-            list.add("test1");
-            list.add("test2");
-            byte[] serialized = serialize(list);
-            Object deserialized = deserializeData(serialized);
-            System.out.println("Test 1 (valid ArrayList): " + deserialized);
-
-            // Test 2: Valid String
-            String str = "Hello World";
-            serialized = serialize(str);
-            deserialized = deserializeData(serialized);
-            System.out.println("Test 2 (valid String): " + deserialized);
-
-            // Test 3: Null input
+            System.out.println("Test Case 1: Basic serialization/deserialization");
+            SecureData data1 = new SecureData("Hello World");
+            byte[] encrypted1 = serializeData(data1, "strongpassphrase123");
+            SecureData decrypted1 = deserializeData(encrypted1, "strongpassphrase123");
+            System.out.println("Original: " + data1);
+            System.out.println("Decrypted: " + decrypted1);
+            System.out.println("Match: " + data1.getData().equals(decrypted1.getData()));
+            System.out.println();
+            
+            System.out.println("Test Case 2: Different data");
+            SecureData data2 = new SecureData("Sensitive information 12345");
+            byte[] encrypted2 = serializeData(data2, "anotherpassword456");
+            SecureData decrypted2 = deserializeData(encrypted2, "anotherpassword456");
+            System.out.println("Original: " + data2);
+            System.out.println("Decrypted: " + decrypted2);
+            System.out.println("Match: " + data2.getData().equals(decrypted2.getData()));
+            System.out.println();
+            
+            System.out.println("Test Case 3: Wrong passphrase");
             try {
-                deserializeData(null);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Test 3 (null input): " + e.getMessage());
+                SecureData data3 = new SecureData("Test data");
+                byte[] encrypted3 = serializeData(data3, "correctpass123");
+                deserializeData(encrypted3, "wrongpass123");
+                System.out.println("ERROR: Should have thrown exception");
+            } catch (Exception e) {
+                System.out.println("Correctly rejected wrong passphrase: " + e.getClass().getSimpleName());
             }
-
-            // Test 4: Empty input
+            System.out.println();
+            
+            System.out.println("Test Case 4: Corrupted data");
             try {
-                deserializeData(new byte[0]);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Test 4 (empty input): " + e.getMessage());
+                SecureData data4 = new SecureData("Test data");
+                byte[] encrypted4 = serializeData(data4, "mypassword789");
+                encrypted4[encrypted4.length - 1] ^= 0xFF;
+                deserializeData(encrypted4, "mypassword789");
+                System.out.println("ERROR: Should have thrown exception");
+            } catch (Exception e) {
+                System.out.println("Correctly rejected corrupted data: " + e.getClass().getSimpleName());
             }
-
-            // Test 5: Unauthorized class
-            try {
-                Runtime runtime = Runtime.getRuntime();
-                serialized = serialize(runtime);
-                deserializeData(serialized);
-            } catch (InvalidClassException e) {
-                System.out.println("Test 5 (unauthorized class): " + e.getMessage());
-            }
-
+            System.out.println();
+            
+            System.out.println("Test Case 5: Empty string");
+            SecureData data5 = new SecureData("");
+            byte[] encrypted5 = serializeData(data5, "emptytest123");
+            SecureData decrypted5 = deserializeData(encrypted5, "emptytest123");
+            System.out.println("Original: " + data5);
+            System.out.println("Decrypted: " + decrypted5);
+            System.out.println("Match: " + data5.getData().equals(decrypted5.getData()));
+            
         } catch (Exception e) {
-            System.err.println("Error in tests: " + e.getMessage());
-        }
-    }
-
-    // Helper method to serialize objects for testing
-    private static byte[] serialize(Object obj) throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(obj);
-            return baos.toByteArray();
+            e.printStackTrace();
         }
     }
 }

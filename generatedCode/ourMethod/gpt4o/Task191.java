@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task191 {
     public int longestValidParentheses(String s) {
         int maxLength = 0;

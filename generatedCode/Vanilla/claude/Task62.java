@@ -42,11 +42,11 @@ class Task62 {
     public static void main(String[] args) {
         // Test cases
         String[] tests = {
-            "{\\"root\\": {\\"child\\": \\"value\\"}}",
-            "{\\"data\\": [1,2,3]}",
+            "{\"root\": {\"child\": \"value\"}}",
+            "{\"data\": [1,2,3]}",
             "[]",
             "{}",
-            "{\\"firstLevel\\": {\\"secondLevel\\": {\\"thirdLevel\\": \\"value\\"}}}"
+            "{\"firstLevel\": {\"secondLevel\": {\"thirdLevel\": \"value\"}}}"
         };
         
         for (int i = 0; i < tests.length; i++) {

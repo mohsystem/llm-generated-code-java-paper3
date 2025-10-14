@@ -1,78 +1,102 @@
 package ourMethod.gemini;
-import java.util.PriorityQueue;
+
 import java.util.Collections;
+import java.util.PriorityQueue;
 
-class Task195 {
-    private PriorityQueue<Integer> small;
-    private PriorityQueue<Integer> large;
+public class Task195 {
 
-    public Task195() {
-        small = new PriorityQueue<>(Collections.reverseOrder());
-        large = new PriorityQueue<>();
-    }
+    static class MedianFinder {
+        private final PriorityQueue<Integer> lower_half; // max-heap
+        private final PriorityQueue<Integer> upper_half; // min-heap
 
-    public void addNum(int num) {
-        if (small.size() <= large.size()) {
-            large.offer(num);
-            small.offer(large.poll());
-        } else {
-            small.offer(num);
-            large.offer(small.poll());
+        /** initialize your data structure here. */
+        public MedianFinder() {
+            // lower_half is a max-heap
+            lower_half = new PriorityQueue<>(Collections.reverseOrder());
+            // upper_half is a min-heap
+            upper_half = new PriorityQueue<>();
         }
-    }
 
-    public double findMedian() {
-        if (small.size() == large.size()) {
-            return (small.peek() + large.peek()) / 2.0;
-        } else {
-            return small.peek();
+        public void addNum(int num) {
+            lower_half.offer(num);
+            upper_half.offer(lower_half.poll());
+
+            if (lower_half.size() < upper_half.size()) {
+                lower_half.offer(upper_half.poll());
+            }
+        }
+
+        public double findMedian() {
+            if (lower_half.size() > upper_half.size()) {
+                return lower_half.peek();
+            } else {
+                // If heaps are empty, peeking would throw an exception,
+                // but the problem guarantees findMedian is called on non-empty data.
+                return (lower_half.peek() + upper_half.peek()) / 2.0;
+            }
         }
     }
 
     public static void main(String[] args) {
-        Task195 medianFinder1 = new Task195();
-        medianFinder1.addNum(1);
-        medianFinder1.addNum(2);
-        System.out.println(medianFinder1.findMedian()); // 1.5
-        medianFinder1.addNum(3);
-        System.out.println(medianFinder1.findMedian()); // 2.0
+        // Test Case 1: Example from prompt
+        System.out.println("Test Case 1:");
+        MedianFinder mf1 = new MedianFinder();
+        mf1.addNum(1);
+        mf1.addNum(2);
+        System.out.printf("Median: %.5f\n", mf1.findMedian()); // Expected: 1.50000
+        mf1.addNum(3);
+        System.out.printf("Median: %.5f\n", mf1.findMedian()); // Expected: 2.00000
+        System.out.println();
 
-        Task195 medianFinder2 = new Task195();
-        medianFinder2.addNum(2);
-        medianFinder2.addNum(3);
-        medianFinder2.addNum(4);
-        System.out.println(medianFinder2.findMedian()); // 3.0
+        // Test Case 2: Negative numbers
+        System.out.println("Test Case 2:");
+        MedianFinder mf2 = new MedianFinder();
+        mf2.addNum(-1);
+        System.out.printf("Median: %.5f\n", mf2.findMedian()); // Expected: -1.00000
+        mf2.addNum(-2);
+        System.out.printf("Median: %.5f\n", mf2.findMedian()); // Expected: -1.50000
+        mf2.addNum(-3);
+        System.out.printf("Median: %.5f\n", mf2.findMedian()); // Expected: -2.00000
+        System.out.println();
 
-        Task195 medianFinder3 = new Task195();
-        medianFinder3.addNum(-1);
-        System.out.println(medianFinder3.findMedian()); // -1.0
-        medianFinder3.addNum(-2);
-        System.out.println(medianFinder3.findMedian()); // -1.5
-        medianFinder3.addNum(-3);
-        System.out.println(medianFinder3.findMedian()); // -2.0
-        medianFinder3.addNum(-4);
-        System.out.println(medianFinder3.findMedian()); // -2.5
-        medianFinder3.addNum(-5);
-        System.out.println(medianFinder3.findMedian()); // -3
+        // Test Case 3: Zeros
+        System.out.println("Test Case 3:");
+        MedianFinder mf3 = new MedianFinder();
+        mf3.addNum(0);
+        mf3.addNum(0);
+        System.out.printf("Median: %.5f\n", mf3.findMedian()); // Expected: 0.00000
+        mf3.addNum(0);
+        System.out.printf("Median: %.5f\n", mf3.findMedian()); // Expected: 0.00000
+        System.out.println();
 
-        Task195 medianFinder4 = new Task195();
-        medianFinder4.addNum(1);
-        medianFinder4.addNum(2);
-        medianFinder4.addNum(3);
-        medianFinder4.addNum(4);
-        medianFinder4.addNum(5);
-        System.out.println(medianFinder4.findMedian());
+        // Test Case 4: Mixed numbers
+        System.out.println("Test Case 4:");
+        MedianFinder mf4 = new MedianFinder();
+        mf4.addNum(6);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 6.00000
+        mf4.addNum(10);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 8.00000
+        mf4.addNum(2);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 6.00000
+        mf4.addNum(6);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 6.00000
+        mf4.addNum(5);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 6.00000
+        mf4.addNum(0);
+        System.out.printf("Median: %.5f\n", mf4.findMedian()); // Expected: 5.50000
+        System.out.println();
 
-
-        Task195 medianFinder5 = new Task195();
-
-         medianFinder5.addNum(6);
-         System.out.println(medianFinder5.findMedian()); // Output: 6.0
-         medianFinder5.addNum(10);
-         System.out.println(medianFinder5.findMedian()); // Output: 8.0
-         medianFinder5.addNum(7);
-         System.out.println(medianFinder5.findMedian()); // Output: 7.0
-         medianFinder5.addNum(4);
-         System.out.println(medianFinder5.findMedian()); // Output: 6.5
+        // Test Case 5: Descending order
+        System.out.println("Test Case 5:");
+        MedianFinder mf5 = new MedianFinder();
+        mf5.addNum(10);
+        mf5.addNum(9);
+        mf5.addNum(8);
+        mf5.addNum(7);
+        mf5.addNum(6);
+        System.out.printf("Median: %.5f\n", mf5.findMedian()); // Expected: 8.00000
+        mf5.addNum(5);
+        System.out.printf("Median: %.5f\n", mf5.findMedian()); // Expected: 7.50000
+        System.out.println();
     }
 }

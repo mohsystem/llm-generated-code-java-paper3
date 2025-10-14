@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task19 {
     public static String spinWords(String sentence) {
         String[] words = sentence.split(" ");

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

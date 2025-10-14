@@ -1,19 +1,33 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 public class Task19 {
-    public String spinWords(String sentence) {
-        if (sentence == null || sentence.trim().isEmpty()) {
-            return "";
+    public static String reverseWords(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input cannot be null");
         }
         
-        String[] words = sentence.split(" ");
+        // Validate input contains only letters and spaces
+        if (!input.matches("[a-zA-Z ]*")) {
+            throw new IllegalArgumentException("Input must contain only letters and spaces");
+        }
+        
+        // Validate reasonable length to prevent DoS
+        if (input.length() > 10000) {
+            throw new IllegalArgumentException("Input exceeds maximum allowed length");
+        }
+        
+        String[] words = input.split(" ", -1);
         StringBuilder result = new StringBuilder();
         
         for (int i = 0; i < words.length; i++) {
-            if (words[i].length() >= 5) {
-                result.append(new StringBuilder(words[i]).reverse());
+            String word = words[i];
+            if (word.length() >= 5) {
+                result.append(reverseString(word));
             } else {
-                result.append(words[i]); 
+                result.append(word);
             }
             
             if (i < words.length - 1) {
@@ -24,14 +38,50 @@ public class Task19 {
         return result.toString();
     }
     
-    public static void main(String[] args) {
-        Task19 task = new Task19();
+    private static String reverseString(String str) {
+        char[] chars = str.toCharArray();
+        int left = 0;
+        int right = chars.length - 1;
         
-        // Test cases
-        System.out.println(task.spinWords("Hey fellow warriors")); // Hey wollef sroirraw
-        System.out.println(task.spinWords("This is a test")); // This is a test
-        System.out.println(task.spinWords("This is another test")); // This is rehtona test
-        System.out.println(task.spinWords("Welcome")); // emocleW
-        System.out.println(task.spinWords("")); // ""
+        while (left < right) {
+            char temp = chars[left];
+            chars[left] = chars[right];
+            chars[right] = temp;
+            left++;
+            right--;
+        }
+        
+        return new String(chars);
+    }
+    
+    public static void main(String[] args) {
+        // Test case 1
+        String test1 = "Hey fellow warriors";
+        System.out.println("Input: \"" + test1 + "\"");
+        System.out.println("Output: \"" + reverseWords(test1) + "\"");
+        System.out.println();
+        
+        // Test case 2
+        String test2 = "This is a test";
+        System.out.println("Input: \"" + test2 + "\"");
+        System.out.println("Output: \"" + reverseWords(test2) + "\"");
+        System.out.println();
+        
+        // Test case 3
+        String test3 = "This is another test";
+        System.out.println("Input: \"" + test3 + "\"");
+        System.out.println("Output: \"" + reverseWords(test3) + "\"");
+        System.out.println();
+        
+        // Test case 4
+        String test4 = "abcd";
+        System.out.println("Input: \"" + test4 + "\"");
+        System.out.println("Output: \"" + reverseWords(test4) + "\"");
+        System.out.println();
+        
+        // Test case 5
+        String test5 = "apple banana";
+        System.out.println("Input: \"" + test5 + "\"");
+        System.out.println("Output: \"" + reverseWords(test5) + "\"");
     }
 }

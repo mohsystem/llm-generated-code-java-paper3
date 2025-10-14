@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task172 {
 
     public static int countDistinctConcatSubstrings(String text) {

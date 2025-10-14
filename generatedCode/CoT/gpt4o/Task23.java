@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task23 {
     public static int findNb(long m) {
         long sum = 0;

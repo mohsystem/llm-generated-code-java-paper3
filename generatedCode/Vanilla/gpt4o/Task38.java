@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 // Java code for a basic web application is typically run on a server with frameworks like Spring or Servlets.
 // Here's a simple example of a servlet-based Java web application, but it won't be executable in one file directly.
 

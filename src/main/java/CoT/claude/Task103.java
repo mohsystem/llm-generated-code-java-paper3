@@ -2,40 +2,55 @@ package CoT.claude;
 
 public class Task103 {
     public static boolean checkPasswordStrength(String password) {
-        if (password == null || password.length() < 8) {
+        // Handle null or empty password securely
+        if (password == null || password.isEmpty()) {
             return false;
         }
         
-        boolean hasUpperCase = false;
-        boolean hasLowerCase = false;
+        // Check minimum length
+        if (password.length() < 8) {
+            return false;
+        }
+        
+        boolean hasUppercase = false;
+        boolean hasLowercase = false;
         boolean hasDigit = false;
         
-        for (char c : password.toCharArray()) {
+        // Iterate through each character to check criteria
+        for (int i = 0; i < password.length(); i++) {
+            char c = password.charAt(i);
+            
             if (Character.isUpperCase(c)) {
-                hasUpperCase = true;
+                hasUppercase = true;
             } else if (Character.isLowerCase(c)) {
-                hasLowerCase = true;
+                hasLowercase = true;
             } else if (Character.isDigit(c)) {
                 hasDigit = true;
             }
+            
+            // Early exit if all criteria met
+            if (hasUppercase && hasLowercase && hasDigit) {
+                return true;
+            }
         }
         
-        return hasUpperCase && hasLowerCase && hasDigit;
+        return hasUppercase && hasLowercase && hasDigit;
     }
-
+    
     public static void main(String[] args) {
         // Test cases
-        String[] passwords = {
-            "Password123",  // valid
-            "password",     // no uppercase, no digit
-            "12345678",    // no letters
-            "Pass123",     // too short
-            "PASSword123"  // valid
+        String[] testPasswords = {
+            "Abcd1234",      // Valid - meets all criteria
+            "abcd1234",      // Invalid - no uppercase
+            "ABCD1234",      // Invalid - no lowercase
+            "Abcdefgh",      // Invalid - no digit
+            "Abc123"         // Invalid - too short
         };
         
-        for (String password : passwords) {
-            System.out.println("Password: " + password + " is " + 
-                (checkPasswordStrength(password) ? "valid" : "invalid"));
+        System.out.println("Password Strength Checker Results:");
+        for (String password : testPasswords) {
+            boolean isStrong = checkPasswordStrength(password);
+            System.out.println("Password: " + password + " -> " + (isStrong ? "STRONG" : "WEAK"));
         }
     }
 }

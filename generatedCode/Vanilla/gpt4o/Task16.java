@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task16 {
 
     public static boolean solution(String str, String ending) {

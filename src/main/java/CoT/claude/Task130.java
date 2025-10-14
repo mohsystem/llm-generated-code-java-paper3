@@ -1,83 +1,154 @@
 package CoT.claude;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
-public class Task130 implements Filter {
+public class Task130 {
+    private static final Set<String> ALLOWED_ORIGINS = new HashSet<>(Arrays.asList(
+        "https://example.com",
+        "https://app.example.com",
+        "http://localhost:3000"
+    ));
     
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // Initialization code
+    private static final Set<String> ALLOWED_METHODS = new HashSet<>(Arrays.asList(
+        "GET", "POST", "PUT", "DELETE", "OPTIONS"
+    ));
+    
+    private static final Set<String> ALLOWED_HEADERS = new HashSet<>(Arrays.asList(
+        "Content-Type", "Authorization", "X-Requested-With"
+    ));
+    
+    private static final int MAX_AGE = 3600;
+
+    public static class CORSResponse {
+        public boolean allowed;
+        public Map<String, String> headers;
+        public String message;
+
+        public CORSResponse(boolean allowed, Map<String, String> headers, String message) {
+            this.allowed = allowed;
+            this.headers = headers;
+            this.message = message;
+        }
     }
 
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+    public static CORSResponse handleCORS(String origin, String method, String requestHeaders) {
+        Map<String, String> responseHeaders = new HashMap<>();
         
-        HttpServletResponse response = (HttpServletResponse) res;
-        HttpServletRequest request = (HttpServletRequest) req;
-
-        // Validate origin
-        String origin = request.getHeader("Origin");
-        if (isValidOrigin(origin)) {
-            // Set CORS headers
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-            response.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Max-Age", "3600");
+        // Validate and sanitize origin
+        String sanitizedOrigin = sanitizeHeader(origin);
+        if (sanitizedOrigin == null || sanitizedOrigin.isEmpty()) {
+            return new CORSResponse(false, responseHeaders, "Invalid origin");
         }
 
-        // Handle preflight requests
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
+        // Check if origin is allowed
+        if (!ALLOWED_ORIGINS.contains(sanitizedOrigin)) {
+            return new CORSResponse(false, responseHeaders, "Origin not allowed");
         }
 
-        chain.doFilter(req, res);
+        // Validate method
+        String sanitizedMethod = sanitizeHeader(method);
+        if (sanitizedMethod == null || !ALLOWED_METHODS.contains(sanitizedMethod.toUpperCase())) {
+            return new CORSResponse(false, responseHeaders, "Method not allowed");
+        }
+
+        // Set CORS headers
+        responseHeaders.put("Access-Control-Allow-Origin", sanitizedOrigin);
+        responseHeaders.put("Access-Control-Allow-Methods", String.join(", ", ALLOWED_METHODS));
+        responseHeaders.put("Access-Control-Allow-Headers", String.join(", ", ALLOWED_HEADERS));
+        responseHeaders.put("Access-Control-Max-Age", String.valueOf(MAX_AGE));
+        responseHeaders.put("Access-Control-Allow-Credentials", "true");
+        
+        // Security headers
+        responseHeaders.put("X-Content-Type-Options", "nosniff");
+        responseHeaders.put("X-Frame-Options", "DENY");
+        responseHeaders.put("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+
+        // Handle preflight request
+        if ("OPTIONS".equalsIgnoreCase(sanitizedMethod)) {
+            if (requestHeaders != null && !requestHeaders.isEmpty()) {
+                String sanitizedHeaders = sanitizeHeader(requestHeaders);
+                if (sanitizedHeaders != null && validateRequestedHeaders(sanitizedHeaders)) {
+                    return new CORSResponse(true, responseHeaders, "Preflight request approved");
+                }
+            }
+            return new CORSResponse(true, responseHeaders, "Preflight request approved");
+        }
+
+        return new CORSResponse(true, responseHeaders, "CORS request approved");
     }
 
-    private boolean isValidOrigin(String origin) {
-        if (origin == null) return false;
-        // Add allowed origins
-        String[] allowedOrigins = {"https://trusted-domain.com", "https://another-trusted.com"};
-        for (String allowed : allowedOrigins) {
-            if (allowed.equals(origin)) {
-                return true;
+    private static String sanitizeHeader(String header) {
+        if (header == null) {
+            return null;
+        }
+        
+        // Remove any control characters and trim
+        String sanitized = header.replaceAll("[\\\\x00-\\\\x1F\\\\x7F]", "").trim();
+        
+        // Check for header injection attempts
+        if (sanitized.contains("\\r") || sanitized.contains("\\n")) {
+            return null;
+        }
+        
+        return sanitized;
+    }
+
+    private static boolean validateRequestedHeaders(String requestedHeaders) {
+        String[] headers = requestedHeaders.split(",");
+        for (String header : headers) {
+            String trimmed = header.trim().toLowerCase();
+            boolean found = false;
+            for (String allowed : ALLOWED_HEADERS) {
+                if (allowed.toLowerCase().equals(trimmed)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found && !trimmed.isEmpty()) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
-    @Override
-    public void destroy() {
-        // Cleanup code
+    public static void printResponse(CORSResponse response) {
+        System.out.println("Allowed: " + response.allowed);
+        System.out.println("Message: " + response.message);
+        System.out.println("Headers:");
+        for (Map.Entry<String, String> entry : response.headers.entrySet()) {
+            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+        }
+        System.out.println();
     }
 
-    // Test cases
     public static void main(String[] args) {
-        Task130 cors = new Task130();
-        
-        // Test case 1: Valid origin
-        System.out.println("Test 1: " + cors.isValidOrigin("https://trusted-domain.com")); // Should return true
-        
-        // Test case 2: Invalid origin
-        System.out.println("Test 2: " + cors.isValidOrigin("https://malicious-site.com")); // Should return false
-        
-        // Test case 3: Null origin
-        System.out.println("Test 3: " + cors.isValidOrigin(null)); // Should return false
-        
-        // Test case 4: Empty origin
-        System.out.println("Test 4: " + cors.isValidOrigin("")); // Should return false
-        
-        // Test case 5: Another valid origin
-        System.out.println("Test 5: " + cors.isValidOrigin("https://another-trusted.com")); // Should return true
+        System.out.println("=== CORS Implementation Test Cases ===\\n");
+
+        // Test case 1: Valid GET request
+        System.out.println("Test 1: Valid GET request from allowed origin");
+        CORSResponse resp1 = handleCORS("https://example.com", "GET", null);
+        printResponse(resp1);
+
+        // Test case 2: Valid OPTIONS preflight request
+        System.out.println("Test 2: Valid OPTIONS preflight request");
+        CORSResponse resp2 = handleCORS("https://app.example.com", "OPTIONS", "Content-Type, Authorization");
+        printResponse(resp2);
+
+        // Test case 3: Invalid origin
+        System.out.println("Test 3: Request from non-allowed origin");
+        CORSResponse resp3 = handleCORS("https://malicious.com", "GET", null);
+        printResponse(resp3);
+
+        // Test case 4: Invalid method
+        System.out.println("Test 4: Request with non-allowed method");
+        CORSResponse resp4 = handleCORS("https://example.com", "TRACE", null);
+        printResponse(resp4);
+
+        // Test case 5: Valid POST request from localhost
+        System.out.println("Test 5: Valid POST request from localhost");
+        CORSResponse resp5 = handleCORS("http://localhost:3000", "POST", "Content-Type");
+        printResponse(resp5);
     }
 }

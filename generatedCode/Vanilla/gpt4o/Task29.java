@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task29 {
     public static int[] twoSum(int[] numbers, int target) {
         for (int i = 0; i < numbers.length; i++) {

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task27 {
     public static int findOutlier(int[] array) {
         int evenCount = 0;

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task26 {
     public static int findOdd(int[] arr) {
         int result = 0;

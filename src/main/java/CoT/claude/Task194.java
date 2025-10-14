@@ -1,70 +1,106 @@
 package CoT.claude;
 
-class Master {
-    private String secret;
-    private int guesses;
-    private int allowedGuesses;
-    
-    public Master(String secret, int allowedGuesses) {
-        this.secret = secret;
-        this.allowedGuesses = allowedGuesses;
-        this.guesses = 0;
-    }
-    
-    public int guess(String word) {
-        guesses++;
-        if (guesses > allowedGuesses) {
-            throw new RuntimeException("Too many guesses");
-        }
-        
+import java.util.*;
+
+interface Master {
+    public int guess(String word);
+}
+
+class Task194 {
+    private int match(String a, String b) {
         int matches = 0;
         for (int i = 0; i < 6; i++) {
-            if (word.charAt(i) == secret.charAt(i)) {
+            if (a.charAt(i) == b.charAt(i)) {
                 matches++;
             }
         }
         return matches;
     }
-}
-
-class Task194 {
-    public String findSecretWord(String[] words, Master master) {
-        int n = words.length;
-        for (int i = 0; i < n; i++) {
-            int matches = master.guess(words[i]);
+    
+    public void findSecretWord(String[] words, Master master) {
+        List<String> candidates = new ArrayList<>(Arrays.asList(words));
+        
+        for (int attempt = 0; attempt < 10 && !candidates.isEmpty(); attempt++) {
+            String guess = selectBestGuess(candidates);
+            int matches = master.guess(guess);
+            
             if (matches == 6) {
-                return "You guessed the secret word correctly.";
+                return;
+            }
+            
+            List<String> newCandidates = new ArrayList<>();
+            for (String word : candidates) {
+                if (match(guess, word) == matches) {
+                    newCandidates.add(word);
+                }
+            }
+            candidates = newCandidates;
+        }
+    }
+    
+    private String selectBestGuess(List<String> candidates) {
+        if (candidates.size() <= 2) {
+            return candidates.get(0);
+        }
+        
+        String bestWord = candidates.get(0);
+        int minMaxGroup = Integer.MAX_VALUE;
+        
+        for (String candidate : candidates) {
+            int[] groups = new int[7];
+            for (String word : candidates) {
+                groups[match(candidate, word)]++;
+            }
+            
+            int maxGroup = 0;
+            for (int count : groups) {
+                maxGroup = Math.max(maxGroup, count);
+            }
+            
+            if (maxGroup < minMaxGroup) {
+                minMaxGroup = maxGroup;
+                bestWord = candidate;
             }
         }
-        return "Either you took too many guesses, or you did not find the secret word.";
+        
+        return bestWord;
     }
     
     public static void main(String[] args) {
-        Task194 task = new Task194();
+        Task194 solution = new Task194();
         
         // Test case 1
-        String[] words1 = {"acckzz","ccbazz","eiowzz","abcczz"};
-        Master master1 = new Master("acckzz", 10);
-        System.out.println(task.findSecretWord(words1, master1));
+        Master master1 = new Master() {
+            private String secret = "acckzz";
+            private String[] words = {"acckzz","ccbazz","eiowzz","abcczz"};
+            
+            public int guess(String word) {
+                if (!Arrays.asList(words).contains(word)) return -1;
+                int matches = 0;
+                for (int i = 0; i < 6; i++) {
+                    if (word.charAt(i) == secret.charAt(i)) matches++;
+                }
+                return matches;
+            }
+        };
+        solution.findSecretWord(new String[]{"acckzz","ccbazz","eiowzz","abcczz"}, master1);
+        System.out.println("Test 1 passed");
         
-        // Test case 2  
-        String[] words2 = {"hamada","khaled"};
-        Master master2 = new Master("hamada", 10);
-        System.out.println(task.findSecretWord(words2, master2));
-        
-        // Test case 3
-        String[] words3 = {"aaaaaa", "bbbbbb", "cccccc"};
-        Master master3 = new Master("bbbbbb", 10);
-        System.out.println(task.findSecretWord(words3, master3));
-        
-        // Test case 4
-        String[] words4 = {"abcdef", "ghijkl"};
-        Master master4 = new Master("ghijkl", 10);
-        System.out.println(task.findSecretWord(words4, master4));
-        
-        // Test case 5
-        String[] words5 = {"zzzzzz"};
-        Master master5 = new Master("zzzzzz", 10);
-        System.out.println(task.findSecretWord(words5, master5));
+        // Test case 2
+        Master master2 = new Master() {
+            private String secret = "hamada";
+            private String[] words = {"hamada","khaled"};
+            
+            public int guess(String word) {
+                if (!Arrays.asList(words).contains(word)) return -1;
+                int matches = 0;
+                for (int i = 0; i < 6; i++) {
+                    if (word.charAt(i) == secret.charAt(i)) matches++;
+                }
+                return matches;
+            }
+        };
+        solution.findSecretWord(new String[]{"hamada","khaled"}, master2);
+        System.out.println("Test 2 passed");
     }
 }

@@ -1,167 +1,179 @@
 package ourMethod.gemini;
-import java.util.LinkedList;
-import java.util.Queue;
 
-class Task151 {
+public class Task151 {
 
+    // Node class for the BST
     static class Node {
-        int data;
+        int key;
         Node left, right;
 
-        Node(int data) {
-            this.data = data;
+        public Node(int item) {
+            key = item;
             left = right = null;
         }
     }
 
-    static class BST {
+    // Binary Search Tree class
+    static class BinarySearchTree {
         Node root;
 
-        BST() {
+        BinarySearchTree() {
             root = null;
         }
 
-
-        void insert(int data) {
-            root = insertRec(root, data);
+        /**
+         * Public method to insert a new key.
+         * @param key The key to insert.
+         */
+        public void insert(int key) {
+            root = insertRec(root, key);
         }
 
-        Node insertRec(Node root, int data) {
+        /**
+         * A recursive function to insert a new key in BST.
+         * @param root The current node in the recursion.
+         * @param key The key to insert.
+         * @return The node pointer (possibly new).
+         */
+        private Node insertRec(Node root, int key) {
             if (root == null) {
-                root = new Node(data);
+                root = new Node(key);
                 return root;
             }
-
-            if (data < root.data) {
-                root.left = insertRec(root.left, data);
-            } else if (data > root.data) {
-                root.right = insertRec(root.right, data);
+            if (key < root.key) {
+                root.left = insertRec(root.left, key);
+            } else if (key > root.key) {
+                root.right = insertRec(root.right, key);
             }
-
             return root;
         }
 
-
-        void delete(int data) {
-            root = deleteRec(root, data);
+        /**
+         * Public method to delete a key.
+         * @param key The key to delete.
+         */
+        public void deleteNode(int key) {
+            root = deleteRec(root, key);
         }
 
-        Node deleteRec(Node root, int data) {
+        /**
+         * A recursive function to delete a key from BST.
+         * @param root The current node in the recursion.
+         * @param key The key to delete.
+         * @return The new root of the subtree.
+         */
+        private Node deleteRec(Node root, int key) {
             if (root == null) {
                 return root;
             }
 
-            if (data < root.data) {
-                root.left = deleteRec(root.left, data);
-            } else if (data > root.data) {
-                root.right = deleteRec(root.right, data);
+            if (key < root.key) {
+                root.left = deleteRec(root.left, key);
+            } else if (key > root.key) {
+                root.right = deleteRec(root.right, key);
             } else {
+                // Node with only one child or no child
                 if (root.left == null) {
                     return root.right;
                 } else if (root.right == null) {
                     return root.left;
                 }
 
-                root.data = minValue(root.right);
-                root.right = deleteRec(root.right, root.data);
+                // Node with two children: Get the inorder successor (smallest in the right subtree)
+                root.key = minValue(root.right);
+                // Delete the inorder successor
+                root.right = deleteRec(root.right, root.key);
             }
-
             return root;
         }
 
-        int minValue(Node root) {
-            int minv = root.data;
+        /**
+         * Helper function to find the minimum value in a subtree.
+         * @param root The root of the subtree.
+         * @return The minimum value.
+         */
+        private int minValue(Node root) {
+            int minv = root.key;
             while (root.left != null) {
-                minv = root.left.data;
+                minv = root.left.key;
                 root = root.left;
             }
             return minv;
         }
 
-
-        boolean search(int data) {
-            return searchRec(root, data);
+        /**
+         * Public method to search for a key.
+         * @param key The key to search for.
+         * @return true if the key is found, false otherwise.
+         */
+        public boolean search(int key) {
+            return searchRec(root, key) != null;
         }
 
-        boolean searchRec(Node root, int data) {
-            if (root == null) {
-                return false;
+        /**
+         * A recursive function to search for a key in BST.
+         * @param root The current node in the recursion.
+         * @param key The key to search for.
+         * @return The node containing the key, or null.
+         */
+        private Node searchRec(Node root, int key) {
+            if (root == null || root.key == key) {
+                return root;
             }
-
-            if (root.data == data) {
-                return true;
+            if (key < root.key) {
+                return searchRec(root.left, key);
             }
-
-            if (data < root.data) {
-                return searchRec(root.left, data);
-            } else {
-                return searchRec(root.right, data);
-            }
-        }
-
-
-        void levelOrderTraversal() {
-            if (root == null) return;
-
-            Queue<Node> q = new LinkedList<>();
-            q.add(root);
-
-            while (!q.isEmpty()) {
-                Node curr = q.poll();
-                System.out.print(curr.data + " ");
-
-                if (curr.left != null) {
-                    q.add(curr.left);
-                }
-                if (curr.right != null) {
-                    q.add(curr.right);
-                }
-            }
+            return searchRec(root.right, key);
         }
     }
 
-
     public static void main(String[] args) {
+        BinarySearchTree bst = new BinarySearchTree();
 
-        BST tree = new BST();
+        // Test Case 1: Insert and search
+        System.out.println("Test Case 1: Insert and Search");
+        bst.insert(50);
+        bst.insert(30);
+        bst.insert(70);
+        System.out.println("Search for 30: " + bst.search(30)); // Expected: true
+        System.out.println("Search for 100: " + bst.search(100)); // Expected: false
+        System.out.println("---");
 
+        // Test Case 2: Delete a leaf node
+        System.out.println("Test Case 2: Delete a leaf node");
+        bst.insert(20);
+        System.out.println("Search for 20 before delete: " + bst.search(20)); // Expected: true
+        bst.deleteNode(20);
+        System.out.println("Search for 20 after delete: " + bst.search(20)); // Expected: false
+        System.out.println("---");
 
-        tree.insert(50);
-        tree.insert(30);
-        tree.insert(20);
-        tree.insert(40);
-        tree.insert(70);
-        tree.insert(60);
-        tree.insert(80);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
+        // Test Case 3: Delete a node with one child
+        System.out.println("Test Case 3: Delete a node with one child");
+        bst.insert(40);
+        System.out.println("Search for 30 before delete: " + bst.search(30)); // Expected: true
+        System.out.println("Search for 40 before delete: " + bst.search(40)); // Expected: true
+        bst.deleteNode(30);
+        System.out.println("Search for 30 after delete: " + bst.search(30)); // Expected: false
+        System.out.println("Search for 40 after delete: " + bst.search(40)); // Expected: true
+        System.out.println("---");
 
-        System.out.println("\nDelete 20");
-        tree.delete(20);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
-
-        System.out.println("\nDelete 30");
-        tree.delete(30);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
-
-        System.out.println("\nDelete 50");
-        tree.delete(50);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
-
-        System.out.println("\nSearch 50: " + tree.search(50));
-        System.out.println("Search 80: " + tree.search(80));
-
-        System.out.println("Insert 90");
-        tree.insert(90);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
-
-        System.out.println("\nDelete 90");
-        tree.delete(90);
-        System.out.print("Level order traversal: ");
-        tree.levelOrderTraversal();
+        // Test Case 4: Delete a node with two children
+        System.out.println("Test Case 4: Delete a node with two children");
+        bst.insert(60);
+        bst.insert(80);
+        System.out.println("Search for 70 before delete: " + bst.search(70)); // Expected: true
+        bst.deleteNode(70);
+        System.out.println("Search for 70 after delete: " + bst.search(70)); // Expected: false
+        System.out.println("Search for 80 (new subtree root): " + bst.search(80)); // Expected: true
+        System.out.println("---");
+        
+        // Test Case 5: Delete root node
+        System.out.println("Test Case 5: Delete root node");
+        System.out.println("Search for 50 before delete: " + bst.search(50)); // Expected: true
+        bst.deleteNode(50);
+        System.out.println("Search for 50 after delete: " + bst.search(50)); // Expected: false
+        // The new root should be the inorder successor of 50, which was 60.
+        System.out.println("Search for 60 (new root): " + bst.search(60)); // Expected: true
+        System.out.println("---");
     }
 }

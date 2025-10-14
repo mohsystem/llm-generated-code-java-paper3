@@ -1,51 +1,90 @@
 package ZeroShot.gemini;
-import java.net.URL;
-import java.net.URLConnection;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 
 public class Task76 {
 
-    public static String extractTitle(String urlString) {
+    /**
+     * Fetches an HTTPS URL and extracts the content of the <title> tag.
+     *
+     * @param urlString The HTTPS URL to fetch.
+     * @return The extracted page title, or an error message.
+     */
+    public static String extractPageTitle(String urlString) {
+        // 1. Input Validation: Ensure URL is not null and uses HTTPS.
+        if (urlString == null || !urlString.toLowerCase().startsWith("https://")) {
+            return "Error: Invalid or insecure URL provided. Please use HTTPS.";
+        }
+
         try {
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            StringBuilder html = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                html.append(line);
-            }
-            reader.close();
+            // 2. Setup HttpClient: Use modern, secure defaults.
+            HttpClient client = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_2)
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .connectTimeout(Duration.ofSeconds(10)) // Connection timeout
+                    .build();
 
-            Pattern pattern = Pattern.compile("<title>(.*?)</title>");
-            Matcher matcher = pattern.matcher(html.toString());
-            if (matcher.find()) {
-                return matcher.group(1).trim();
-            } else {
-                return "Title not found";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlString))
+                    .timeout(Duration.ofSeconds(10)) // Request timeout
+                    .header("User-Agent", "Java HttpClient Bot") // Set a user agent
+                    .GET()
+                    .build();
+
+            // 3. Send Request and Get Response
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // 4. Handle HTTP Errors
+            if (response.statusCode() != 200) {
+                return "Error: Received non-200 status code: " + response.statusCode();
             }
 
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            String body = response.body();
+
+            // 5. Extract Title using safe string searching (not complex regex)
+            int titleStart = body.toLowerCase().indexOf("<title>");
+            if (titleStart == -1) {
+                return "Error: Title tag not found.";
+            }
+            // Move index to the end of the opening tag
+            titleStart += "<title>".length();
+
+            int titleEnd = body.toLowerCase().indexOf("</title>", titleStart);
+            if (titleEnd == -1) {
+                return "Error: Closing title tag not found.";
+            }
+
+            // Extract, trim, and return the title
+            return body.substring(titleStart, titleEnd).trim();
+
+        } catch (IllegalArgumentException e) {
+            return "Error: Invalid URL format - " + e.getMessage();
+        } catch (HttpTimeoutException e) {
+            return "Error: Request timed out - " + e.getMessage();
+        } catch (Exception e) { // Catches IOException, InterruptedException etc.
+            return "Error: An exception occurred - " + e.getClass().getSimpleName() + ": " + e.getMessage();
         }
     }
 
-
     public static void main(String[] args) {
         String[] testUrls = {
-            "https://www.example.com",
             "https://www.google.com",
-            "https://www.amazon.com",
-            "https://www.wikipedia.org",
-            "https://www.invalidurl.com" // Invalid URL for testing
+            "https://github.com",
+            "https://github.com/nonexistent/repo", // 404 test
+            "https://thissitedoesnotexist12345.com", // DNS error
+            "http://www.google.com" // Insecure URL test
         };
 
         for (String url : testUrls) {
-            String title = extractTitle(url);
-            System.out.println("URL: " + url + ", Title: " + title);
+            System.out.println("Testing URL: " + url);
+            String title = extractPageTitle(url);
+            System.out.println("Page Title: " + title);
+            System.out.println("--------------------");
         }
     }
 }

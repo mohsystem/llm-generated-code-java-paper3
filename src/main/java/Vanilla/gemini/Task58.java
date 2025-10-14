@@ -1,14 +1,16 @@
 package Vanilla.gemini;
+
 public class Task58 {
 
     public static boolean XO(String str) {
         int xCount = 0;
         int oCount = 0;
-        str = str.toLowerCase();
-        for (int i = 0; i < str.length(); i++) {
-            if (str.charAt(i) == 'x') {
+        String lowerStr = str.toLowerCase();
+        for (int i = 0; i < lowerStr.length(); i++) {
+            char c = lowerStr.charAt(i);
+            if (c == 'x') {
                 xCount++;
-            } else if (str.charAt(i) == 'o') {
+            } else if (c == 'o') {
                 oCount++;
             }
         }
@@ -16,10 +18,9 @@ public class Task58 {
     }
 
     public static void main(String[] args) {
-        System.out.println(XO("ooxx")); // true
-        System.out.println(XO("xooxx")); // false
-        System.out.println(XO("ooxXm")); // true
-        System.out.println(XO("zpzpzpp")); // true
-        System.out.println(XO("zzoo")); // false
+        String[] testCases = {"ooxx", "xooxx", "ooxXm", "zpzpzpp", "zzoo"};
+        for (String test : testCases) {
+            System.out.println("XO(\"" + test + "\") => " + XO(test));
+        }
     }
 }

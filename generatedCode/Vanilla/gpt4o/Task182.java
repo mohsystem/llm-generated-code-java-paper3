@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task182 {
     public static String cleanPhoneNumber(String input) {
         String cleaned = input.replaceAll("[^0-9]", "");

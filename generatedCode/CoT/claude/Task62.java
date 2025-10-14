@@ -34,9 +34,9 @@ public class Task62 {
     public static void main(String[] args) {
         // Test cases
         String[] tests = {
-            "{\\"name\\": \\"John\\", \\"age\\": 30}",
+            "{\"name\": \"John\", \"age\": 30}",
             "[1, 2, 3, 4]",
-            "\\"Hello World\\"",
+            "\"Hello World\"",
             "42",
             "true"
         };

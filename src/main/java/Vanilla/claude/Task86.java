@@ -2,49 +2,60 @@ package Vanilla.claude;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.*;
 
 public class Task86 {
-    public static void downloadAndExecute(String url) {
+    public static String downloadAndExecute(String urlString) {
         try {
-            // Extract filename from URL
-            String fileName = url.substring(url.lastIndexOf('/') + 1);
+            // Create URL object
+            URL url = new URL(urlString);
+            
+            // Generate temporary file name
+            String fileName = "downloaded_" + System.currentTimeMillis() + ".exe";
+            Path tempFile = Paths.get(System.getProperty("java.io.tmpdir"), fileName);
             
             // Download file
-            URL downloadUrl = new URL(url);
-            URLConnection conn = downloadUrl.openConnection();
-            InputStream in = conn.getInputStream();
-            FileOutputStream out = new FileOutputStream(fileName);
-            
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
+            try (InputStream in = url.openStream()) {
+                Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
             }
-            out.close();
-            in.close();
-
-            // Execute file
-            Process process = Runtime.getRuntime().exec(fileName);
-            process.waitFor();
+            
+            // Make file executable (for Unix-like systems)
+            tempFile.toFile().setExecutable(true);
+            
+            // Execute the file
+            ProcessBuilder processBuilder = new ProcessBuilder(tempFile.toString());
+            Process process = processBuilder.start();
+            
+            // Wait for process to complete (with timeout)
+            boolean finished = process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS);
+            
+            String result = "File downloaded to: " + tempFile.toString() + 
+                          "\\nExecution " + (finished ? "completed" : "timed out");
+            
+            return result;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            return "Error: " + e.getMessage();
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases - Note: Using dummy URLs for demonstration
+        System.out.println("=== SECURITY WARNING: This program downloads and executes files ===\\n");
+        
+        // Test cases - Using safe/mock URLs
         String[] testUrls = {
-            "http://example.com/program1.exe",
-            "http://example.com/program2.exe",
-            "http://example.com/program3.exe",
-            "http://example.com/program4.exe",
-            "http://example.com/program5.exe"
+            "https://example.com/safe-program.exe",
+            "https://example.com/test-app.exe",
+            "https://example.com/utility.exe",
+            "https://example.com/installer.exe",
+            "https://example.com/application.exe"
         };
         
-        for(String url : testUrls) {
-            System.out.println("Testing URL: " + url);
-            downloadAndExecute(url);
+        for (int i = 0; i < testUrls.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("URL: " + testUrls[i]);
+            System.out.println("Result: " + downloadAndExecute(testUrls[i]));
+            System.out.println("---");
         }
     }
 }

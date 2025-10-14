@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task161 {
     public static int knapsack(int capacity, int[] weights, int[] values) {
         int n = weights.length;

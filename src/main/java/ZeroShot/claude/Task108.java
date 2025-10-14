@@ -1,106 +1,177 @@
 package ZeroShot.claude;
 
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.Remote;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.security.*;
 
-interface RemoteObjectInterface extends Remote {
-    String performOperation(String sessionToken, String operation, String data) throws RemoteException;
-}
-
-class RemoteObjectImpl extends UnicastRemoteObject implements RemoteObjectInterface {
-    private Map<String, String> sessions = new HashMap<>();
-    private Map<String, String> objects = new HashMap<>();
-    private static final SecureRandom secureRandom = new SecureRandom();
+class Task108 {
+    private static final int PORT = 8080;
+    private static final String SECRET_KEY = "MySecretKey12345"; // 16 chars for AES-128
+    private static Map<String, String> serverObjects = new ConcurrentHashMap<>();
+    private static Set<String> authenticatedClients = ConcurrentHashMap.newKeySet();
     
-    protected RemoteObjectImpl() throws RemoteException {
-        super();
-    }
-    
-    private boolean validateSession(String token) {
-        return sessions.containsKey(token);
-    }
-    
-    private String hashPassword(String password, byte[] salt) {
-        try {
-            PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            byte[] hash = factory.generateSecret(spec).getEncoded();
-            return Base64.getEncoder().encodeToString(hash);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    @Override
-    public String performOperation(String sessionToken, String operation, String data) throws RemoteException {
-        if (!validateSession(sessionToken)) {
-            return "Invalid session";
-        }
+    // Server methods
+    public static void startServer() {
+        serverObjects.put("object1", "value1");
+        serverObjects.put("object2", "value2");
         
-        switch(operation.toLowerCase()) {
-            case "create":
-                String objectId = Base64.getEncoder().encodeToString(secureRandom.generateSeed(16));
-                objects.put(objectId, data);
-                return "Object created with ID: " + objectId;
-            case "read":
-                return objects.getOrDefault(data, "Object not found");
-            case "update":
-                if (objects.containsKey(data.split(",")[0])) {
-                    objects.put(data.split(",")[0], data.split(",")[1]);
-                    return "Object updated";
+        new Thread(() -> {
+            try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+                System.out.println("Server started on port " + PORT);
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    new Thread(() -> handleClient(clientSocket)).start();
                 }
-                return "Object not found";
-            case "delete":
-                if (objects.remove(data) != null) {
-                    return "Object deleted";
-                }
-                return "Object not found";
-            default:
-                return "Invalid operation";
-        }
+            } catch (IOException e) {
+                System.err.println("Server error: " + e.getMessage());
+            }
+        }).start();
     }
-}
-
-public class Task108 {
-    public static void main(String[] args) {
-        try {
-            RemoteObjectImpl obj = new RemoteObjectImpl();
-            Registry registry = LocateRegistry.createRegistry(1099);
-            registry.bind("RemoteObject", obj);
-            System.out.println("Server is running...");
+    
+    private static void handleClient(Socket socket) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
             
-            // Test cases
-            RemoteObjectInterface stub = (RemoteObjectInterface) registry.lookup("RemoteObject");
-            String sessionToken = "test-session-token";
+            String clientId = socket.getInetAddress().toString();
+            String request = in.readLine();
             
-            // Test case 1: Create object
-            System.out.println(stub.performOperation(sessionToken, "create", "test data 1"));
+            if (request == null) return;
             
-            // Test case 2: Create another object
-            String response = stub.performOperation(sessionToken, "create", "test data 2");
-            String objectId = response.split(": ")[1];
+            String[] parts = request.split("\\\\|");
+            String command = parts[0];
             
-            // Test case 3: Read object
-            System.out.println(stub.performOperation(sessionToken, "read", objectId));
+            // Authentication
+            if (command.equals("AUTH") && parts.length == 2) {
+                if (authenticate(parts[1])) {
+                    authenticatedClients.add(clientId);
+                    out.println("AUTH_SUCCESS");
+                } else {
+                    out.println("AUTH_FAILED");
+                }
+                return;
+            }
             
-            // Test case 4: Update object
-            System.out.println(stub.performOperation(sessionToken, "update", objectId + ",updated data"));
+            // Check authentication for other commands
+            if (!authenticatedClients.contains(clientId)) {
+                out.println("ERROR|Not authenticated");
+                return;
+            }
             
-            // Test case 5: Delete object
-            System.out.println(stub.performOperation(sessionToken, "delete", objectId));
+            String response = processCommand(parts);
+            out.println(response);
             
         } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
-            e.printStackTrace();
+            System.err.println("Client handling error: " + e.getMessage());
         }
+    }
+    
+    private static boolean authenticate(String token) {
+        // Simple authentication - in production use proper authentication
+        return token.equals(SECRET_KEY);
+    }
+    
+    private static String processCommand(String[] parts) {
+        String command = parts[0];
+        
+        try {
+            switch (command) {
+                case "GET":
+                    if (parts.length == 2) {
+                        String key = sanitizeInput(parts[1]);
+                        String value = serverObjects.get(key);
+                        return value != null ? "SUCCESS|" + value : "ERROR|Object not found";
+                    }
+                    return "ERROR|Invalid GET command";
+                    
+                case "SET":
+                    if (parts.length == 3) {
+                        String key = sanitizeInput(parts[1]);
+                        String value = sanitizeInput(parts[2]);
+                        serverObjects.put(key, value);
+                        return "SUCCESS|Object set";
+                    }
+                    return "ERROR|Invalid SET command";
+                    
+                case "DELETE":
+                    if (parts.length == 2) {
+                        String key = sanitizeInput(parts[1]);
+                        serverObjects.remove(key);
+                        return "SUCCESS|Object deleted";
+                    }
+                    return "ERROR|Invalid DELETE command";
+                    
+                case "LIST":
+                    return "SUCCESS|" + String.join(",", serverObjects.keySet());
+                    
+                default:
+                    return "ERROR|Unknown command";
+            }
+        } catch (Exception e) {
+            return "ERROR|" + e.getMessage();
+        }
+    }
+    
+    private static String sanitizeInput(String input) {
+        // Remove potentially dangerous characters
+        return input.replaceAll("[^a-zA-Z0-9_-]", "");
+    }
+    
+    // Client methods
+    public static String sendRequest(String host, int port, String request) {
+        try (Socket socket = new Socket(host, port);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+            
+            out.println(request);
+            return in.readLine();
+        } catch (IOException e) {
+            return "ERROR|Connection failed: " + e.getMessage();
+        }
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("=== Secure Remote Object Access System ===\\n");
+        
+        // Start server
+        startServer();
+        
+        // Wait for server to start
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        // Test Case 1: Authentication
+        System.out.println("Test 1 - Authentication:");
+        String response = sendRequest("localhost", PORT, "AUTH|" + SECRET_KEY);
+        System.out.println("Response: " + response);
+        System.out.println();
+        
+        // Test Case 2: Get object
+        System.out.println("Test 2 - Get object:");
+        response = sendRequest("localhost", PORT, "GET|object1");
+        System.out.println("Response: " + response);
+        System.out.println();
+        
+        // Test Case 3: Set object
+        System.out.println("Test 3 - Set object:");
+        response = sendRequest("localhost", PORT, "SET|object3|value3");
+        System.out.println("Response: " + response);
+        System.out.println();
+        
+        // Test Case 4: List objects
+        System.out.println("Test 4 - List objects:");
+        response = sendRequest("localhost", PORT, "LIST");
+        System.out.println("Response: " + response);
+        System.out.println();
+        
+        // Test Case 5: Delete object
+        System.out.println("Test 5 - Delete object:");
+        response = sendRequest("localhost", PORT, "DELETE|object2");
+        System.out.println("Response: " + response);
+        System.out.println();
+        
+        System.exit(0);
     }
 }

@@ -1,77 +1,106 @@
 package CoT.claude;
 
-import java.util.*;
+import java.sql.*;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Task137 {
-    private static Map<Integer, Product> productTable = new HashMap<>();
-    
-    static class Product {
-        private int id;
-        private String name;
-        private double price;
-        
-        public Product(int id, String name, double price) {
-            this.id = id;
-            this.name = validateInput(name);
-            this.price = price;
-        }
-        
-        private String validateInput(String input) {
-            if(input == null || input.trim().isEmpty()) {
-                throw new IllegalArgumentException("Invalid input");
-            }
-            return input.trim();
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Product ID: %d, Name: %s, Price: $%.2f", id, name, price);
-        }
-    }
-    
-    public static void initializeProducts() {
-        productTable.put(1, new Product(1, "Laptop", 999.99));
-        productTable.put(2, new Product(2, "Phone", 599.99));
-        productTable.put(3, new Product(3, "Tablet", 299.99));
-        productTable.put(4, new Product(4, "Watch", 199.99));
-        productTable.put(5, new Product(5, "Headphones", 99.99));
-    }
-    
-    public static Product getProductDetails(int productId) {
-        if(productId <= 0) {
-            throw new IllegalArgumentException("Invalid product ID");
-        }
-        Product product = productTable.get(productId);
-        if(product == null) {
-            throw new NoSuchElementException("Product not found");
-        }
-        return product;
-    }
+    private static final String DB_URL = "jdbc:sqlite:products.db";
+    private static final Pattern PRODUCT_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]{1,50}$");
     
     public static void main(String[] args) {
-        initializeProducts();
+        Task137 task = new Task137();
+        
+        // Initialize database with sample data
+        task.initializeDatabase();
         
         // Test cases
-        try {
-            // Test case 1: Valid product
-            System.out.println(getProductDetails(1));
+        System.out.println("Test Case 1: Valid product ID");
+        task.getProductDetails("PROD001");
+        
+        System.out.println("\\nTest Case 2: Valid product ID");
+        task.getProductDetails("PROD002");
+        
+        System.out.println("\\nTest Case 3: Non-existent product");
+        task.getProductDetails("PROD999");
+        
+        System.out.println("\\nTest Case 4: Invalid input (SQL injection attempt)");
+        task.getProductDetails("PROD001' OR '1'='1");
+        
+        System.out.println("\\nTest Case 5: Empty input");
+        task.getProductDetails("");
+    }
+    
+    public void initializeDatabase() {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement()) {
             
-            // Test case 2: Another valid product
-            System.out.println(getProductDetails(3));
+            stmt.execute("DROP TABLE IF EXISTS products");
+            stmt.execute("CREATE TABLE products (" +
+                        "id TEXT PRIMARY KEY, " +
+                        "name TEXT NOT NULL, " +
+                        "description TEXT, " +
+                        "price REAL NOT NULL, " +
+                        "stock INTEGER NOT NULL)");
             
-            // Test case 3: Invalid product ID (negative)
-            System.out.println(getProductDetails(-1));
-            
-            // Test case 4: Non-existent product ID
-            System.out.println(getProductDetails(10));
-            
-            // Test case 5: Invalid product ID (zero)
-            System.out.println(getProductDetails(0));
-            
-        } catch(IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch(NoSuchElementException e) {
-            System.out.println("Error: " + e.getMessage());
+            String insertSQL = "INSERT INTO products (id, name, description, price, stock) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
+                String[][] products = {
+                    {"PROD001", "Laptop", "High-performance laptop", "999.99", "50"},
+                    {"PROD002", "Mouse", "Wireless mouse", "29.99", "200"},
+                    {"PROD003", "Keyboard", "Mechanical keyboard", "79.99", "150"},
+                    {"PROD004", "Monitor", "27-inch 4K monitor", "399.99", "75"},
+                    {"PROD005", "Headphones", "Noise-cancelling headphones", "199.99", "100"}
+                };
+                
+                for (String[] product : products) {
+                    pstmt.setString(1, product[0]);
+                    pstmt.setString(2, product[1]);
+                    pstmt.setString(3, product[2]);
+                    pstmt.setDouble(4, Double.parseDouble(product[3]));
+                    pstmt.setInt(5, Integer.parseInt(product[4]));
+                    pstmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Database initialization error: " + e.getMessage());
         }
+    }
+    
+    public void getProductDetails(String productId) {
+        if (!validateInput(productId)) {
+            System.out.println("Invalid product ID format. Please use alphanumeric characters, hyphens, or underscores only.");
+            return;
+        }
+        
+        String query = "SELECT id, name, description, price, stock FROM products WHERE id = ?";
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, productId);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("Product Found:");
+                    System.out.println("ID: " + rs.getString("id"));
+                    System.out.println("Name: " + rs.getString("name"));
+                    System.out.println("Description: " + rs.getString("description"));
+                    System.out.println("Price: $" + rs.getDouble("price"));
+                    System.out.println("Stock: " + rs.getInt("stock"));
+                } else {
+                    System.out.println("Product not found with ID: " + productId);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Database query error: " + e.getMessage());
+        }
+    }
+    
+    private boolean validateInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return false;
+        }
+        return PRODUCT_ID_PATTERN.matcher(input.trim()).matches();
     }
 }

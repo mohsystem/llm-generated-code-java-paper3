@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task16 {
 
     public static boolean solution(String str, String ending) {

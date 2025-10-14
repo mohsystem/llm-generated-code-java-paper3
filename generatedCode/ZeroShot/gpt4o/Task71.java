@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task71 {
     public static Integer convertStringToInt(String input) {
         try {

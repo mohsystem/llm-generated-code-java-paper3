@@ -1,32 +1,50 @@
 package ZeroShot.gemini;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-class Task103 {
-    public boolean isStrongPassword(String password) {
-        if (password.length() < 8) {
-            return false;
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            return false;
-        }
-        if (!password.matches(".*[a-z].*")) {
-            return false;
-        }
-        if (!password.matches(".*\\d.*")) {
+public class Task103 {
+
+    /**
+     * Checks the strength of a given password.
+     * A strong password must be at least 8 characters long, contain both
+     * uppercase and lowercase letters, and at least one digit.
+     *
+     * @param password The password string to validate.
+     * @return true if the password is strong, false otherwise.
+     */
+    public static boolean checkPasswordStrength(String password) {
+        if (password == null || password.length() < 8) {
             return false;
         }
 
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
 
-        return true;
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                hasUpper = true;
+            } else if (Character.isLowerCase(c)) {
+                hasLower = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            }
+        }
+
+        return hasUpper && hasLower && hasDigit;
     }
 
     public static void main(String[] args) {
-        Task103 checker = new Task103();
-        System.out.println(checker.isStrongPassword("short")); //false
-        System.out.println(checker.isStrongPassword("noNumbers")); //false
-        System.out.println(checker.isStrongPassword("NoDigits"));//false
-        System.out.println(checker.isStrongPassword("NoUpperCase1"));//false
-        System.out.println(checker.isStrongPassword("CorrectPassword1"));//true
+        String[] testCases = {
+            "Password123",    // Strong
+            "password123",    // Weak (no uppercase)
+            "PASSWORD123",    // Weak (no lowercase)
+            "Password",       // Weak (no digit)
+            "pass"            // Weak (too short)
+        };
+
+        System.out.println("--- Java Test Cases ---");
+        for (String password : testCases) {
+            boolean isStrong = checkPasswordStrength(password);
+            System.out.println("Password: \"" + password + "\" -> Strong: " + isStrong);
+        }
     }
 }

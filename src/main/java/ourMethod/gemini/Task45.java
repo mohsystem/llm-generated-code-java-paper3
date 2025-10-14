@@ -1,79 +1,75 @@
 package ourMethod.gemini;
+
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Task45 {
 
-    public static int performOperation(int choice, int num1, int num2) {
-        int result = 0;
-        switch (choice) {
-            case 1:
-                result = num1 + num2;
-                break;
-            case 2:
-                result = num1 - num2;
-                break;
-            case 3:
-                if (num2 == 0) {
-                    throw new ArithmeticException("Cannot divide by zero");
-                }
-                result = num1 / num2;
-                break;
-            case 4:
-                result = num1 * num2;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid choice");
+    /**
+     * Divides two integers and returns the result.
+     *
+     * @param numerator   The number to be divided.
+     * @param denominator The number to divide by.
+     * @return The result of the division as a double.
+     * @throws IllegalArgumentException if the denominator is zero.
+     */
+    public static double divide(int numerator, int denominator) {
+        if (denominator == 0) {
+            throw new IllegalArgumentException("Error: Division by zero is not allowed.");
         }
-        return result;
+        return (double) numerator / denominator;
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
+    /**
+     * Processes two string inputs, converts them to integers, performs division,
+     * and prints the result or an error message.
+     *
+     * @param numStr1 String representation of the numerator.
+     * @param numStr2 String representation of the denominator.
+     */
+    public static void processDivision(String numStr1, String numStr2) {
+        System.out.println("Processing inputs: \"" + numStr1 + "\", \"" + numStr2 + "\"");
         try {
-            System.out.print("Enter first number: ");
-            int num1 = scanner.nextInt();
+            // Rule #1: Validate input by parsing.
+            // Rule #7: Use safe parsing.
+            int numerator = Integer.parseInt(numStr1);
+            int denominator = Integer.parseInt(numStr2);
 
-            System.out.print("Enter second number: ");
-            int num2 = scanner.nextInt();
+            // Perform the operation
+            double result = divide(numerator, denominator);
 
-            System.out.print("Enter choice (1:add, 2:subtract, 3:divide, 4:multiply): ");
-            int choice = scanner.nextInt();
-
-            int result = performOperation(choice, num1, num2);
             System.out.println("Result: " + result);
 
-
-        } catch (InputMismatchException e) {
-            System.err.println("Invalid input: Please enter integers only.");
-        } catch (ArithmeticException e) {
-            System.err.println(e.getMessage());
+        // Rule #6: Ensure that all exceptions are caught and handled appropriately.
+        } catch (NumberFormatException e) {
+            System.err.println("Error: Invalid number format. Please enter integers only.");
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
             System.err.println("An unexpected error occurred: " + e.getMessage());
         } finally {
-            scanner.close();
+            System.out.println("--- Operation finished ---");
         }
+    }
 
+
+    public static void main(String[] args) {
         // Test cases
-        System.out.println(performOperation(1, 10, 5)); // 15
-        System.out.println(performOperation(2, 10, 5)); // 5
-        System.out.println(performOperation(4, 10, 5)); // 50
+        System.out.println("--- Running Test Cases ---");
 
-        try {
-            System.out.println(performOperation(3, 10, 0));
-        } catch (ArithmeticException e) {
-            System.err.println(e.getMessage()); // Cannot divide by zero
-        }
+        // Test Case 1: Valid input
+        processDivision("10", "2");
 
-        try {
-            System.out.println(performOperation(5, 10, 5));
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage()); // Invalid Choice
-        }
+        // Test Case 2: Division by zero
+        processDivision("5", "0");
 
+        // Test Case 3: Non-numeric input for numerator
+        processDivision("abc", "5");
 
+        // Test Case 4: Non-numeric input for denominator
+        processDivision("10", "xyz");
+        
+        // Test Case 5: Large numbers (within integer limits)
+        processDivision("2147483647", "2");
     }
 }

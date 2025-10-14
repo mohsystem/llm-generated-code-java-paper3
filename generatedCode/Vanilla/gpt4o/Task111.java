@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 // Java code for XML-RPC server
 import org.apache.xmlrpc.WebServer;
 import org.apache.xmlrpc.XmlRpcException;

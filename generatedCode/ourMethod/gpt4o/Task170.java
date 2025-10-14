@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task170 {
     public static int countRangeSum(int[] nums, int lower, int upper) {
         return countRangeSumRecursive(nums, lower, upper, 0, nums.length - 1);

@@ -1,27 +1,32 @@
 package CoT.gemini;
-class Task59 {
-    public String accum(String s) {
-        StringBuilder sb = new StringBuilder();
+
+public class Task59 {
+
+    public static String accum(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            sb.append(Character.toUpperCase(c));
+            // Append the first character, capitalized
+            result.append(Character.toUpperCase(c));
+            // Append the rest of the characters, in lowercase, i times
             for (int j = 0; j < i; j++) {
-                sb.append(Character.toLowerCase(c));
+                result.append(Character.toLowerCase(c));
             }
+            // Append a hyphen if it's not the last part
             if (i < s.length() - 1) {
-                sb.append("-");
+                result.append("-");
             }
         }
-        return sb.toString();
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task59 task59 = new Task59();
-        System.out.println(task59.accum("abcd"));
-        System.out.println(task59.accum("RqaEzty"));
-        System.out.println(task59.accum("cwAt"));
-        System.out.println(task59.accum("ZpglnRWvg"));
-        System.out.println(task59.accum("NyffsGeyylB"));
-
+        String[] testCases = {"abcd", "RqaEzty", "cwAt", "Z", ""};
+        for (String testCase : testCases) {
+            System.out.println(String.format("\"%s\" -> \"%s\"", testCase, accum(testCase)));
+        }
     }
 }

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task174 {
     public static void main(String[] args) {
         System.out.println(shortestPalindrome("aacecaaa")); // Output: "aaacecaaa"

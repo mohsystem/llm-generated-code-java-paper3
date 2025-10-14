@@ -1,22 +1,38 @@
 package ourMethod.gemini;
-class Task34 {
+
+import java.lang.Math;
+
+public class Task34 {
+
+    /**
+     * Checks if a given number is a Narcissistic Number (Armstrong Number).
+     * A number is narcissistic if it is the sum of its own digits, each raised to
+     * the power of the number of digits.
+     *
+     * @param number The positive integer to check.
+     * @return true if the number is narcissistic, false otherwise.
+     */
     public static boolean isNarcissistic(int number) {
-        String numStr = String.valueOf(number);
-        int power = numStr.length();
-        int sum = 0;
-        for (int i = 0; i < power; i++) {
-            int digit = Character.getNumericValue(numStr.charAt(i));
-            sum += Math.pow(digit, power);
+        String numberStr = String.valueOf(number);
+        int numDigits = numberStr.length();
+        long sum = 0;
+
+        int temp = number;
+        while (temp > 0) {
+            int digit = temp % 10;
+            sum += Math.pow(digit, numDigits);
+            temp /= 10;
         }
+
         return sum == number;
     }
 
     public static void main(String[] args) {
-        System.out.println(isNarcissistic(153)); // true
-        System.out.println(isNarcissistic(1652)); // false
-        System.out.println(isNarcissistic(1)); // true
-        System.out.println(isNarcissistic(407)); // true
-        System.out.println(isNarcissistic(1634)); // true
-
+        // 5 test cases
+        System.out.println("isNarcissistic(153): " + isNarcissistic(153));   // Expected: true
+        System.out.println("isNarcissistic(1652): " + isNarcissistic(1652)); // Expected: false
+        System.out.println("isNarcissistic(7): " + isNarcissistic(7));      // Expected: true
+        System.out.println("isNarcissistic(371): " + isNarcissistic(371));   // Expected: true
+        System.out.println("isNarcissistic(123): " + isNarcissistic(123));   // Expected: false
     }
 }

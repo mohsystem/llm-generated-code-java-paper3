@@ -1,40 +1,64 @@
 package ZeroShot.claude;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 public class Task73 {
     public static boolean isValidAdminPassword(String password) {
         if (password == null || password.length() < 12) {
             return false;
         }
-
-        boolean hasUpper = false;
-        boolean hasLower = false;
+        
+        // Check for at least one uppercase letter
+        boolean hasUppercase = false;
+        // Check for at least one lowercase letter
+        boolean hasLowercase = false;
+        // Check for at least one digit
         boolean hasDigit = false;
+        // Check for at least one special character
         boolean hasSpecial = false;
+        
         String specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
-
+        
         for (char c : password.toCharArray()) {
-            if (Character.isUpperCase(c)) hasUpper = true;
-            else if (Character.isLowerCase(c)) hasLower = true;
-            else if (Character.isDigit(c)) hasDigit = true;
-            else if (specialChars.indexOf(c) >= 0) hasSpecial = true;
+            if (Character.isUpperCase(c)) {
+                hasUppercase = true;
+            } else if (Character.isLowerCase(c)) {
+                hasLowercase = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else if (specialChars.indexOf(c) >= 0) {
+                hasSpecial = true;
+            }
         }
-
-        return hasUpper && hasLower && hasDigit && hasSpecial;
+        
+        // Check for common weak passwords
+        String lowerPassword = password.toLowerCase();
+        String[] weakPasswords = {"password", "admin", "123456", "qwerty", "letmein"};
+        for (String weak : weakPasswords) {
+            if (lowerPassword.contains(weak)) {
+                return false;
+            }
+        }
+        
+        return hasUppercase && hasLowercase && hasDigit && hasSpecial;
     }
-
+    
     public static void main(String[] args) {
         // Test cases
-        String[] passwords = {
-            "Admin@12345678",       // true
-            "weakpassword",         // false (no upper, digit, special)
-            "Admin12345678",        // false (no special)
-            "Admin@pass",           // false (too short)
-            "!@#$%^&*()",          // false (no upper, lower, digit)
+        String[] testPasswords = {
+            "Admin@123456",           // Valid
+            "SecureP@ssw0rd!",       // Valid
+            "weak",                   // Invalid - too short
+            "NoSpecialChar123",       // Invalid - no special character
+            "Admin@Password2024"      // Valid
         };
-
-        for (String password : passwords) {
-            System.out.println("Password: " + password + " is valid: " + 
-                             isValidAdminPassword(password));
+        
+        System.out.println("Admin Password Validation Results:");
+        System.out.println("=====================================");
+        for (String password : testPasswords) {
+            boolean isValid = isValidAdminPassword(password);
+            System.out.println("Password: " + password + " -> " + (isValid ? "VALID" : "INVALID"));
         }
     }
 }

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.io.*;
 import java.nio.file.*;
 import java.util.regex.*;

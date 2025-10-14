@@ -1,149 +1,190 @@
 package ZeroShot.gemini;
-import java.io.BufferedInputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-
+import java.util.zip.ZipOutputStream;
 
 public class Task117 {
 
-    public static void extractArchive(String archivePath, String destPath) throws IOException {
-        File archiveFile = new File(archivePath);
-        if (!archiveFile.exists()) {
-            throw new IOException("Archive file not found: " + archivePath);
+    /**
+     * Extracts a ZIP file to a specified destination directory with security checks.
+     *
+     * @param zipFilePath   Path to the ZIP file.
+     * @param destDirPath   Path to the destination directory.
+     * @throws IOException if an I/O error occurs or a security violation is detected.
+     */
+    public static void extractZip(String zipFilePath, String destDirPath) throws IOException {
+        Path destDir = Paths.get(destDirPath).toAbsolutePath();
+        if (!Files.exists(destDir)) {
+            Files.createDirectories(destDir);
         }
 
-        if (archivePath.endsWith(".zip")) {
-            extractZip(archivePath, destPath);
-        } else if (archivePath.endsWith(".tar.gz") || archivePath.endsWith(".tgz")) {
-            extractTarGz(archivePath, destPath);
-        } else if (archivePath.endsWith(".tar.bz2") || archivePath.endsWith(".tbz")) {
-            extractTarBz2(archivePath, destPath);
-        } else if (archivePath.endsWith(".tar")) {
-            extractTar(archivePath, destPath);
-        } else {
-            throw new IOException("Unsupported archive format: " + archivePath);
-        }
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            byte[] buffer = new byte[1024];
 
-    }
+            while (zipEntry != null) {
+                Path newFilePath = destDir.resolve(zipEntry.getName()).normalize();
 
+                // Security Check: Path Traversal (Zip Slip)
+                if (!newFilePath.startsWith(destDir)) {
+                    throw new IOException("Zip Slip vulnerability detected: Entry is outside of the target dir: " + zipEntry.getName());
+                }
 
-    private static void extractZip(String archivePath, String destPath) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(archivePath))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                File newFile = newFile(new File(destPath), entry);
-                if (entry.isDirectory()) {
-                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                        throw new IOException("Failed to create directory " + newFile);
+                if (zipEntry.isDirectory()) {
+                    if (!Files.exists(newFilePath)) {
+                        Files.createDirectories(newFilePath);
                     }
                 } else {
-                    //todo incompatible types: ZipInputStream cannot be converted to BufferedInputStream
-//                    extractFile(zis, newFile);
+                    // Create parent directories if they don't exist
+                    Path parent = newFilePath.getParent();
+                    if (parent != null && !Files.exists(parent)) {
+                        Files.createDirectories(parent);
+                    }
+
+                    // Write file content
+                    try (FileOutputStream fos = new FileOutputStream(newFilePath.toFile())) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
                 }
+                zis.closeEntry();
+                zipEntry = zis.getNextEntry();
             }
         }
     }
 
-    private static void extractTar(String archivePath, String destPath) throws IOException {
-        try (TarArchiveInputStream tais = new TarArchiveInputStream(new FileInputStream(archivePath))) {
-            extractTarGeneric(tais, destPath);
+    /**
+     * Helper method to create a test zip file.
+     */
+    private static void createTestZip(String zipFilePath) throws IOException {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFilePath))) {
+            // Add a normal file
+            zos.putNextEntry(new ZipEntry("test_file1.txt"));
+            zos.write("This is file 1.".getBytes());
+            zos.closeEntry();
 
+            // Add a file in a subdirectory
+            zos.putNextEntry(new ZipEntry("subdir/test_file2.txt"));
+            zos.write("This is file 2 in a subdir.".getBytes());
+            zos.closeEntry();
+
+            // Add an empty directory
+            zos.putNextEntry(new ZipEntry("empty_dir/"));
+            zos.closeEntry();
+            
+            // Add a file with a path traversal attempt (for testing security)
+            zos.putNextEntry(new ZipEntry("../malicious.txt"));
+            zos.write("This should not be extracted.".getBytes());
+            zos.closeEntry();
         }
     }
 
-    private static void extractTarGz(String archivePath, String destPath) throws IOException {
-
-        try (TarArchiveInputStream tais = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(archivePath)))) {
-            extractTarGeneric(tais, destPath);
+    /**
+     * Helper method to delete a directory recursively.
+     */
+    private static void deleteDirectory(Path path) throws IOException {
+        if (Files.exists(path)) {
+            Files.walk(path)
+                 .sorted(Comparator.reverseOrder())
+                 .map(Path::toFile)
+                 .forEach(File::delete);
         }
     }
 
+    public static void main(String[] args) {
+        String testDir = "java_test_area";
+        try {
+            // Setup test environment
+            Path testDirPath = Paths.get(testDir);
+            deleteDirectory(testDirPath); // Clean up previous runs
+            Files.createDirectories(testDirPath);
 
-    private static void extractTarBz2(String archivePath, String destPath) throws IOException {
-        try (TarArchiveInputStream tais = new TarArchiveInputStream(new BZip2CompressorInputStream(new FileInputStream(archivePath)))) {
-            extractTarGeneric(tais, destPath);
-        }
-    }
+            String validZip = testDirPath.resolve("test.zip").toString();
+            String maliciousZip = testDirPath.resolve("malicious.zip").toString(); // Conceptually, this would be the same file for the test
+            createTestZip(validZip);
 
-
-    private static void extractTarGeneric(TarArchiveInputStream tais, String destPath) throws IOException {
-        TarArchiveEntry entry;
-        while ((entry = tais.getNextTarEntry()) != null) {
-            File newFile = newFile(new File(destPath), entry);
-
-            if (entry.isDirectory()) {
-                if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                    throw new IOException("Failed to create directory " + newFile);
+            // Test Case 1: Standard successful extraction
+            System.out.println("--- Test Case 1: Standard Extraction ---");
+            String dest1 = testDirPath.resolve("output1").toString();
+            try {
+                extractZip(validZip, dest1);
+                System.out.println("Successfully extracted to: " + dest1);
+                if(Files.exists(Paths.get(dest1, "test_file1.txt")) && Files.exists(Paths.get(dest1, "subdir", "test_file2.txt"))){
+                    System.out.println("Verification: PASSED");
+                } else {
+                    System.out.println("Verification: FAILED");
                 }
-            } else {
-                //todo incompatible types: TarArchiveInputStream cannot be converted to BufferedInputStream
-//                extractFile(tais, newFile);
+            } catch (IOException e) {
+                System.err.println("Extraction failed: " + e.getMessage());
+            }
+
+            // Test Case 2: Extracting a non-existent ZIP file
+            System.out.println("\n--- Test Case 2: Non-existent ZIP File ---");
+            String dest2 = testDirPath.resolve("output2").toString();
+            try {
+                extractZip("non_existent.zip", dest2);
+                System.out.println("Extraction successful (this should not happen).");
+            } catch (IOException e) {
+                System.out.println("Caught expected exception: " + e.getMessage());
+            }
+
+            // Test Case 3: Path Traversal (Zip Slip) security test
+            System.out.println("\n--- Test Case 3: Path Traversal (Zip Slip) Test ---");
+            String dest3 = testDirPath.resolve("output3").toString();
+            try {
+                extractZip(validZip, dest3); // The same zip contains a malicious entry
+                System.out.println("Extraction completed.");
+                 if(Files.exists(Paths.get(testDirPath.toString(), "malicious.txt"))){
+                    System.out.println("Verification: FAILED - Malicious file was created.");
+                } else {
+                    System.out.println("Verification: PASSED - Malicious file was blocked.");
+                }
+            } catch (IOException e) {
+                System.out.println("Caught expected security exception: " + e.getMessage());
+            }
+
+            // Test Case 4: Destination is an existing file (should fail gracefully)
+             System.out.println("\n--- Test Case 4: Destination is a File ---");
+            Path dest4File = testDirPath.resolve("output4");
+            Files.createFile(dest4File);
+            try {
+                extractZip(validZip, dest4File.toString());
+                System.out.println("Extraction successful (this should not happen).");
+            } catch (IOException e) {
+                System.out.println("Caught expected exception: " + e.getMessage());
+            }
+
+            // Test Case 5: Empty source zip file path
+            System.out.println("\n--- Test Case 5: Empty Source Path ---");
+             String dest5 = testDirPath.resolve("output5").toString();
+            try {
+                extractZip("", dest5);
+                System.out.println("Extraction successful (this should not happen).");
+            } catch (Exception e) {
+                System.out.println("Caught expected exception: " + e.getMessage());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Clean up
+            try {
+                deleteDirectory(Paths.get(testDir));
+                System.out.println("\nCleaned up test directory.");
+            } catch (IOException e) {
+                System.err.println("Failed to clean up test directory: " + e.getMessage());
             }
         }
-    }
-
-    private static void extractFile(BufferedInputStream inputStream, File outputFile) throws IOException {
-        File parent = outputFile.getParentFile();
-        if (!parent.exists() && !parent.mkdirs()) {
-            throw new IOException("Failed to create directory " + parent);
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                fos.write(buffer, 0, bytesRead);
-            }
-        }
-
-    }
-
-
-    private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-
-        return destFile;
-    }
-
-    private static File newFile(File destinationDir, TarArchiveEntry tarEntry) throws IOException {
-        File destFile = new File(destinationDir, tarEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + tarEntry.getName());
-        }
-
-        return destFile;
-    }
-
-
-
-    public static void main(String[] args) throws IOException {
-        String tempDir = Files.createTempDirectory("test").toString();
-        extractArchive("test.zip", tempDir + "/test1");
-        extractArchive("test.tar", tempDir + "/test2");
-        extractArchive("test.tar.gz", tempDir + "/test3");
-        extractArchive("test.tar.bz2", tempDir + "/test4");
-        extractArchive("test.tgz", tempDir + "/test5");
     }
 }

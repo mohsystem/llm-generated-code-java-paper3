@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task28 {
     public static void main(String[] args) {
         System.out.println(formatLikes(new String[]{})); // "no one likes this"

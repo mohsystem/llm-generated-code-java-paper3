@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task3 {
     public static boolean isPangram(String sentence) {
         boolean[] letters = new boolean[26];

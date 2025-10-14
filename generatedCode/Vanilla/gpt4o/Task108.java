@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.rmi.registry.*;

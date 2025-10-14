@@ -1,74 +1,98 @@
 package CoT.gemini;
+
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-class Task7 {
+public class Task7 {
 
-    // Client-side code
-    static class Client {
-        public static void main(String[] args) throws IOException {
-            Socket socket = new Socket("localhost", 5000);
-            Scanner scanner = new Scanner(System.in);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    private static final String USER_FILE = "users.dat";
+    private static final int PORT = 8080;
+    private static final String HOST = "127.0.0.1";
 
-            System.out.print("Enter username: ");
-            String username = scanner.nextLine();
-            System.out.print("Enter password: ");
-            String password = scanner.nextLine();
+    // --- Security Utilities ---
+    private static class SecurityUtils {
 
-            out.println("LOGIN " + username + " " + password);
+        public static byte[] getSalt() throws NoSuchAlgorithmException {
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            byte[] salt = new byte[16];
+            sr.nextBytes(salt);
+            return salt;
+        }
 
-            String response = in.readLine();
-            System.out.println(response);
+        public static String hashPassword(String password, byte[] salt) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(salt);
+                byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+                return Base64.getEncoder().encodeToString(hashedPassword);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("Could not find SHA-256 algorithm", e);
+            }
+        }
 
-            socket.close();
-            scanner.close();
+        public static boolean verifyPassword(String originalPassword, String storedHash, String saltStr) {
+            byte[] salt = Base64.getDecoder().decode(saltStr);
+            String newHash = hashPassword(originalPassword, salt);
+            return newHash.equals(storedHash);
+        }
 
+        public static void addUser(String username, String password) {
+            if (isUserExists(username)) {
+                System.out.println("Error: User '" + username + "' already exists.");
+                return;
+            }
+            try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(USER_FILE, true)))) {
+                byte[] salt = getSalt();
+                String hashedPassword = hashPassword(password, salt);
+                String saltStr = Base64.getEncoder().encodeToString(salt);
+                out.println(username + ":" + hashedPassword + ":" + saltStr);
+                System.out.println("User '" + username + "' added successfully.");
+            } catch (IOException | NoSuchAlgorithmException e) {
+                System.err.println("Error adding user: " + e.getMessage());
+            }
+        }
+
+        public static boolean isUserExists(String username) {
+             File db = new File(USER_FILE);
+             if (!db.exists()) return false;
+             try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
+                 String line;
+                 while ((line = reader.readLine()) != null) {
+                     String[] parts = line.split(":", 3);
+                     if (parts.length > 0 && parts[0].equals(username)) {
+                         return true;
+                     }
+                 }
+             } catch (IOException e) {
+                 System.err.println("Error checking user existence: " + e.getMessage());
+             }
+             return false;
         }
     }
 
-
-    // Server-side code
-    static class Server {
-
-        private static HashMap<String, String> users = new HashMap<>();
-
-        public static void main(String[] args) throws IOException {
-            ServerSocket serverSocket = new ServerSocket(5000);
-            System.out.println("Server started...");
-
-
-            // Load users from file (replace with your actual file path)
-            loadUsers("users.txt");
-
-
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Client connected: " + clientSocket.getInetAddress());
-
-                new ClientHandler(clientSocket).start();
-            }
-        }
-
-        // Load users from a file
-        private static void loadUsers(String filePath) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(":");
-                    if (parts.length == 2) {
-                        users.put(parts[0], parts[1]);
-                    }
+    // --- Server ---
+    private static class Server {
+        public void start() {
+            ExecutorService pool = Executors.newCachedThreadPool();
+            try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+                System.out.println("Server listening on port " + PORT);
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    pool.execute(new ClientHandler(clientSocket));
                 }
             } catch (IOException e) {
-                System.err.println("Error loading users: " + e.getMessage());
+                System.err.println("Server error: " + e.getMessage());
             }
         }
 
-        static class ClientHandler extends Thread {
+        private static class ClientHandler implements Runnable {
             private final Socket clientSocket;
 
             public ClientHandler(Socket socket) {
@@ -77,58 +101,135 @@ class Task7 {
 
             @Override
             public void run() {
-                try {
-                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                try (
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
+                ) {
                     String request = in.readLine();
-                    String[] parts = request.split(" ");
-
-                    if (parts.length == 3 && parts[0].equals("LOGIN")) {
-                        String username = parts[1];
-                        String password = parts[2];
-
-                        if (users.containsKey(username) && users.get(username).equals(password)) {
-                            out.println("Login successful!");
+                    if (request != null) {
+                        System.out.println("Server received: " + request.split(" ")[0] + " " + request.split(" ")[1] + " *****");
+                        boolean authenticated = processRequest(request);
+                        if (authenticated) {
+                            out.println("LOGIN_SUCCESS");
+                            System.out.println("Authentication successful for " + request.split(" ")[1]);
                         } else {
-                            out.println("Login failed!");
+                            out.println("LOGIN_FAIL");
+                             System.out.println("Authentication failed for " + request.split(" ")[1]);
                         }
-                    } else {
-                        out.println("Invalid request!");
                     }
-
-
-                    clientSocket.close();
                 } catch (IOException e) {
-                    System.err.println("Error handling client: " + e.getMessage());
+                    // System.err.println("Handler error: " + e.getMessage());
+                } finally {
+                    try {
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
                 }
+            }
 
+            private boolean processRequest(String request) {
+                String[] parts = request.split(" ", 3);
+                if (parts.length == 3 && parts[0].equals("LOGIN")) {
+                    return authenticate(parts[1], parts[2]);
+                }
+                return false;
+            }
+
+            private boolean authenticate(String username, String password) {
+                 File db = new File(USER_FILE);
+                 if (!db.exists()) return false;
+                 try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(":", 3);
+                        if (parts.length == 3 && parts[0].equals(username)) {
+                            return SecurityUtils.verifyPassword(password, parts[1], parts[2]);
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Authentication error: " + e.getMessage());
+                }
+                return false;
             }
         }
-
     }
 
+    // --- Client ---
+    private static class Client {
+        public void login(String username, String password) {
+            try (
+                Socket socket = new Socket(HOST, PORT);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+            ) {
+                String request = "LOGIN " + username + " " + password;
+                out.println(request);
+                System.out.println("Client sent login request for user: " + username);
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+                String response = in.readLine();
+                System.out.println("Server response: " + response);
 
-        // Test cases (run server in a separate thread)
-        Thread serverThread = new Thread(() -> {
-            try {
-                Task7.Server.main(new String[0]);
+            } catch (UnknownHostException e) {
+                System.err.println("Don't know about host " + HOST);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Couldn't get I/O for the connection to " + HOST + ". Is the server running?");
             }
-        });
-        serverThread.start();
+        }
+    }
 
-        Thread.sleep(1000); // Give the server time to start
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            printUsage();
+            return;
+        }
 
-        Task7.Client.main(new String[]{"user1", "pass1"}); // Correct credentials
-        Task7.Client.main(new String[]{"user1", "wrong"}); // Incorrect password
-        Task7.Client.main(new String[]{"invaliduser", "pass"}); // Invalid username
-        Task7.Client.main(new String[]{"user2", "pass2"}); // Correct credentials (user2 should be in users.txt)
-        Task7.Client.main(new String[]{"user2", ""});    // empty password
+        String mode = args[0];
+        if ("server".equalsIgnoreCase(mode)) {
+            new Server().start();
+        } else if ("adduser".equalsIgnoreCase(mode)) {
+            if (args.length != 3) {
+                System.out.println("Usage: java Task7 adduser <username> <password>");
+                return;
+            }
+            SecurityUtils.addUser(args[1], args[2]);
+        } else if ("client".equalsIgnoreCase(mode)) {
+            runClientTests();
+        } else {
+            printUsage();
+        }
+    }
 
-        serverThread.interrupt(); // Stop the server after tests
+    private static void printUsage() {
+        System.out.println("Usage: java Task7 <mode> [options]");
+        System.out.println("Modes:");
+        System.out.println("  server                  - Start the chat server.");
+        System.out.println("  adduser <user> <pass>   - Add a new user to the user file.");
+        System.out.println("  client                  - Run predefined client test cases.");
+    }
+
+    private static void runClientTests() {
+        System.out.println("\n--- Running Client Test Cases ---");
+        System.out.println("Instructions:");
+        System.out.println("1. Start the server in a separate terminal: java Task7 server");
+        System.out.println("2. Add a test user in another terminal: java Task7 adduser testuser testpass123");
+        System.out.println("3. The test cases below will now run against the server.\n");
+
+        Client client = new Client();
+        
+        System.out.println("--- Test Case 1: Successful Login ---");
+        client.login("testuser", "testpass123");
+        
+        System.out.println("\n--- Test Case 2: Incorrect Password ---");
+        client.login("testuser", "wrongpassword");
+
+        System.out.println("\n--- Test Case 3: Non-existent User ---");
+        client.login("nouser", "anypassword");
+
+        System.out.println("\n--- Test Case 4: Another Successful Login ---");
+        client.login("testuser", "testpass123");
+
+        System.out.println("\n--- Test Case 5: Empty Password ---");
+        client.login("testuser", "");
     }
 }

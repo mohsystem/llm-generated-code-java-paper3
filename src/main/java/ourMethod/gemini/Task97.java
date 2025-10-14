@@ -1,65 +1,197 @@
 package ourMethod.gemini;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathVariableResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import java.io.File;
-import java.io.StringReader;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.xml.namespace.QName;
+import javax.xml.XMLConstants;
 
 public class Task97 {
 
-    public static String executeXPath(String xmlFileName, String xpathValue) throws Exception {
-        // Construct and parse the XML file
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(new InputSource(new StringReader(xmlFileName)));
+    // Regex for validating the ID to be alphanumeric + underscore
+    private static final Pattern ID_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
 
-
-        // Execute the XPath query
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile(xpathValue);
-        NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < nl.getLength(); i++) {
-            result.append(nl.item(i).getTextContent());
-
+    /**
+     * Executes an XPath query to find nodes by ID.
+     *
+     * @param id The ID to search for. Must be a simple alphanumeric string.
+     * @param xmlFilePath The path to the XML file. Must be a simple filename without path components.
+     * @return A list of string contents of the found nodes.
+     * @throws IllegalArgumentException for invalid inputs.
+     * @throws ParserConfigurationException, SAXException, IOException, XPathExpressionException on XML/XPath processing errors.
+     */
+    public static List<String> executeXPathQuery(final String id, final String xmlFilePath) 
+            throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
+        
+        // Rule #1 & #5: Validate inputs
+        if (id == null || !ID_PATTERN.matcher(id).matches()) {
+            throw new IllegalArgumentException("Invalid ID format. Only alphanumeric characters and underscores are allowed.");
         }
-        return result.toString();
+        
+        if (xmlFilePath == null || xmlFilePath.trim().isEmpty()) {
+            throw new IllegalArgumentException("XML file path cannot be null or empty.");
+        }
 
+        // Rule #5: Prevent path traversal
+        try {
+            if (!Paths.get(xmlFilePath).getFileName().toString().equals(xmlFilePath)) {
+                throw new IllegalArgumentException("Invalid file path. Only simple filenames are allowed.");
+            }
+        } catch (InvalidPathException e) {
+            throw new IllegalArgumentException("Invalid file path format.", e);
+        }
+
+        File xmlFile = new File(xmlFilePath);
+        if (!xmlFile.exists() || !xmlFile.isFile()) {
+            throw new IOException("XML file does not exist or is not a regular file: " + xmlFilePath);
+        }
+
+        // Rule #4: Securely configure the XML parser to prevent XXE
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setExpandEntityReferences(false);
+        
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.parse(xmlFile);
+
+        XPathFactory xpf = XPathFactory.newInstance();
+        XPath xpath = xpf.newXPath();
+
+        // Use a variable resolver to prevent XPath injection
+        xpath.setXPathVariableResolver(new XPathVariableResolver() {
+            @Override
+            public Object resolveVariable(QName variableName) {
+                if (variableName.getLocalPart().equals("idVar")) {
+                    return id;
+                }
+                return null;
+            }
+        });
+
+        // The format is /tag[@id={}], here we use `*` for any tag
+        String expression = "//*[@id=$idVar]";
+        XPathExpression expr = xpath.compile(expression);
+
+        NodeList nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        List<String> results = new ArrayList<>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            results.add(nodeList.item(i).getTextContent());
+        }
+
+        return results;
     }
 
-    public static void main(String[] args) throws Exception {
-        // Test cases
-        String testXml1 = "<tag id='1'>Value1</tag>";
-        String testXpath1 = "/tag[@id='1']";
-        System.out.println("Test case 1: " + executeXPath(testXml1, testXpath1));
+    private static void setupTestFile(String filename) throws IOException {
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<root>\n");
+            writer.write("    <item id=\"item1\">Content 1</item>\n");
+            writer.write("    <data>\n");
+            writer.write("        <item id=\"item2\">Content 2</item>\n");
+            writer.write("    </data>\n");
+            writer.write("    <item id=\"item3\">Content 3</item>\n");
+            writer.write("    <item id=\"another_id_4\">More Content</item>\n");
+            writer.write("</root>");
+        }
+    }
 
-        String testXml2 = "<root><tag id='2'>Value2</tag><tag id='3'>Value3</tag></root>";
-        String testXpath2 = "/root/tag[@id='2']";
+    private static void cleanupTestFile(String filename) {
+        new File(filename).delete();
+    }
 
-        System.out.println("Test case 2: " + executeXPath(testXml2, testXpath2));
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.err.println("Usage: java Task97 <id> <xml_file>");
+            System.err.println("Running test cases instead...");
+            runTests();
+            return;
+        }
 
-        String testXml3 = "<data><item id='a'>A</item><item id='b'>B</item></data>";
-        String testXpath3 = "/data/item[@id='b']";
-        System.out.println("Test case 3: " + executeXPath(testXml3, testXpath3));
+        try {
+            List<String> results = executeXPathQuery(args[0], args[1]);
+            System.out.println("Query Result:");
+            if (results.isEmpty()) {
+                System.out.println("No nodes found.");
+            } else {
+                results.forEach(System.out::println);
+            }
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+        }
+    }
+    
+    private static void runTests() {
+        String testFile = "test97.xml";
+        try {
+            setupTestFile(testFile);
+            System.out.println("--- Running 5 Test Cases ---");
 
+            // Test Case 1: Valid ID, existing item
+            System.out.println("\n[Test 1] ID: 'item1', File: '" + testFile + "'");
+            try {
+                System.out.println("Result: " + executeXPathQuery("item1", testFile));
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
 
-        String testXml4 = "<bookstore><book><title lang='eng'>Harry Potter</title><price>29.99</price></book><book><title lang='eng'>Learning XML</title><price>39.95</price></book></bookstore>";
-        String testXpath4 = "/bookstore/book[price>30]";
+            // Test Case 2: Valid ID, nested item
+            System.out.println("\n[Test 2] ID: 'item2', File: '" + testFile + "'");
+            try {
+                System.out.println("Result: " + executeXPathQuery("item2", testFile));
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
 
-        System.out.println("Test case 4: " + executeXPath(testXml4, testXpath4));
-         String testXml5 = "<tag id='1'>Value1</tag>";
-        String testXpath5 = "/tag[@id='2']";
-        System.out.println("Test case 5: " + executeXPath(testXml5, testXpath5));
+            // Test Case 3: Valid ID, non-existent item
+            System.out.println("\n[Test 3] ID: 'nonexistent', File: '" + testFile + "'");
+            try {
+                System.out.println("Result: " + executeXPathQuery("nonexistent", testFile));
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
 
+            // Test Case 4: Invalid ID (potential injection)
+            System.out.println("\n[Test 4] ID: \"' or '1'='1'\", File: '" + testFile + "'");
+            try {
+                executeXPathQuery("' or '1'='1'", testFile);
+            } catch (Exception e) {
+                System.err.println("Caught expected error: " + e.getMessage());
+            }
 
+            // Test Case 5: Invalid filename (path traversal)
+            System.out.println("\n[Test 5] ID: 'item1', File: '../test97.xml'");
+            try {
+                executeXPathQuery("item1", "../test97.xml");
+            } catch (Exception e) {
+                System.err.println("Caught expected error: " + e.getMessage());
+            }
+            
+            System.out.println("\n--- Test Cases Finished ---");
+
+        } catch (IOException e) {
+            System.err.println("Failed to set up or run tests: " + e.getMessage());
+        } finally {
+            cleanupTestFile(testFile);
+        }
     }
 }

@@ -1,63 +1,86 @@
 package CoT.gemini;
+
 import java.util.concurrent.Semaphore;
 
 class Task188 {
-    private int n;
-    private Semaphore fooSemaphore;
-    private Semaphore barSemaphore;
+    // Inner class to handle the FooBar logic
+    static class FooBar {
+        private int n;
+        private Semaphore fooSem;
+        private Semaphore barSem;
 
-    public Task188(int n) {
-        this.n = n;
-        this.fooSemaphore = new Semaphore(1);
-        this.barSemaphore = new Semaphore(0);
-    }
+        public FooBar(int n) {
+            this.n = n;
+            // fooSem is initialized to 1 so that foo() can run first.
+            this.fooSem = new Semaphore(1);
+            // barSem is initialized to 0 so that bar() has to wait.
+            this.barSem = new Semaphore(0);
+        }
 
-    public void foo() {
-        for (int i = 0; i < n; i++) {
-            try {
-                fooSemaphore.acquire();
-                System.out.print("foo");
-                barSemaphore.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        public void foo(Runnable printFoo) throws InterruptedException {
+            for (int i = 0; i < n; i++) {
+                // Acquire the foo semaphore. This will block if the permit is not available.
+                fooSem.acquire();
+                // printFoo.run() outputs "foo". Do not change or remove this line.
+                printFoo.run();
+                // Release the bar semaphore, allowing the bar() method to proceed.
+                barSem.release();
+            }
+        }
+
+        public void bar(Runnable printBar) throws InterruptedException {
+            for (int i = 0; i < n; i++) {
+                // Acquire the bar semaphore. This will block until foo() releases it.
+                barSem.acquire();
+                // printBar.run() outputs "bar". Do not change or remove this line.
+                printBar.run();
+                // Release the foo semaphore, allowing the foo() method to proceed for the next iteration.
+                fooSem.release();
             }
         }
     }
 
-    public void bar() {
-        for (int i = 0; i < n; i++) {
+    public static void runTest(int n) throws InterruptedException {
+        System.out.println("Test Case (n = " + n + "):");
+        final FooBar fooBar = new FooBar(n);
+        
+        Runnable printFoo = () -> System.out.print("foo");
+        Runnable printBar = () -> System.out.print("bar");
+
+        Thread threadA = new Thread(() -> {
             try {
-                barSemaphore.acquire();
-                System.out.print("bar");
-                fooSemaphore.release();
+                fooBar.foo(printFoo);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
-        }
+        });
+
+        Thread threadB = new Thread(() -> {
+            try {
+                fooBar.bar(printBar);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+
+        threadA.join();
+        threadB.join();
+        System.out.println("\n");
     }
 
     public static void main(String[] args) {
-        test(1);
-        test(2);
-        test(3);
-        test(4);
-        test(5);
-    }
-
-    private static void test(int n) {
-        Task188 fooBar = new Task188(n);
-        Thread fooThread = new Thread(fooBar::foo);
-        Thread barThread = new Thread(fooBar::bar);
-
-        fooThread.start();
-        barThread.start();
-
         try {
-            fooThread.join();
-            barThread.join();
+            runTest(1);
+            runTest(2);
+            runTest(5);
+            runTest(10);
+            runTest(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
-        System.out.println();
     }
 }

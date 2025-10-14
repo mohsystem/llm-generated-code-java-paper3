@@ -1,41 +1,42 @@
 package CoT.gemini;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
 
 public class Task126 {
 
-    public static String redirect(String input) {
-        // Use a Map to store the mappings between user input and URLs.
-        Map<String, String> redirectMap = new HashMap<>();
-        redirectMap.put("home", "/home");
-        redirectMap.put("about", "/about");
-        redirectMap.put("contact", "/contact");
-        redirectMap.put("products", "/products");
+    /**
+     * Redirects a user based on a string choice.
+     * The comparison is case-insensitive.
+     *
+     * @param choice The user's page selection (e.g., "home", "about").
+     * @return A string indicating the redirection URL or an error message.
+     */
+    public static String redirectUser(String choice) {
+        if (choice == null || choice.trim().isEmpty()) {
+            return "Error: Page not found (404)";
+        }
 
+        // Convert choice to lowercase for case-insensitive matching
+        String lowerCaseChoice = choice.toLowerCase();
 
-        // Retrieve the corresponding URL from the map.
-        String url = redirectMap.getOrDefault(input.toLowerCase(), "/error"); // Default to error page if input is invalid
-
-        return url;
+        switch (lowerCaseChoice) {
+            case "home":
+                return "Redirecting to /home.html";
+            case "about":
+                return "Redirecting to /about.html";
+            case "contact":
+                return "Redirecting to /contact.html";
+            case "products":
+                return "Redirecting to /products.html";
+            default:
+                return "Error: Page not found (404)";
+        }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter your choice (home, about, contact, products):");
-        String input = scanner.nextLine();
-
-
-        String redirectedUrl = redirect(input);
-        System.out.println("Redirecting to: " + redirectedUrl);
-
-
-        // Test cases
-        System.out.println(redirect("home")); // Expected: /home
-        System.out.println(redirect("About")); // Expected: /about
-        System.out.println(redirect("invalid")); // Expected: /error
-        System.out.println(redirect("PRODUCTS")); // Expected: /products
-        System.out.println(redirect("contact")); // Expected: /contact
+        String[] testCases = {"home", "About", "products", "login", ""};
+        
+        System.out.println("--- Java Test Cases ---");
+        for (String test : testCases) {
+            System.out.println("Input: \"" + test + "\" -> Output: " + redirectUser(test));
+        }
     }
 }

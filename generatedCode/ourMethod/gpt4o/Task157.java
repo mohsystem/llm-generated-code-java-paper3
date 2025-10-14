@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task157 {
     public static void dynamicMemoryManagement(int size) {
         int[] array = null;

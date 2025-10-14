@@ -1,103 +1,186 @@
 package ourMethod.gemini;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
+
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-public class Task43 extends HttpServlet {
+public class Task43 {
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
+    /**
+     * Represents a user session.
+     * This is an immutable data class.
+     */
+    private static final class Session {
+        private final String userId;
+        private final Instant creationTime;
+        private final Instant expirationTime;
 
-        if (action == null) {
-            response.getWriter().println("No action specified.");
-            return;
+        public Session(String userId, Instant creationTime, Instant expirationTime) {
+            this.userId = userId;
+            this.creationTime = creationTime;
+            this.expirationTime = expirationTime;
         }
 
-        HttpSession session = request.getSession();
-
-        switch (action) {
-            case "create":
-                createSession(session, response);
-                break;
-            case "get":
-                getSessionInfo(session, response);
-                break;
-            case "terminate":
-                terminateSession(session, response);
-                break;
-            default:
-                response.getWriter().println("Invalid action specified.");
+        public String getUserId() {
+            return userId;
         }
-    }
 
-    private void createSession(HttpSession session, HttpServletResponse response) throws IOException {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] sessionIdBytes = new byte[32]; // Use a sufficiently long session ID
-        secureRandom.nextBytes(sessionIdBytes);
-        String sessionId = Base64.getUrlEncoder().withoutPadding().encodeToString(sessionIdBytes);
-        session.setAttribute("sessionId", sessionId);
+        public Instant getExpirationTime() {
+            return expirationTime;
+        }
 
-        session.setMaxInactiveInterval(15 * 60); // Set session timeout (e.g., 15 minutes)
-        response.getWriter().println("Session created with ID: " + sessionId);
-
-    }
-
-    private void getSessionInfo(HttpSession session, HttpServletResponse response) throws IOException {
-        String sessionId = (String) session.getAttribute("sessionId");
-        if (sessionId != null) {
-            response.getWriter().println("Session ID: " + sessionId);
-        } else {
-            response.getWriter().println("No active session.");
+        public boolean isExpired() {
+            return Instant.now().isAfter(expirationTime);
         }
     }
 
-    private void terminateSession(HttpSession session, HttpServletResponse response) throws IOException {
-        session.invalidate();
-        response.getWriter().println("Session terminated.");
+    /**
+     * Manages user sessions securely in memory.
+     */
+    public static class SessionManager {
+        private static final int SESSION_ID_BYTES = 32;
+        private static final Duration SESSION_LIFETIME = Duration.ofMinutes(30);
+        private static final SecureRandom secureRandom = new SecureRandom();
+        private static final Base64.Encoder urlEncoder = Base64.getUrlEncoder().withoutPadding();
+
+        private final Map<String, Session> sessions = new ConcurrentHashMap<>();
+
+        /**
+         * Generates a cryptographically secure, URL-safe session ID.
+         *
+         * @return A new session ID string.
+         */
+        private String generateSessionId() {
+            byte[] randomBytes = new byte[SESSION_ID_BYTES];
+            secureRandom.nextBytes(randomBytes);
+            return urlEncoder.encodeToString(randomBytes);
+        }
+
+        /**
+         * Creates a new session for a given user.
+         *
+         * @param userId The identifier for the user.
+         * @return The newly created session ID.
+         */
+        public String createSession(String userId) {
+            if (userId == null || userId.isEmpty()) {
+                throw new IllegalArgumentException("User ID cannot be null or empty.");
+            }
+            String sessionId = generateSessionId();
+            Instant now = Instant.now();
+            Instant expiration = now.plus(SESSION_LIFETIME);
+            Session session = new Session(userId, now, expiration);
+            sessions.put(sessionId, session);
+            return sessionId;
+        }
+
+        /**
+         * Overloaded version of createSession for testing with custom lifetime.
+         */
+        public String createSession(String userId, Duration lifetime) {
+            if (userId == null || userId.isEmpty()) {
+                throw new IllegalArgumentException("User ID cannot be null or empty.");
+            }
+            String sessionId = generateSessionId();
+            Instant now = Instant.now();
+            Instant expiration = now.plus(lifetime);
+            Session session = new Session(userId, now, expiration);
+            sessions.put(sessionId, session);
+            return sessionId;
+        }
+
+        /**
+         * Retrieves the user ID associated with a session ID, if the session is valid and not expired.
+         *
+         * @param sessionId The session ID to validate.
+         * @return An Optional containing the user ID if the session is valid, otherwise an empty Optional.
+         */
+        public Optional<String> getUserIdFromSession(String sessionId) {
+            if (sessionId == null) {
+                return Optional.empty();
+            }
+            Session session = sessions.get(sessionId);
+            if (session == null) {
+                return Optional.empty();
+            }
+
+            if (session.isExpired()) {
+                // Eagerly remove expired session
+                sessions.remove(sessionId, session);
+                return Optional.empty();
+            }
+
+            return Optional.of(session.getUserId());
+        }
+
+        /**
+         * Terminates a session, effectively logging the user out.
+         *
+         * @param sessionId The session ID to terminate.
+         */
+        public void terminateSession(String sessionId) {
+            if (sessionId != null) {
+                sessions.remove(sessionId);
+            }
+        }
     }
 
-//    public static void main(String[] args) throws ServletException, IOException{
-//    // Test cases
-//        HttpServletRequest request1 = new MockHttpServletRequest("create");
-//        HttpServletResponse response1 = new MockHttpServletResponse();
-//        new Task43().doGet(request1,response1);
-//        System.out.println(response1.getOutput());
-//
-//
-//        HttpSession session = request1.getSession();
-//
-//        HttpServletRequest request2 = new MockHttpServletRequest("get");
-//        request2.setSession(session);
-//        HttpServletResponse response2 = new MockHttpServletResponse();
-//        new Task43().doGet(request2,response2);
-//        System.out.println(response2.getOutput());
-//
-//
-//        HttpServletRequest request3 = new MockHttpServletRequest("terminate");
-//        request3.setSession(session);
-//        HttpServletResponse response3 = new MockHttpServletResponse();
-//        new Task43().doGet(request3,response3);
-//        System.out.println(response3.getOutput());
-//
-//
-//        HttpServletRequest request4 = new MockHttpServletRequest("get");
-//        request4.setSession(session);
-//        HttpServletResponse response4 = new MockHttpServletResponse();
-//        new Task43().doGet(request4,response4);
-//        System.out.println(response4.getOutput());
-//
-//
-//
-//        HttpServletRequest request5 = new MockHttpServletRequest("create");
-//        HttpServletResponse response5 = new MockHttpServletResponse();
-//        new Task43().doGet(request5,response5);
-//        System.out.println(response5.getOutput());
-//
-//    }
+    public static void main(String[] args) {
+        SessionManager sessionManager = new SessionManager();
+
+        System.out.println("--- Test Case 1: Session Creation and Validation ---");
+        String sessionId1 = sessionManager.createSession("user123");
+        System.out.println("Created session for user123: " + sessionId1);
+        sessionManager.getUserIdFromSession(sessionId1)
+                .ifPresent(userId -> System.out.println("Session is valid. User ID: " + userId));
+
+        System.out.println("\n--- Test Case 2: Validation of Non-Existent Session ---");
+        String fakeSessionId = "nonexistent-session-id";
+        Optional<String> result2 = sessionManager.getUserIdFromSession(fakeSessionId);
+        System.out.println("Validation for fake session '" + fakeSessionId + "': " +
+                (result2.isPresent() ? "Valid" : "Invalid"));
+
+
+        System.out.println("\n--- Test Case 3: Session Termination ---");
+        String sessionId3 = sessionManager.createSession("user456");
+        System.out.println("Created session for user456: " + sessionId3);
+        sessionManager.terminateSession(sessionId3);
+        System.out.println("Terminated session for user456.");
+        Optional<String> result3 = sessionManager.getUserIdFromSession(sessionId3);
+        System.out.println("Validation after termination: " + (result3.isPresent() ? "Valid" : "Invalid"));
+
+        System.out.println("\n--- Test Case 4: Session Expiration ---");
+        String sessionId4 = sessionManager.createSession("user789", Duration.ofSeconds(2));
+        System.out.println("Created short-lived session for user789: " + sessionId4);
+        System.out.println("Waiting for 3 seconds for session to expire...");
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        Optional<String> result4 = sessionManager.getUserIdFromSession(sessionId4);
+        System.out.println("Validation after expiration: " + (result4.isPresent() ? "Valid" : "Invalid"));
+
+
+        System.out.println("\n--- Test Case 5: Multiple Concurrent Sessions ---");
+        String userA_session = sessionManager.createSession("userA");
+        String userB_session = sessionManager.createSession("userB");
+        System.out.println("Created session for userA: " + userA_session);
+        System.out.println("Created session for userB: " + userB_session);
+        Optional<String> userA_result = sessionManager.getUserIdFromSession(userA_session);
+        Optional<String> userB_result = sessionManager.getUserIdFromSession(userB_session);
+        System.out.println("User A session validation: " + userA_result.orElse("Invalid"));
+        System.out.println("User B session validation: " + userB_result.orElse("Invalid"));
+        sessionManager.terminateSession(userA_session);
+        System.out.println("Terminated session for userA.");
+        userA_result = sessionManager.getUserIdFromSession(userA_session);
+        userB_result = sessionManager.getUserIdFromSession(userB_session);
+        System.out.println("User A session validation after termination: " + userA_result.orElse("Invalid"));
+        System.out.println("User B session validation (should still be valid): " + userB_result.orElse("Invalid"));
+    }
 }

@@ -1,27 +1,43 @@
 package ZeroShot.gemini;
-import java.util.*;
 
-class Task19 {
-    public String spinWords(String sentence) {
-        String[] words = sentence.split(" ");
-        StringBuilder sb = new StringBuilder();
-        for (String word : words) {
-            if (word.length() >= 5) {
-                sb.append(new StringBuilder(word).reverse().toString()).append(" ");
-            } else {
-                sb.append(word).append(" ");
-            }
+import java.util.stream.Collectors;
+import java.util.Arrays;
+
+public class Task19 {
+
+    /**
+     * Reverses words in a sentence that have five or more letters.
+     *
+     * @param sentence The input string containing words and spaces.
+     * @return The modified string with long words reversed.
+     */
+    public static String spinWords(String sentence) {
+        if (sentence == null) {
+            return "";
         }
-        return sb.toString().trim();
+        // Split by one or more whitespace characters
+        return Arrays.stream(sentence.split("\\s+"))
+                .map(word -> {
+                    if (word.length() >= 5) {
+                        return new StringBuilder(word).reverse().toString();
+                    } else {
+                        return word;
+                    }
+                })
+                .collect(Collectors.joining(" "));
     }
 
     public static void main(String[] args) {
-        Task19 task19 = new Task19();
-        System.out.println(task19.spinWords("Hey fellow warriors"));
-        System.out.println(task19.spinWords("This is a test"));
-        System.out.println(task19.spinWords("This is another test"));
-        System.out.println(task19.spinWords("Hello"));
-        System.out.println(task19.spinWords("Welcome to the world"));
-
+        String[] testCases = {
+            "Hey fellow warriors",
+            "This is a test",
+            "This is another test",
+            "Welcome to the jungle",
+            "Supercalifragilisticexpialidocious"
+        };
+        
+        for (String test : testCases) {
+            System.out.println(spinWords(test));
+        }
     }
 }

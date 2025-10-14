@@ -1,81 +1,75 @@
 package ourMethod.gemini;
+
 import java.util.Objects;
 
-class Task199 {
-    private int hours;
-    private int minutes;
+public class Task199 {
 
-    public Task199(int hours, int minutes) {
-        this.hours = 0;
-        this.minutes = 0;
-        add(hours * 60 + minutes);
-    }
+    public static final class Clock {
+        private static final int MINUTES_PER_HOUR = 60;
+        private static final int HOURS_PER_DAY = 24;
+        private static final int MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR;
 
+        private final int totalMinutes;
 
-    public void add(int minutes) {
-        this.minutes += minutes;
-        this.hours += this.minutes / 60;
-        this.hours %= 24;
-        this.minutes %= 60;
-        if (this.minutes < 0) {
-            this.minutes += 60;
-            this.hours--;
-            if (this.hours < 0) {
-                this.hours += 24;
-            }
+        public Clock(int hour, int minute) {
+            int effectiveTotalMinutes = hour * MINUTES_PER_HOUR + minute;
+            // The formula (a % n + n) % n handles negative results correctly,
+            // ensuring the value is always in the range [0, n-1].
+            this.totalMinutes = (effectiveTotalMinutes % MINUTES_PER_DAY + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+        }
+        
+        public Clock add(int minutes) {
+            // Create a new Clock object by passing the new total minutes
+            // to the constructor, which will handle normalization.
+            // Hour is set to 0 as we are working with total minutes.
+            return new Clock(0, this.totalMinutes + minutes);
+        }
+
+        public Clock subtract(int minutes) {
+            return new Clock(0, this.totalMinutes - minutes);
+        }
+
+        @Override
+        public String toString() {
+            int hour = totalMinutes / MINUTES_PER_HOUR;
+            int minute = totalMinutes % MINUTES_PER_HOUR;
+            return String.format("%02d:%02d", hour, minute);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Clock clock = (Clock) o;
+            return totalMinutes == clock.totalMinutes;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(totalMinutes);
         }
     }
-
-    public void subtract(int minutes) {
-        add(-minutes);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        Task199 clock = (Task199) obj;
-        return hours == clock.hours && minutes == clock.minutes;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(hours, minutes);
-    }
-
-
-    public String toString() {
-        String h = String.format("%02d", hours);
-        String m = String.format("%02d", minutes);
-        return h + ":" + m;
-    }
-
 
     public static void main(String[] args) {
-        Task199 clock1 = new Task199(10, 30);
-        System.out.println(clock1); // Output: 10:30
-        clock1.add(20);
-        System.out.println(clock1); // Output: 10:50
+        // Test Case 1: Create a clock and check its string representation
+        Clock clock1 = new Clock(10, 30);
+        System.out.println("Test 1: Create 10:30 -> " + clock1);
 
-        Task199 clock2 = new Task199(23, 50);
-        System.out.println(clock2); // Output: 23:50
-        clock2.add(20);
-        System.out.println(clock2); // Output: 00:10
+        // Test Case 2: Add minutes
+        Clock clock2 = clock1.add(70);
+        System.out.println("Test 2: 10:30 + 70 min -> " + clock2);
 
-        Task199 clock3 = new Task199(10, 30);
-        System.out.println(clock3.equals(clock1)); // false
+        // Test Case 3: Subtract minutes, wrapping backwards
+        Clock clock3 = new Clock(0, 15).subtract(30);
+        System.out.println("Test 3: 00:15 - 30 min -> " + clock3);
 
-        Task199 clock4 = new Task199(10, 30);
-        clock4.add(150);
-        System.out.println(clock4);
+        // Test Case 4: Equality check with different but equivalent inputs
+        Clock clock4a = new Clock(14, 0);
+        Clock clock4b = new Clock(13, 60);
+        System.out.println("Test 4: 14:00 equals 13:60 -> " + clock4a.equals(clock4b));
 
-        Task199 clock5 = new Task199(1, 30);
-        clock5.subtract(90);
-        System.out.println(clock5);
-
+        // Test Case 5: Add minutes, wrapping forwards past midnight
+        Clock clock5 = new Clock(23, 50).add(20);
+        System.out.println("Test 5: 23:50 + 20 min -> " + clock5);
     }
 }

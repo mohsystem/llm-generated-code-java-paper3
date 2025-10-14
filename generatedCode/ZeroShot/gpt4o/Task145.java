@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task145 {
     public static int maxSubArray(int[] nums) {
         if (nums == null || nums.length == 0) return 0;

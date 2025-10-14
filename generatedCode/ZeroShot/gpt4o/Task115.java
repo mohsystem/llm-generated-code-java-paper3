@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task115 {
     static class BitFieldClass {
         private int field1;

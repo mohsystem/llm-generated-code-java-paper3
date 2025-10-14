@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.apache.commons.net.ftp.FTP;

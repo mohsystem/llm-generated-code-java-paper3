@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task12 {
 
     public static String highestScoringWord(String input) {

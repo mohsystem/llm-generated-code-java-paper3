@@ -1,45 +1,57 @@
 package CoT.gemini;
-import java.util.HashMap;
+
 import java.util.Map;
-import java.util.Scanner;
+import java.util.HashMap;
 
 public class Task125 {
 
-    private static final Map<String, String> resources = new HashMap<>();
+    // A whitelist of allowed resources and their internal paths.
+    // This prevents path traversal as user input is only used as a key.
+    private static final Map<String, String> allowedResources = new HashMap<>();
 
     static {
-        resources.put("resource1", "path/to/resource1");
-        resources.put("resource2", "path/to/resource2");
-        resources.put("resource3", "path/to/resource3");
+        allowedResources.put("profile", "data/user_profile.dat");
+        allowedResources.put("settings", "config/app_settings.json");
+        allowedResources.put("dashboard", "pages/dashboard.html");
     }
 
-    public static String getResourcePath(String resourceName) {
-        if (resources.containsKey(resourceName)) {
-            return resources.get(resourceName);
+    /**
+     * Securely accesses a resource based on a predefined whitelist.
+     *
+     * @param resourceKey The user-provided key for the resource.
+     * @return A string indicating the result of the access attempt.
+     */
+    public static String accessResource(String resourceKey) {
+        // Input validation: Check for null or empty input.
+        if (resourceKey == null || resourceKey.trim().isEmpty()) {
+            return "Error: Resource key cannot be empty.";
+        }
+
+        // Securely check if the key exists in our whitelist map.
+        if (allowedResources.containsKey(resourceKey)) {
+            String resourcePath = allowedResources.get(resourceKey);
+            // In a real application, you would now use 'resourcePath' to read the file.
+            // For this example, we just simulate the access.
+            return "Success: Accessing resource at " + resourcePath;
         } else {
-            return null; 
+            // Generic error message to avoid leaking information about valid resources.
+            return "Error: Resource not found or access denied.";
         }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter resource name: ");
-        String resourceName = scanner.nextLine();
-        String resourcePath = getResourcePath(resourceName);
+        System.out.println("Java Test Cases:");
+        
+        String[] testCases = {
+            "profile",          // Valid case 1
+            "settings",         // Valid case 2
+            "logs",             // Invalid case
+            "../etc/passwd",    // Path traversal attempt
+            ""                  // Empty input
+        };
 
-        if (resourcePath != null) {
-            System.out.println("Path: " + resourcePath);
-        } else {
-            System.out.println("Resource not found.");
+        for (String test : testCases) {
+            System.out.println("Input: \"" + test + "\" -> Output: " + accessResource(test));
         }
-
-         // Test cases
-        System.out.println(getResourcePath("resource1")); // Expected: path/to/resource1
-        System.out.println(getResourcePath("resource2")); // Expected: path/to/resource2
-        System.out.println(getResourcePath("resource3")); // Expected: path/to/resource3
-        System.out.println(getResourcePath("resource4")); // Expected: null
-        System.out.println(getResourcePath("resource1.txt")); // Expected: null
-
-
     }
 }

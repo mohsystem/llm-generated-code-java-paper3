@@ -1,0 +1,643 @@
+C:\Users\Home\.jdks\corretto-21.0.7\bin\java.exe "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.3\lib\idea_rt.jar=56417" -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath C:\data\PhD\llm-generated-code-java-paper3\build\classes\java\main Compiler
+Compiling: generatedCode\ourMethodv2\gpt4o\Task0.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task0.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task1.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task1.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task10.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task10.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task100.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task100.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task101.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task101.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task102.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task102.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task103.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task103.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task104.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task104.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task105.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task105.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task106.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task106.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task107.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task107.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task108.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task108.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task109.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task109.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task11.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task11.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task110.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task110.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task111.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task111.java
+Error on line 2: package org.apache.xmlrpc does not exist
+Error Type: Compilation Error
+Error on line 3: package org.apache.xmlrpc does not exist
+Error Type: Compilation Error
+Error on line 4: package org.apache.xmlrpc does not exist
+Error Type: Compilation Error
+Error on line 5: package org.apache.xmlrpc.server does not exist
+Error Type: Compilation Error
+Error on line 6: package org.apache.xmlrpc.server does not exist
+Error Type: Compilation Error
+Error on line 7: package org.apache.xmlrpc.server does not exist
+Error Type: Compilation Error
+Error on line 8: package org.apache.xmlrpc.server does not exist
+Error Type: Compilation Error
+Error on line 24: cannot find symbol
+  symbol:   class WebServer
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 24: cannot find symbol
+  symbol:   class WebServer
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 25: cannot find symbol
+  symbol:   class XmlRpcServer
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 27: cannot find symbol
+  symbol:   class PropertyHandlerMapping
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 27: cannot find symbol
+  symbol:   class PropertyHandlerMapping
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 31: cannot find symbol
+  symbol:   class XmlRpcServerConfigImpl
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Error on line 31: cannot find symbol
+  symbol:   class XmlRpcServerConfigImpl
+  location: class ourMethodv2.gpt4o.Task111
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task112.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task112.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task113.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task113.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task114.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task114.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task115.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task115.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task116.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task116.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task117.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task117.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task118.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task118.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task119.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task119.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task12.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task12.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task120.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task120.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task121.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task121.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task122.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task122.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task123.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task123.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task124.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task124.java
+Error on line 25: cannot find symbol
+  symbol:   variable SecureRandom
+  location: class ourMethodv2.gpt4o.Task124
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task125.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task125.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task126.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task126.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task127.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task127.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task128.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task128.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task129.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task129.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task13.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task13.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task130.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task130.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task131.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task131.java
+Error on line 2: package com.fasterxml.jackson.databind does not exist
+Error Type: Compilation Error
+Error on line 3: package com.fasterxml.jackson.databind does not exist
+Error Type: Compilation Error
+Error on line 4: package com.fasterxml.jackson.core does not exist
+Error Type: Compilation Error
+Error on line 8: cannot find symbol
+  symbol:   class ObjectMapper
+  location: class ourMethodv2.gpt4o.Task131
+Error Type: Compilation Error
+Error on line 8: cannot find symbol
+  symbol:   class ObjectMapper
+  location: class ourMethodv2.gpt4o.Task131
+Error Type: Compilation Error
+Error on line 9: cannot find symbol
+  symbol:   variable DeserializationFeature
+  location: class ourMethodv2.gpt4o.Task131
+Error Type: Compilation Error
+Error on line 12: cannot find symbol
+  symbol:   class JsonProcessingException
+  location: class ourMethodv2.gpt4o.Task131
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task132.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task132.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task133.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task133.java
+Error on line 29: package org.apache.commons.codec.digest does not exist
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task134.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task134.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task135.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task135.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task136.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task136.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task137.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task137.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task138.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task138.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task139.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task139.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task14.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task14.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task140.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task140.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task141.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task141.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task142.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task142.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task143.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task143.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task144.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task144.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task145.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task145.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task146.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task146.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task147.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task147.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task148.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task148.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task149.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task149.java
+Error on line 5: cannot find symbol
+  symbol:   class LinkedList
+  location: class ourMethodv2.gpt4o.Task149.Queue
+Error Type: Compilation Error
+Error on line 8: cannot find symbol
+  symbol:   class LinkedList
+  location: class ourMethodv2.gpt4o.Task149.Queue
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task15.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task15.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task150.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task150.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task151.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task151.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task152.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task152.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task153.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task153.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task154.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task154.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task155.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task155.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task156.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task156.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task157.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task157.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task158.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task158.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task159.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task159.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task16.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task16.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task160.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task160.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task161.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task161.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task162.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task162.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task163.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task163.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task164.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task164.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task165.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task165.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task166.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task166.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task167.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task167.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task168.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task168.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task169.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task169.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task17.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task17.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task170.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task170.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task171.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task171.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task172.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task172.java
+Error on line 5: cannot find symbol
+  symbol:   class Set
+  location: class ourMethodv2.gpt4o.Task172
+Error Type: Compilation Error
+Error on line 5: cannot find symbol
+  symbol:   class HashSet
+  location: class ourMethodv2.gpt4o.Task172
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task173.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task173.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task174.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task174.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task175.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task175.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task176.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task176.java
+Error on line 5: cannot find symbol
+  symbol:   class ArrayList
+  location: class ourMethodv2.gpt4o.Task176.ProductOfNumbers
+Error Type: Compilation Error
+Error on line 8: cannot find symbol
+  symbol:   class ArrayList
+  location: class ourMethodv2.gpt4o.Task176.ProductOfNumbers
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task177.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task177.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task178.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task178.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task179.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task179.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task18.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task18.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task180.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task180.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task181.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task181.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task182.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task182.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task183.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task183.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task184.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task184.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task185.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task185.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task186.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task186.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task187.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task187.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task188.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task188.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task189.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task189.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task19.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task19.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task190.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task190.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task191.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task191.java
+Error on line 5: cannot find symbol
+  symbol:   class Stack
+  location: class ourMethodv2.gpt4o.Task191
+Error Type: Compilation Error
+Error on line 5: cannot find symbol
+  symbol:   class Stack
+  location: class ourMethodv2.gpt4o.Task191
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task192.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task192.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task193.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task193.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task194.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task194.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task195.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task195.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task196.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task196.java
+Error on line 45: incompatible types: incompatible parameter types in lambda expression
+Error Type: Compilation Error
+Error on line 49: incompatible types: java.lang.Runnable cannot be converted to java.util.function.IntConsumer
+Error Type: Compilation Error
+Error on line 57: incompatible types: java.lang.Runnable cannot be converted to java.util.function.IntConsumer
+Error Type: Compilation Error
+Error on line 65: incompatible types: java.lang.Runnable cannot be converted to java.util.function.IntConsumer
+Error Type: Compilation Error
+Error on line -1: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+Error Type: Other
+Compiling: generatedCode\ourMethodv2\gpt4o\Task197.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task197.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task198.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task198.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task199.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task199.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task2.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task2.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task20.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task20.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task21.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task21.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task22.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task22.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task23.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task23.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task24.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task24.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task25.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task25.java
+Error on line 3: cannot find symbol
+  symbol:   class List
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 3: cannot find symbol
+  symbol:   class List
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 4: cannot find symbol
+  symbol:   class List
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 4: cannot find symbol
+  symbol:   class ArrayList
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 12: cannot find symbol
+  symbol:   variable Arrays
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 13: cannot find symbol
+  symbol:   variable Arrays
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 14: cannot find symbol
+  symbol:   variable Arrays
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 15: cannot find symbol
+  symbol:   variable Arrays
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Error on line 16: cannot find symbol
+  symbol:   variable Arrays
+  location: class ourMethodv2.gpt4o.Task25
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task26.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task26.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task27.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task27.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task28.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task28.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task29.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task29.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task3.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task3.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task30.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task30.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task31.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task31.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task32.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task32.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task33.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task33.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task34.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task34.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task35.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task35.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task36.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task36.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task37.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task37.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task38.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task38.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task39.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task39.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task4.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task4.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task40.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task40.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task41.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task41.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task42.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task42.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task43.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task43.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task44.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task44.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task45.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task45.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task46.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task46.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task47.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task47.java
+Error on line 8: package org.jsoup does not exist
+Error Type: Compilation Error
+Error on line 9: package org.jsoup.nodes does not exist
+Error Type: Compilation Error
+Error on line 10: package org.jsoup.nodes does not exist
+Error Type: Compilation Error
+Error on line 11: package org.jsoup.select does not exist
+Error Type: Compilation Error
+Error on line 16: cannot find symbol
+  symbol:   class Document
+  location: class ourMethodv2.gpt4o.Task47
+Error Type: Compilation Error
+Error on line 16: cannot find symbol
+  symbol:   variable Jsoup
+  location: class ourMethodv2.gpt4o.Task47
+Error Type: Compilation Error
+Error on line 17: cannot find symbol
+  symbol:   class Elements
+  location: class ourMethodv2.gpt4o.Task47
+Error Type: Compilation Error
+Error on line 24: cannot find symbol
+  symbol:   class Element
+  location: class ourMethodv2.gpt4o.Task47
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task48.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task48.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task49.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task49.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task5.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task5.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task50.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task50.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task51.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task51.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task52.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task52.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task53.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task53.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task54.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task54.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task55.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task55.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task56.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task56.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task57.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task57.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task58.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task58.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task59.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task59.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task6.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task6.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task60.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task60.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task61.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task61.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task62.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task62.java
+Error on line 2: package org.json does not exist
+Error Type: Compilation Error
+Error on line 6: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task62
+Error Type: Compilation Error
+Error on line 6: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task62
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task63.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task63.java
+Error on line 3: package org.json does not exist
+Error Type: Compilation Error
+Error on line 12: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task63
+Error Type: Compilation Error
+Error on line 12: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task63
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task64.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task64.java
+Error on line 7: package org.json does not exist
+Error Type: Compilation Error
+Error on line 11: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task64
+Error Type: Compilation Error
+Error on line 24: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task64
+Error Type: Compilation Error
+Error on line 38: cannot find symbol
+  symbol:   class JSONObject
+  location: class ourMethodv2.gpt4o.Task64
+Error Type: Compilation Error
+Error on line -1: generatedCode\ourMethodv2\gpt4o\Task64.java uses or overrides a deprecated API.
+Error Type: Other
+Error on line -1: Recompile with -Xlint:deprecation for details.
+Error Type: Other
+Compiling: generatedCode\ourMethodv2\gpt4o\Task65.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task65.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task66.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task66.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task67.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task67.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task68.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task68.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task69.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task69.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task7.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task7.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task70.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task70.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task71.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task71.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task72.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task72.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task73.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task73.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task74.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task74.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task75.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task75.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task76.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task76.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task77.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task77.java
+Error on line 2: package org.apache.commons.net.ftp does not exist
+Error Type: Compilation Error
+Error on line 3: package org.apache.commons.net.ftp does not exist
+Error Type: Compilation Error
+Error on line 9: cannot find symbol
+  symbol:   class FTPClient
+  location: class ourMethodv2.gpt4o.Task77
+Error Type: Compilation Error
+Error on line 9: cannot find symbol
+  symbol:   class FTPClient
+  location: class ourMethodv2.gpt4o.Task77
+Error Type: Compilation Error
+Error on line 14: cannot find symbol
+  symbol:   variable FTP
+  location: class ourMethodv2.gpt4o.Task77
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task78.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task78.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task79.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task79.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task8.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task8.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task80.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task80.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task81.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task81.java
+Error on line 6: package javax.xml.bind does not exist
+Error Type: Compilation Error
+Error on line 16: cannot find symbol
+  symbol:   variable DatatypeConverter
+  location: class ourMethodv2.gpt4o.Task81
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task82.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task82.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task83.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task83.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task84.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task84.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task85.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task85.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task86.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task86.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task87.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task87.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task88.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task88.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task89.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task89.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task9.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task9.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task90.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task90.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task91.java
+Compilation failed: generatedCode\ourMethodv2\gpt4o\Task91.java
+Error on line 14: unreported exception java.net.UnknownHostException; must be caught or declared to be thrown
+Error Type: Compilation Error
+Compiling: generatedCode\ourMethodv2\gpt4o\Task92.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task92.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task93.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task93.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task94.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task94.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task95.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task95.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task96.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task96.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task97.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task97.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task98.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task98.java
+Compiling: generatedCode\ourMethodv2\gpt4o\Task99.java
+Compilation successful: generatedCode\ourMethodv2\gpt4o\Task99.java
+
+Summary:
+Valid files: 183
+Files with syntax errors: 0
+Files with compilation errors: 17
+Files with other errors: 0
+
+Process finished with exit code 0

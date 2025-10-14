@@ -2,82 +2,64 @@ package Vanilla.claude;
 
 import java.util.*;
 
-class Task169 {
-    public int[] countSmaller(int[] nums) {
-        int n = nums.length;
-        int[] result = new int[n];
-        int[] indices = new int[n];
-        for(int i = 0; i < n; i++) {
-            indices[i] = i;
-        }
+public class Task169 {
+    private static class Node {
+        int val;
+        int count;
+        Node left, right;
         
-        mergeSort(nums, indices, 0, n-1, result);
-        return result;
+        Node(int val) {
+            this.val = val;
+            this.count = 0;
+        }
     }
     
-    private void mergeSort(int[] nums, int[] indices, int start, int end, int[] result) {
-        if(start >= end) return;
+    public static List<Integer> countSmaller(int[] nums) {
+        Integer[] result = new Integer[nums.length];
+        if (nums == null || nums.length == 0) {
+            return Arrays.asList(result);
+        }
         
-        int mid = start + (end - start)/2;
-        mergeSort(nums, indices, start, mid, result);
-        mergeSort(nums, indices, mid+1, end, result);
+        Node root = null;
+        for (int i = nums.length - 1; i >= 0; i--) {
+            root = insert(root, nums[i], result, i, 0);
+        }
         
-        merge(nums, indices, start, end, mid, result);
+        return Arrays.asList(result);
     }
     
-    private void merge(int[] nums, int[] indices, int start, int end, int mid, int[] result) {
-        int leftLen = mid - start + 1;
-        int rightLen = end - mid;
-        
-        int[] leftIndices = new int[leftLen];
-        int[] rightIndices = new int[rightLen];
-        
-        for(int i = 0; i < leftLen; i++) {
-            leftIndices[i] = indices[start + i];
+    private static Node insert(Node node, int val, Integer[] result, int index, int preSum) {
+        if (node == null) {
+            node = new Node(val);
+            result[index] = preSum;
+        } else if (node.val > val) {
+            node.count++;
+            node.left = insert(node.left, val, result, index, preSum);
+        } else {
+            node.right = insert(node.right, val, result, index, preSum + node.count + (node.val < val ? 1 : 0));
         }
-        for(int i = 0; i < rightLen; i++) {
-            rightIndices[i] = indices[mid + 1 + i];
-        }
-        
-        int i = 0, j = 0, k = start;
-        int rightCount = 0;
-        
-        while(i < leftLen && j < rightLen) {
-            if(nums[leftIndices[i]] <= nums[rightIndices[j]]) {
-                result[leftIndices[i]] += rightCount;
-                indices[k++] = leftIndices[i++];
-            } else {
-                rightCount++;
-                indices[k++] = rightIndices[j++];
-            }
-        }
-        
-        while(i < leftLen) {
-            result[leftIndices[i]] += rightCount;
-            indices[k++] = leftIndices[i++];
-        }
-        
-        while(j < rightLen) {
-            indices[k++] = rightIndices[j++];
-        }
+        return node;
     }
-
+    
     public static void main(String[] args) {
-        Task169 sol = new Task169();
-        
         // Test case 1
-        System.out.println(Arrays.toString(sol.countSmaller(new int[]{5,2,6,1})));  // [2,1,1,0]
+        int[] nums1 = {5, 2, 6, 1};
+        System.out.println("Test 1: " + countSmaller(nums1));
         
         // Test case 2
-        System.out.println(Arrays.toString(sol.countSmaller(new int[]{-1})));  // [0]
+        int[] nums2 = {-1};
+        System.out.println("Test 2: " + countSmaller(nums2));
         
         // Test case 3
-        System.out.println(Arrays.toString(sol.countSmaller(new int[]{-1,-1})));  // [0,0]
+        int[] nums3 = {-1, -1};
+        System.out.println("Test 3: " + countSmaller(nums3));
         
         // Test case 4
-        System.out.println(Arrays.toString(sol.countSmaller(new int[]{1,2,3,4})));  // [0,0,0,0]
+        int[] nums4 = {1, 2, 3, 4, 5};
+        System.out.println("Test 4: " + countSmaller(nums4));
         
         // Test case 5
-        System.out.println(Arrays.toString(sol.countSmaller(new int[]{4,3,2,1})));  // [3,2,1,0]
+        int[] nums5 = {5, 4, 3, 2, 1};
+        System.out.println("Test 5: " + countSmaller(nums5));
     }
 }

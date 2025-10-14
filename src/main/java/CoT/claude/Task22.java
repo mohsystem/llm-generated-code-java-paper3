@@ -3,18 +3,20 @@ package CoT.claude;
 import java.util.*;
 
 public class Task22 {
-    public static List<Object> filterList(List<Object> list) {
-        if (list == null) return new ArrayList<>();
+    public static List<Integer> filterList(List<Object> list) {
+        if (list == null) {
+            return new ArrayList<>();
+        }
         
-        List<Object> result = new ArrayList<>();
+        List<Integer> result = new ArrayList<>();
         for (Object item : list) {
-            if (item instanceof Integer && (Integer)item >= 0) {
-                result.add(item);
+            if (item instanceof Integer) {
+                result.add((Integer) item);
             }
         }
         return result;
     }
-
+    
     public static void main(String[] args) {
         // Test case 1
         System.out.println(filterList(List.of(1, 2, "a", "b")));
@@ -26,9 +28,9 @@ public class Task22 {
         System.out.println(filterList(List.of(1, 2, "a", "b", "aasf", "1", "123", 123)));
         
         // Test case 4
-        System.out.println(filterList(List.of()));
+        System.out.println(filterList(new ArrayList<>()));
         
         // Test case 5
-        System.out.println(filterList(List.of("string", "only", "list")));
+        System.out.println(filterList(List.of(100, 200, "test", 300)));
     }
 }

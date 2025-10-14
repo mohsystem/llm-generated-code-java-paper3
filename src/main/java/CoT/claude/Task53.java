@@ -1,124 +1,178 @@
 package CoT.claude;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Task53 {
-    private static final int MAX_SESSIONS = 1000;
-    private static final int SESSION_TIMEOUT = 1800; // 30 minutes in seconds
+    private static final int SESSION_TIMEOUT_SECONDS = 1800; // 30 minutes
+    private static final int ABSOLUTE_TIMEOUT_SECONDS = 7200; // 2 hours
+    private static final int SESSION_ID_LENGTH = 32;
+    
+    private Map<String, Session> sessions;
+    private Map<String, Set<String>> userSessions;
+    private SecureRandom secureRandom;
+    
+    public Task53() {
+        this.sessions = new ConcurrentHashMap<>();
+        this.userSessions = new ConcurrentHashMap<>();
+        this.secureRandom = new SecureRandom();
+    }
     
     private static class Session {
-        private String sessionId;
-        private String userId;
-        private long lastAccessTime;
-        private boolean isValid;
+        String sessionId;
+        String userId;
+        long createdAt;
+        long lastAccessedAt;
+        Map<String, String> attributes;
         
-        public Session(String sessionId, String userId) {
+        Session(String sessionId, String userId) {
             this.sessionId = sessionId;
             this.userId = userId;
-            this.lastAccessTime = System.currentTimeMillis();
-            this.isValid = true;
+            this.createdAt = Instant.now().getEpochSecond();
+            this.lastAccessedAt = this.createdAt;
+            this.attributes = new HashMap<>();
+        }
+        
+        boolean isExpired() {
+            long now = Instant.now().getEpochSecond();
+            boolean idleExpired = (now - lastAccessedAt) > SESSION_TIMEOUT_SECONDS;
+            boolean absoluteExpired = (now - createdAt) > ABSOLUTE_TIMEOUT_SECONDS;
+            return idleExpired || absoluteExpired;
+        }
+        
+        void updateAccess() {
+            this.lastAccessedAt = Instant.now().getEpochSecond();
         }
     }
     
-    private Session[] sessions;
-    private int sessionCount;
-    
-    public Task53() {
-        sessions = new Session[MAX_SESSIONS];
-        sessionCount = 0;
+    private String generateSessionId() {
+        byte[] randomBytes = new byte[SESSION_ID_LENGTH];
+        secureRandom.nextBytes(randomBytes);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : randomBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
     
     public String createSession(String userId) {
-        if(sessionCount >= MAX_SESSIONS) {
-            cleanupExpiredSessions();
-        }
-        
-        if(sessionCount >= MAX_SESSIONS) {
-            return null; // Cannot create new session
+        if (userId == null || userId.trim().isEmpty()) {
+            return null;
         }
         
         String sessionId = generateSessionId();
         Session session = new Session(sessionId, userId);
-        sessions[sessionCount++] = session;
+        sessions.put(sessionId, session);
+        
+        userSessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
+        
         return sessionId;
     }
     
-    private String generateSessionId() {
-        return java.util.UUID.randomUUID().toString();
-    }
-    
     public boolean validateSession(String sessionId) {
-        Session session = findSession(sessionId);
-        if(session == null || !session.isValid) {
+        if (sessionId == null) {
             return false;
         }
         
-        if((System.currentTimeMillis() - session.lastAccessTime) / 1000 > SESSION_TIMEOUT) {
-            session.isValid = false;
+        Session session = sessions.get(sessionId);
+        if (session == null) {
             return false;
         }
         
-        session.lastAccessTime = System.currentTimeMillis();
+        if (session.isExpired()) {
+            invalidateSession(sessionId);
+            return false;
+        }
+        
+        session.updateAccess();
         return true;
     }
     
     public void invalidateSession(String sessionId) {
-        Session session = findSession(sessionId);
-        if(session != null) {
-            session.isValid = false;
-        }
-    }
-    
-    private Session findSession(String sessionId) {
-        for(int i = 0; i < sessionCount; i++) {
-            if(sessions[i].sessionId.equals(sessionId)) {
-                return sessions[i];
+        Session session = sessions.remove(sessionId);
+        if (session != null) {
+            Set<String> userSessionSet = userSessions.get(session.userId);
+            if (userSessionSet != null) {
+                userSessionSet.remove(sessionId);
+                if (userSessionSet.isEmpty()) {
+                    userSessions.remove(session.userId);
+                }
             }
         }
-        return null;
     }
     
-    private void cleanupExpiredSessions() {
-        int validCount = 0;
-        for(int i = 0; i < sessionCount; i++) {
-            if(sessions[i].isValid && 
-               (System.currentTimeMillis() - sessions[i].lastAccessTime) / 1000 <= SESSION_TIMEOUT) {
-                sessions[validCount++] = sessions[i];
+    public void invalidateAllUserSessions(String userId) {
+        Set<String> userSessionSet = userSessions.get(userId);
+        if (userSessionSet != null) {
+            for (String sessionId : new HashSet<>(userSessionSet)) {
+                sessions.remove(sessionId);
+            }
+            userSessions.remove(userId);
+        }
+    }
+    
+    public int getActiveSessionCount(String userId) {
+        Set<String> userSessionSet = userSessions.get(userId);
+        if (userSessionSet == null) {
+            return 0;
+        }
+        
+        Set<String> validSessions = new HashSet<>();
+        for (String sessionId : userSessionSet) {
+            if (validateSession(sessionId)) {
+                validSessions.add(sessionId);
             }
         }
-        sessionCount = validCount;
+        return validSessions.size();
     }
     
-    public static void main(String[] args) {
+    public void cleanupExpiredSessions() {
+        for (String sessionId : new HashSet<>(sessions.keySet())) {
+            Session session = sessions.get(sessionId);
+            if (session != null && session.isExpired()) {
+                invalidateSession(sessionId);
+            }
+        }
+    }
+    
+    public static void main(String[] args) throws InterruptedException {
         Task53 sessionManager = new Task53();
         
-        // Test case 1: Create new session
-        String sessionId1 = sessionManager.createSession("user1");
-        System.out.println("Test 1 - New session created: " + (sessionId1 != null));
+        // Test Case 1: Create and validate session
+        System.out.println("Test Case 1: Create and validate session");
+        String session1 = sessionManager.createSession("user1");
+        System.out.println("Session created: " + (session1 != null));
+        System.out.println("Session valid: " + sessionManager.validateSession(session1));
+        System.out.println();
         
-        // Test case 2: Validate valid session
-        boolean isValid = sessionManager.validateSession(sessionId1);
-        System.out.println("Test 2 - Session validation: " + isValid);
+        // Test Case 2: Multiple sessions for same user
+        System.out.println("Test Case 2: Multiple sessions for same user");
+        String session2 = sessionManager.createSession("user1");
+        String session3 = sessionManager.createSession("user1");
+        System.out.println("Active sessions for user1: " + sessionManager.getActiveSessionCount("user1"));
+        System.out.println();
         
-        // Test case 3: Invalidate session
-        sessionManager.invalidateSession(sessionId1);
-        isValid = sessionManager.validateSession(sessionId1);
-        System.out.println("Test 3 - Invalid session check: " + !isValid);
+        // Test Case 3: Invalidate specific session
+        System.out.println("Test Case 3: Invalidate specific session");
+        sessionManager.invalidateSession(session2);
+        System.out.println("Session2 valid after invalidation: " + sessionManager.validateSession(session2));
+        System.out.println("Active sessions for user1: " + sessionManager.getActiveSessionCount("user1"));
+        System.out.println();
         
-        // Test case 4: Create multiple sessions
-        String[] sessions = new String[5];
-        boolean allCreated = true;
-        for(int i = 0; i < 5; i++) {
-            sessions[i] = sessionManager.createSession("user" + i);
-            if(sessions[i] == null) allCreated = false;
-        }
-        System.out.println("Test 4 - Multiple sessions created: " + allCreated);
+        // Test Case 4: Invalidate all user sessions
+        System.out.println("Test Case 4: Invalidate all user sessions");
+        sessionManager.invalidateAllUserSessions("user1");
+        System.out.println("Session1 valid after user invalidation: " + sessionManager.validateSession(session1));
+        System.out.println("Active sessions for user1: " + sessionManager.getActiveSessionCount("user1"));
+        System.out.println();
         
-        // Test case 5: Validate expired session
-        try {
-            Thread.sleep(2000); // Wait 2 seconds
-            isValid = sessionManager.validateSession(sessions[0]);
-            System.out.println("Test 5 - Session still valid after 2s: " + isValid);
-        } catch(InterruptedException e) {
-            System.out.println("Test 5 failed due to interruption");
-        }
+        // Test Case 5: Invalid session handling
+        System.out.println("Test Case 5: Invalid session handling");
+        System.out.println("Null session valid: " + sessionManager.validateSession(null));
+        System.out.println("Non-existent session valid: " + sessionManager.validateSession("invalid123"));
+        String nullUserSession = sessionManager.createSession(null);
+        System.out.println("Session created with null user: " + (nullUserSession != null));
     }
 }

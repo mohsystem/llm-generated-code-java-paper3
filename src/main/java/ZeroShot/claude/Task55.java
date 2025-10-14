@@ -1,6 +1,7 @@
 package ZeroShot.claude;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class Task55 {
     public static boolean isValidEmail(String email) {
@@ -8,24 +9,27 @@ public class Task55 {
             return false;
         }
         
-        // RFC 5322 compliant email regex pattern
+        // Email regex pattern
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,7}$";
         Pattern pattern = Pattern.compile(emailRegex);
-        return pattern.matcher(email).matches();
+        Matcher matcher = pattern.matcher(email);
+        
+        return matcher.matches();
     }
-
+    
     public static void main(String[] args) {
         // Test cases
-        String[] emails = {
-            "test@example.com",
-            "user.name@domain.co.in", 
+        String[] testEmails = {
+            "user@example.com",
+            "john.doe@company.co.uk",
             "invalid.email@",
             "@invalid.com",
-            "test@.com"
+            "valid_email123@test-domain.org"
         };
         
-        for(String email : emails) {
-            System.out.println(email + " is " + (isValidEmail(email) ? "valid" : "invalid"));
+        System.out.println("Email Validation Results:");
+        for (String email : testEmails) {
+            System.out.println(email + " -> " + (isValidEmail(email) ? "Valid" : "Invalid"));
         }
     }
 }

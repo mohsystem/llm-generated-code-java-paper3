@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;

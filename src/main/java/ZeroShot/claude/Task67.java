@@ -1,88 +1,106 @@
 package ZeroShot.claude;
 
 import java.sql.*;
+import java.util.*;
+
+class Customer {
+    private String username;
+    private String name;
+    private String email;
+    private String phone;
+    
+    public Customer(String username, String name, String email, String phone) {
+        this.username = username;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
+    
+    @Override
+    public String toString() {
+        return "Customer{username='" + username + "', name='" + name + 
+               "', email='" + email + "', phone='" + phone + "'}";
+    }
+}
 
 public class Task67 {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/customerdb";
-    private static final String DB_USER = "dbuser"; 
-    private static final String DB_PASSWORD = "dbpass";
-
-    public static Customer getCustomerInfo(String customerUsername) {
-        Customer customer = null;
+    private static final String DB_URL = "jdbc:sqlite:customer.db";
+    
+    public static Customer getCustomerByUsername(String customerUsername) {
+        if (customerUsername == null || customerUsername.trim().isEmpty()) {
+            return null;
+        }
         
-        // Use try-with-resources to ensure connections are closed
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(
-                     "SELECT * FROM customer WHERE username = ? LIMIT 1")) {
+        String query = "SELECT username, name, email, phone FROM customer WHERE username = ?";
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
             
-            // Use prepared statement to prevent SQL injection
-            stmt.setString(1, customerUsername);
+            pstmt.setString(1, customerUsername);
             
-            try (ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    customer = new Customer(
-                        rs.getInt("id"),
+                    return new Customer(
                         rs.getString("username"),
-                        rs.getString("first_name"), 
-                        rs.getString("last_name"),
-                        rs.getString("email")
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("phone")
                     );
                 }
             }
         } catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
-            return null;
         }
         
-        return customer;
+        return null;
     }
-
-    public static void main(String[] args) {
-        // Test cases
-        String[] testUsernames = {
-            "john_doe",
-            "jane_smith", 
-            "bob123",
-            "alice_wong",
-            "mike_jones"
-        };
-
-        for (String username : testUsernames) {
-            System.out.println("Looking up customer: " + username);
-            Customer result = getCustomerInfo(username);
-            if (result != null) {
-                System.out.println(result);
-            } else {
-                System.out.println("Customer not found");
-            }
-            System.out.println("-------------------");
+    
+    private static void initializeDatabase() {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement()) {
+            
+            stmt.execute("CREATE TABLE IF NOT EXISTS customer (" +
+                        "username TEXT PRIMARY KEY, " +
+                        "name TEXT, " +
+                        "email TEXT, " +
+                        "phone TEXT)");
+            
+            stmt.execute("DELETE FROM customer");
+            
+            stmt.execute("INSERT INTO customer VALUES ('john_doe', 'John Doe', 'john@example.com', '555-0101')");
+            stmt.execute("INSERT INTO customer VALUES ('jane_smith', 'Jane Smith', 'jane@example.com', '555-0102')");
+            stmt.execute("INSERT INTO customer VALUES ('bob_wilson', 'Bob Wilson', 'bob@example.com', '555-0103')");
+            stmt.execute("INSERT INTO customer VALUES ('alice_brown', 'Alice Brown', 'alice@example.com', '555-0104')");
+            stmt.execute("INSERT INTO customer VALUES ('charlie_davis', 'Charlie Davis', 'charlie@example.com', '555-0105')");
+            
+        } catch (SQLException e) {
+            System.err.println("Database initialization error: " + e.getMessage());
         }
     }
-}
-
-class Customer {
-    private int id;
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String email;
-
-    public Customer(int id, String username, String firstName, String lastName, String email) {
-        this.id = id;
-        this.username = username;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-    }
-
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    
+    public static void main(String[] args) {
+        initializeDatabase();
+        
+        String[] testCases = {"john_doe", "jane_smith", "bob_wilson", "nonexistent_user", ""};
+        
+        if (args.length > 0) {
+            Customer customer = getCustomerByUsername(args[0]);
+            if (customer != null) {
+                System.out.println("Found: " + customer);
+            } else {
+                System.out.println("Customer not found: " + args[0]);
+            }
+        } else {
+            System.out.println("Running test cases:");
+            for (String username : testCases) {
+                System.out.println("\\nSearching for: '" + username + "'");
+                Customer customer = getCustomerByUsername(username);
+                if (customer != null) {
+                    System.out.println("Result: " + customer);
+                } else {
+                    System.out.println("Result: Customer not found");
+                }
+            }
+        }
     }
 }

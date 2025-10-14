@@ -63,7 +63,7 @@ public class Task48 {
         }
 
         private String sanitizeMessage(String message) {
-            return message.replaceAll("[<>\\"&']", "");
+            return message.replaceAll("[<>\"&']", "");
         }
 
         private void broadcast(String message) {

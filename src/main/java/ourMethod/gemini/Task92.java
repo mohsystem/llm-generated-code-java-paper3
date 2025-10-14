@@ -1,68 +1,93 @@
 package ourMethod.gemini;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-class Task92 {
+public class Task92 {
 
-    private int currentCounter = 0;
-    private int maxCounter;
-    private ReentrantLock lock = new ReentrantLock();
+    static class SharedResource {
+        private int currentCounter = 0;
+        private final int maxCounter;
+        private final Lock lock = new ReentrantLock();
 
-    public Task92(int maxCounter) {
-        this.maxCounter = maxCounter;
-    }
+        public SharedResource(int maxCounter) {
+            this.maxCounter = maxCounter;
+        }
 
-    public void incrementAndPrint(String threadName) {
-        lock.lock();
-        try {
-            if (currentCounter <= maxCounter) {
-                currentCounter++;
-                System.out.println(threadName + " is accessing currentCounter: " + currentCounter);
+        public void accessResource() {
+            // This loop allows threads to compete for access until the counter is maxed out.
+            while (true) {
+                int localValue = -1;
+                boolean shouldBreak = false;
+
+                lock.lock();
+                try {
+                    // Check-then-act is performed atomically inside the lock to prevent TOCTOU.
+                    if (currentCounter < maxCounter) {
+                        currentCounter++;
+                        localValue = currentCounter;
+                    } else {
+                        shouldBreak = true;
+                    }
+                } finally {
+                    lock.unlock();
+                }
+
+                if (shouldBreak) {
+                    break;
+                }
+
+                if (localValue != -1) {
+                    System.out.println("Thread " + Thread.currentThread().getName() + " is accessing counter: " + localValue);
+                }
             }
-        } finally {
-            lock.unlock();
         }
     }
 
+    static class Worker implements Runnable {
+        private final SharedResource resource;
+
+        public Worker(SharedResource resource) {
+            this.resource = resource;
+        }
+
+        @Override
+        public void run() {
+            resource.accessResource();
+        }
+    }
+
+    public static void runTest(int numThreads, int maxCounter) {
+        System.out.println("--- Running test with " + numThreads + " threads and max counter " + maxCounter + " ---");
+        SharedResource resource = new SharedResource(maxCounter);
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; i < numThreads; i++) {
+            Thread t = new Thread(new Worker(resource), "Worker-" + (i + 1));
+            threads.add(t);
+            t.start();
+        }
+
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Thread interrupted: " + e.getMessage());
+            }
+        }
+        System.out.println("--- Test finished. Final counter should be " + maxCounter + " ---");
+        System.out.println();
+    }
 
     public static void main(String[] args) {
-        Task92 task = new Task92(5);
-
-        Thread thread1 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                task.incrementAndPrint("Thread 1");
-            }
-        });
-
-        Thread thread2 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                task.incrementAndPrint("Thread 2");
-
-            }
-        });
-
-        Thread thread3 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                task.incrementAndPrint("Thread 3");
-            }
-        });
-        Thread thread4 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                task.incrementAndPrint("Thread 4");
-            }
-        });
-        Thread thread5 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                task.incrementAndPrint("Thread 5");
-            }
-        });
-
-
-        thread1.start();
-        thread2.start();
-        thread3.start();
-        thread4.start();
-        thread5.start();
-
-
+        // 5 test cases
+        runTest(5, 10);
+        runTest(10, 20);
+        runTest(2, 50);
+        runTest(20, 100);
+        runTest(8, 8);
     }
 }

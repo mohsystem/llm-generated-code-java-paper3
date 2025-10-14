@@ -1,45 +1,68 @@
 package CoT.gemini;
-import java.util.Scanner;
 
 public class Task140 {
 
-    public static double calculate(double num1, double num2, String operator) {
-        double result = 0;
-
+    /**
+     * Performs a basic arithmetic operation on two numbers.
+     *
+     * @param num1     The first number.
+     * @param num2     The second number.
+     * @param operator The operator character (+, -, *, /).
+     * @return The result of the operation.
+     * @throws IllegalArgumentException if the operator is invalid or if division by zero is attempted.
+     */
+    public static double calculate(double num1, double num2, char operator) {
         switch (operator) {
-            case "+":
-                result = num1 + num2;
-                break;
-            case "-":
-                result = num1 - num2;
-                break;
-            case "*":
-                result = num1 * num2;
-                break;
-            case "/":
+            case '+':
+                return num1 + num2;
+            case '-':
+                return num1 - num2;
+            case '*':
+                return num1 * num2;
+            case '/':
                 if (num2 == 0) {
-                    System.out.println("Error: Division by zero");
-                    return Double.NaN; // Indicate an error
+                    throw new IllegalArgumentException("Division by zero is not allowed.");
                 }
-                result = num1 / num2;
-                break;
+                return num1 / num2;
             default:
-                System.out.println("Error: Invalid operator");
-                return Double.NaN; // Indicate an error
-
+                throw new IllegalArgumentException("Invalid operator: " + operator);
         }
-        return result;
     }
 
-
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        System.out.println(calculate(5,2,"+"));
-        System.out.println(calculate(5,2,"-"));
-        System.out.println(calculate(5,2,"*"));
-        System.out.println(calculate(5,2,"/"));
-        System.out.println(calculate(5,0,"/"));
+        // Test Case 1: Addition
+        try {
+            System.out.println("Test 1: 10.5 + 2.5 = " + calculate(10.5, 2.5, '+'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Test 1 Error: " + e.getMessage());
+        }
 
+        // Test Case 2: Subtraction
+        try {
+            System.out.println("Test 2: 20.0 - 5.5 = " + calculate(20.0, 5.5, '-'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Test 2 Error: " + e.getMessage());
+        }
 
+        // Test Case 3: Multiplication
+        try {
+            System.out.println("Test 3: 5.0 * 4.0 = " + calculate(5.0, 4.0, '*'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Test 3 Error: " + e.getMessage());
+        }
+
+        // Test Case 4: Division by Zero (Error)
+        try {
+            System.out.println("Test 4: 10.0 / 0.0 = " + calculate(10.0, 0.0, '/'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Test 4 Error: " + e.getMessage());
+        }
+
+        // Test Case 5: Invalid Operator (Error)
+        try {
+            System.out.println("Test 5: 10.0 % 5.0 = " + calculate(10.0, 5.0, '%'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Test 5 Error: " + e.getMessage());
+        }
     }
 }

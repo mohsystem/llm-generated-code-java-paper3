@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Task92 {

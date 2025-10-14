@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task12 {
     public static String high(String s) {
         String[] words = s.split(" ");

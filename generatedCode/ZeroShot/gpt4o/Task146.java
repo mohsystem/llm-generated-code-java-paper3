@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task146 {
     public static int findMissingNumber(int[] arr, int n) {
         int expectedSum = n * (n + 1) / 2;

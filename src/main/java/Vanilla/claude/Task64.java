@@ -1,47 +1,57 @@
 package Vanilla.claude;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import org.json.JSONObject;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import org.json.*;
 
 public class Task64 {
-    public static JSONObject fetchJsonFromUrl(String urlStr) {
-        try {
-            URL url = new URL(urlStr);
-            URLConnection conn = url.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder sb = new StringBuilder();
+    public static String readJsonFromUrl(String urlString) throws IOException {
+        StringBuilder content = new StringBuilder();
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+        
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                sb.append(line);
+                content.append(line);
             }
-            reader.close();
-            return new JSONObject(sb.toString());
+        }
+        return content.toString();
+    }
+    
+    public static JSONObject parseJson(String url) {
+        try {
+            String jsonContent = readJsonFromUrl(url);
+            return new JSONObject(jsonContent);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return null;
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] urls = {
+        // Test cases with publicly available JSON APIs
+        String[] testUrls = {
+            "https://jsonplaceholder.typicode.com/posts/1",
+            "https://jsonplaceholder.typicode.com/users/1",
+            "https://jsonplaceholder.typicode.com/comments/1",
             "https://jsonplaceholder.typicode.com/todos/1",
-            "https://api.github.com/users/github",
-            "https://api.publicapis.org/entries",
-            "https://api.ipify.org?format=json",
-            "https://api.coindesk.com/v1/bpi/currentprice.json"
+            "https://jsonplaceholder.typicode.com/albums/1"
         };
-
-        for (String url : urls) {
-            System.out.println("Fetching JSON from: " + url);
-            JSONObject json = fetchJsonFromUrl(url);
-            if (json != null) {
-                System.out.println("Response: " + json.toString());
+        
+        for (int i = 0; i < testUrls.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("URL: " + testUrls[i]);
+            JSONObject result = parseJson(testUrls[i]);
+            if (result != null) {
+                System.out.println("JSON Object: " + result.toString(2));
             }
-            System.out.println("------------------------");
+            System.out.println();
         }
     }
 }

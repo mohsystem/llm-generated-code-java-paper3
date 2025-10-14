@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

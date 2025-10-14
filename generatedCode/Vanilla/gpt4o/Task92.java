@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task92 {
     private static int currentCounter = 0;
     private static final int maxCounter = 10;

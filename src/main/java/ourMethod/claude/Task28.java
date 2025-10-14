@@ -1,32 +1,44 @@
 package ourMethod.claude;
 
+import java.util.Arrays;
+
 public class Task28 {
-    public static String whoLikesIt(String... names) {
+    public static String whoLikesIt(String[] names) {
         if (names == null) {
             return "no one likes this";
         }
         
-        switch (names.length) {
-            case 0:
-                return "no one likes this";
-            case 1:
-                return String.format("%s likes this", names[0]);
-            case 2:
-                return String.format("%s and %s like this", names[0], names[1]);
-            case 3:
-                return String.format("%s, %s and %s like this", names[0], names[1], names[2]);
-            default:
-                return String.format("%s, %s and %d others like this", 
-                    names[0], names[1], names.length - 2);
+        int count = names.length;
+        
+        if (count == 0) {
+            return "no one likes this";
+        } else if (count == 1) {
+            return sanitizeName(names[0]) + " likes this";
+        } else if (count == 2) {
+            return sanitizeName(names[0]) + " and " + sanitizeName(names[1]) + " like this";
+        } else if (count == 3) {
+            return sanitizeName(names[0]) + ", " + sanitizeName(names[1]) + " and " + sanitizeName(names[2]) + " like this";
+        } else {
+            int others = count - 2;
+            return sanitizeName(names[0]) + ", " + sanitizeName(names[1]) + " and " + others + " others like this";
         }
     }
-
+    
+    private static String sanitizeName(String name) {
+        if (name == null) {
+            return "";
+        }
+        if (name.length() > 100) {
+            return name.substring(0, 100);
+        }
+        return name;
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(whoLikesIt()); // "no one likes this"
-        System.out.println(whoLikesIt("Peter")); // "Peter likes this"
-        System.out.println(whoLikesIt("Jacob", "Alex")); // "Jacob and Alex like this"
-        System.out.println(whoLikesIt("Max", "John", "Mark")); // "Max, John and Mark like this"
-        System.out.println(whoLikesIt("Alex", "Jacob", "Mark", "Max")); // "Alex, Jacob and 2 others like this"
+        System.out.println(whoLikesIt(new String[]{}));
+        System.out.println(whoLikesIt(new String[]{"Peter"}));
+        System.out.println(whoLikesIt(new String[]{"Jacob", "Alex"}));
+        System.out.println(whoLikesIt(new String[]{"Max", "John", "Mark"}));
+        System.out.println(whoLikesIt(new String[]{"Alex", "Jacob", "Mark", "Max"}));
     }
 }

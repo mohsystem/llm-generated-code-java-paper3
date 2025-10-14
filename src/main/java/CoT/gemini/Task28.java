@@ -1,30 +1,46 @@
 package CoT.gemini;
-import java.util.Arrays;
-import java.util.List;
 
-class Task28 {
-    public static String whoLikesIt(String... names) {
-        List<String> nameList = Arrays.asList(names);
-        int size = nameList.size();
-        switch (size) {
+public class Task28 {
+
+    /**
+     * Creates a display text for who likes an item based on an array of names.
+     * @param names An array of strings containing the names of people who like the item.
+     * @return A formatted string.
+     */
+    public static String whoLikesIt(String[] names) {
+        switch (names.length) {
             case 0:
                 return "no one likes this";
             case 1:
-                return nameList.get(0) + " likes this";
+                return String.format("%s likes this", names[0]);
             case 2:
-                return nameList.get(0) + " and " + nameList.get(1) + " like this";
+                return String.format("%s and %s like this", names[0], names[1]);
             case 3:
-                return nameList.get(0) + ", " + nameList.get(1) + " and " + nameList.get(2) + " like this";
+                return String.format("%s, %s and %s like this", names[0], names[1], names[2]);
             default:
-                return nameList.get(0) + ", " + nameList.get(1) + " and " + (size - 2) + " others like this";
+                return String.format("%s, %s and %d others like this", names[0], names[1], names.length - 2);
         }
     }
 
     public static void main(String[] args) {
-        System.out.println(whoLikesIt());
-        System.out.println(whoLikesIt("Peter"));
-        System.out.println(whoLikesIt("Jacob", "Alex"));
-        System.out.println(whoLikesIt("Max", "John", "Mark"));
-        System.out.println(whoLikesIt("Alex", "Jacob", "Mark", "Max"));
+        // Test Case 1: 0 names
+        String[] names1 = {};
+        System.out.println(whoLikesIt(names1));
+
+        // Test Case 2: 1 name
+        String[] names2 = {"Peter"};
+        System.out.println(whoLikesIt(names2));
+
+        // Test Case 3: 2 names
+        String[] names3 = {"Jacob", "Alex"};
+        System.out.println(whoLikesIt(names3));
+
+        // Test Case 4: 3 names
+        String[] names4 = {"Max", "John", "Mark"};
+        System.out.println(whoLikesIt(names4));
+
+        // Test Case 5: 4 or more names
+        String[] names5 = {"Alex", "Jacob", "Mark", "Max"};
+        System.out.println(whoLikesIt(names5));
     }
 }

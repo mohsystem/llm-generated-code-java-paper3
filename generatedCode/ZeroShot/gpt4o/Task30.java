@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task30 {
     public static String longest(String s1, String s2) {
         String combined = s1 + s2;

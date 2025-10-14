@@ -1,102 +1,105 @@
 package Vanilla.gemini;
-import java.util.concurrent.Semaphore;
+
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
-class Task187 {
+class H2O {
 
-    private Semaphore hydrogenSemaphore = new Semaphore(0);
-    private Semaphore oxygenSemaphore = new Semaphore(0);
-    private CyclicBarrier barrier = new CyclicBarrier(3);
-    private AtomicInteger hydrogenCount = new AtomicInteger(0);
-    private AtomicInteger oxygenCount = new AtomicInteger(0);
-    private StringBuilder molecule = new StringBuilder();
+    private final Semaphore hSem;
+    private final Semaphore oSem;
+    private final CyclicBarrier barrier;
 
-
-    public void releaseHydrogen(Runnable releaseHydrogen) throws InterruptedException {
-        hydrogenCount.incrementAndGet();
-        if (hydrogenCount.get() == 2 && oxygenCount.get() == 1) {
-            hydrogenSemaphore.release(2);
-            oxygenSemaphore.release();
-        }
-       hydrogenSemaphore.acquire();
-        molecule.append("H");
-
-        try {
-            barrier.await();
-        } catch (Exception e) {
-
-        }
-
+    public H2O() {
+        hSem = new Semaphore(2);
+        oSem = new Semaphore(1);
         
+        // This action will run when the barrier is tripped (i.e., when 3 threads arrive).
+        // It resets the semaphores for the next molecule.
+        Runnable barrierAction = () -> {
+            hSem.release(2);
+            oSem.release(1);
+        };
+        barrier = new CyclicBarrier(3, barrierAction);
     }
 
-    public void releaseOxygen(Runnable releaseOxygen) throws InterruptedException {
-        oxygenCount.incrementAndGet();
-        if (hydrogenCount.get() == 2 && oxygenCount.get() == 1) {
-            hydrogenSemaphore.release(2);
-            oxygenSemaphore.release();
-        }
-        oxygenSemaphore.acquire();
-        molecule.append("O");
-
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        hSem.acquire();
         try {
             barrier.await();
-        } catch (Exception e) {
-
+        } catch (BrokenBarrierException e) {
+            Thread.currentThread().interrupt();
         }
-
+        // releaseHydrogen.run() outputs "H". Do not change or remove this line.
+        releaseHydrogen.run();
     }
 
-    public String getMolecule() {
-        hydrogenCount.set(0);
-        oxygenCount.set(0);
-        String result = molecule.toString();
-        molecule.setLength(0);
-        return result;
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        oSem.acquire();
+        try {
+            barrier.await();
+        } catch (BrokenBarrierException e) {
+            Thread.currentThread().interrupt();
+        }
+        // releaseOxygen.run() outputs "O". Do not change or remove this line.
+        releaseOxygen.run();
     }
+}
 
-    public static void main(String[] args) throws InterruptedException {
-        Task187 task = new Task187();
-        String[] inputs = {"HOH", "OOHHHH", "HOHHOH", "OHH", "HHHHOO"};
-        String[] expectedOutputs = {"HHO", "HHOHHO", "HHOHHO", "HHO", "HHHOHO"};
+public class Task187 {
+    public static void runTest(String input) {
+        H2O h2o = new H2O();
+        StringBuilder sb = new StringBuilder();
+        ExecutorService executor = Executors.newFixedThreadPool(input.length());
 
-        for (int i = 0; i < inputs.length; i++) {
-            String input = inputs[i];
-            String expectedOutput = expectedOutputs[i];
-            Thread[] threads = new Thread[input.length()];
-
-            for (int j = 0; j < input.length(); j++) {
-                char c = input.charAt(j);
-                if (c == 'H') {
-                    threads[j] = new Thread(() -> {
-                        try {
-                            task.releaseHydrogen(() -> {});
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } else {
-                    threads[j] = new Thread(() -> {
-                        try {
-                            task.releaseOxygen(() -> {});
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-                threads[j].start();
+        for (char c : input.toCharArray()) {
+            if (c == 'H') {
+                executor.submit(() -> {
+                    try {
+                        h2o.hydrogen(() -> sb.append('H'));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            } else if (c == 'O') {
+                executor.submit(() -> {
+                    try {
+                        h2o.oxygen(() -> sb.append('O'));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
             }
-
-            for (Thread thread : threads) {
-                thread.join();
-            }
-            String actualOutput = task.getMolecule();
-            System.out.println("Input: " + input + ", Expected: " + expectedOutput + ", Actual: " + actualOutput);
-            assert actualOutput.equals(expectedOutput) : "Test case " + (i + 1) + " failed";
-
         }
 
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+        
+        System.out.println("Input: " + input);
+        System.out.println("Output: " + sb.toString());
+        System.out.println("---");
+    }
 
+    public static void main(String[] args) {
+        String[] testCases = {
+            "HOH",
+            "OOHHHH",
+            "HHHHHHOOO",
+            "HOHOHH",
+            "OOOHHHHHH"
+        };
+
+        for (String testCase : testCases) {
+            runTest(testCase);
+        }
     }
 }

@@ -3,61 +3,97 @@ package ourMethod.claude;
 import java.util.*;
 
 public class Task169 {
-    public static int[] countSmaller(int[] nums) {
+    public static List<Integer> countSmaller(int[] nums) {
         if (nums == null || nums.length == 0) {
-            return new int[0];
+            return new ArrayList<>();
+        }
+        
+        // Validate input constraints
+        if (nums.length > 100000) {
+            throw new IllegalArgumentException("Array length exceeds maximum allowed size");
+        }
+        
+        for (int num : nums) {
+            if (num < -10000 || num > 10000) {
+                throw new IllegalArgumentException("Array element out of valid range");
+            }
         }
         
         int n = nums.length;
-        int[] result = new int[n];
-        ArrayList<Integer> sorted = new ArrayList<>();
+        int[] counts = new int[n];
+        int[] indices = new int[n];
         
-        // Start from right to left
-        for (int i = n - 1; i >= 0; i--) {
-            int index = findInsertPosition(sorted, nums[i]);
-            result[i] = index;
-            sorted.add(index, nums[i]);
+        for (int i = 0; i < n; i++) {
+            indices[i] = i;
+        }
+        
+        mergeSort(nums, indices, counts, 0, n - 1);
+        
+        List<Integer> result = new ArrayList<>();
+        for (int count : counts) {
+            result.add(count);
         }
         
         return result;
     }
     
-    private static int findInsertPosition(ArrayList<Integer> sorted, int target) {
-        if (sorted.isEmpty()) {
-            return 0;
+    private static void mergeSort(int[] nums, int[] indices, int[] counts, int left, int right) {
+        if (left >= right) {
+            return;
         }
         
-        int left = 0;
-        int right = sorted.size();
+        int mid = left + (right - left) / 2;
+        mergeSort(nums, indices, counts, left, mid);
+        mergeSort(nums, indices, counts, mid + 1, right);
+        merge(nums, indices, counts, left, mid, right);
+    }
+    
+    private static void merge(int[] nums, int[] indices, int[] counts, int left, int mid, int right) {
+        int[] temp = new int[right - left + 1];
+        int i = left, j = mid + 1, k = 0;
+        int rightCount = 0;
         
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (sorted.get(mid) >= target) {
-                right = mid;
+        while (i <= mid && j <= right) {
+            if (nums[indices[j]] < nums[indices[i]]) {
+                temp[k++] = indices[j++];
+                rightCount++;
             } else {
-                left = mid + 1;
+                counts[indices[i]] += rightCount;
+                temp[k++] = indices[i++];
             }
         }
         
-        return left;
-    }
-
-    public static void main(String[] args) {
-        // Test cases
-        int[][] testCases = {
-            {5, 2, 6, 1},
-            {-1},
-            {-1, -1},
-            {1, 2, 3, 4},
-            {4, 3, 2, 1}
-        };
-        
-        for (int[] test : testCases) {
-            System.out.print("Input: ");
-            System.out.println(Arrays.toString(test));
-            System.out.print("Output: ");
-            System.out.println(Arrays.toString(countSmaller(test)));
-            System.out.println();
+        while (i <= mid) {
+            counts[indices[i]] += rightCount;
+            temp[k++] = indices[i++];
         }
+        
+        while (j <= right) {
+            temp[k++] = indices[j++];
+        }
+        
+        System.arraycopy(temp, 0, indices, left, temp.length);
+    }
+    
+    public static void main(String[] args) {
+        // Test case 1
+        int[] test1 = {5, 2, 6, 1};
+        System.out.println("Test 1: " + countSmaller(test1));
+        
+        // Test case 2
+        int[] test2 = {-1};
+        System.out.println("Test 2: " + countSmaller(test2));
+        
+        // Test case 3
+        int[] test3 = {-1, -1};
+        System.out.println("Test 3: " + countSmaller(test3));
+        
+        // Test case 4
+        int[] test4 = {1, 2, 3, 4, 5};
+        System.out.println("Test 4: " + countSmaller(test4));
+        
+        // Test case 5
+        int[] test5 = {5, 4, 3, 2, 1};
+        System.out.println("Test 5: " + countSmaller(test5));
     }
 }

@@ -16,7 +16,7 @@ public class Task100 {
         String filename = args[1];
 
         // Security check: Validate the filename to prevent path traversal attacks
-        if (filename.contains("../") || filename.contains("..\\") || filename.startsWith("/")) {
+        if (filename.contains("../") || filename.contains("..\") || filename.startsWith("/")) {
             System.out.println("Invalid filename. Potential path traversal attack.");
             return;
         }

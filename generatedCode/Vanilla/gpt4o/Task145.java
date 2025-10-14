@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task145 {
     public static int maxSubArray(int[] nums) {
         int maxSoFar = nums[0];

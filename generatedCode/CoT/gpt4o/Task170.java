@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task170 {
 
     public static int countRangeSum(int[] nums, int lower, int upper) {

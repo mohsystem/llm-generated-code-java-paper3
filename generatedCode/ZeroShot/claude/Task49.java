@@ -82,18 +82,18 @@ public class Task49 {
     // Test cases
     public static void testAPI() {
         // Test case 1: Valid user data
-        String validJson = "{\\"name\\":\\"John Doe\\",\\"email\\":\\"john@example.com\\"}";
+        String validJson = "{\"name\":\"John Doe\",\"email\":\"john@example.com\"}";
         
         // Test case 2: Invalid name
-        String invalidNameJson = "{\\"name\\":\\"\\",\\"email\\":\\"john@example.com\\"}";
+        String invalidNameJson = "{\"name\":\"\",\"email\":\"john@example.com\"}";
         
         // Test case 3: Invalid email
-        String invalidEmailJson = "{\\"name\\":\\"John Doe\\",\\"email\\":\\"\\"}";
+        String invalidEmailJson = "{\"name\":\"John Doe\",\"email\":\"\"}";
         
         // Test case 4: Malformed JSON
         String malformedJson = "{name:John Doe}";
         
         // Test case 5: SQL injection attempt
-        String sqlInjectionJson = "{\\"name\\":\\"' OR '1'='1\\",\\"email\\":\\"hack@example.com\\"}";
+        String sqlInjectionJson = "{\"name\":\"' OR '1'='1\",\"email\":\"hack@example.com\"}";
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.*;

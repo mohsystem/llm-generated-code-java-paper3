@@ -1,42 +1,44 @@
 package ZeroShot.claude;
 
-import java.util.HashSet;
+import java.util.*;
 
-class Task172 {
-    public static int countDistinctRepeatedSubstrings(String text) {
-        HashSet<String> result = new HashSet<>();
+public class Task172 {
+    public static int distinctEchoSubstrings(String text) {
+        Set<String> distinctSubstrings = new HashSet<>();
         int n = text.length();
         
+        // Try all possible substring lengths (must be even)
         for (int len = 2; len <= n; len += 2) {
+            int halfLen = len / 2;
+            
+            // Try all starting positions
             for (int i = 0; i <= n - len; i++) {
-                String substring = text.substring(i, i + len);
-                int halfLen = len / 2;
-                String firstHalf = substring.substring(0, halfLen);
-                String secondHalf = substring.substring(halfLen);
+                String firstHalf = text.substring(i, i + halfLen);
+                String secondHalf = text.substring(i + halfLen, i + len);
                 
                 if (firstHalf.equals(secondHalf)) {
-                    result.add(substring);
+                    distinctSubstrings.add(text.substring(i, i + len));
                 }
             }
         }
         
-        return result.size();
+        return distinctSubstrings.size();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "abcabcabc",
-            "leetcodeleetcode",
-            "aa",
-            "aabaabaa",
-            "abcd"
-        };
+        // Test case 1
+        System.out.println("Test 1: " + distinctEchoSubstrings("abcabcabc")); // Expected: 3
         
-        for (String test : tests) {
-            System.out.println("Input: " + test);
-            System.out.println("Output: " + countDistinctRepeatedSubstrings(test));
-            System.out.println();
-        }
+        // Test case 2
+        System.out.println("Test 2: " + distinctEchoSubstrings("leetcodeleetcode")); // Expected: 2
+        
+        // Test case 3
+        System.out.println("Test 3: " + distinctEchoSubstrings("aa")); // Expected: 1
+        
+        // Test case 4
+        System.out.println("Test 4: " + distinctEchoSubstrings("aaaa")); // Expected: 2 ("aa", "aaaa")
+        
+        // Test case 5
+        System.out.println("Test 5: " + distinctEchoSubstrings("abcdefg")); // Expected: 0
     }
 }

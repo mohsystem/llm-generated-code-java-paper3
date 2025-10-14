@@ -1,59 +1,42 @@
 package ZeroShot.claude;
 
-import java.security.Key;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.Base64;
-
+// INSECURE - For educational purposes only
+// This demonstrates poor security practices
 public class Task124 {
-    private static final String ALGORITHM = "AES";
-    private static final String SECRET_KEY = "MySuperSecretKey"; // Use secure key management in production
-    
-    public static String encrypt(String data) throws Exception {
-        Key key = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encryptedBytes = cipher.doFinal(data.getBytes());
-        return Base64.getEncoder().encodeToString(encryptedBytes);
-    }
-    
-    public static String decrypt(String encryptedData) throws Exception {
-        Key key = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
-        return new String(decryptedBytes);
-    }
-
-    public static void main(String[] args) {
-        try {
-            // Test case 1
-            String cc1 = "4532-7153-3790-4421";
-            String encrypted1 = encrypt(cc1);
-            System.out.println("Test 1: " + encrypted1 + " -> " + decrypt(encrypted1));
-            
-            // Test case 2
-            String cc2 = "SSN: 123-45-6789";
-            String encrypted2 = encrypt(cc2);
-            System.out.println("Test 2: " + encrypted2 + " -> " + decrypt(encrypted2));
-            
-            // Test case 3
-            String cc3 = "Password123!@#";
-            String encrypted3 = encrypt(cc3);
-            System.out.println("Test 3: " + encrypted3 + " -> " + decrypt(encrypted3));
-            
-            // Test case 4
-            String cc4 = "user@email.com";
-            String encrypted4 = encrypt(cc4);
-            System.out.println("Test 4: " + encrypted4 + " -> " + decrypt(encrypted4));
-            
-            // Test case 5
-            String cc5 = "Account#: 7890123456";
-            String encrypted5 = encrypt(cc5);
-            System.out.println("Test 5: " + encrypted5 + " -> " + decrypt(encrypted5));
-            
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+    // WARNING: Never store sensitive data like this in production!
+    private static class SensitiveData {
+        String creditCard;
+        String ssn;
+        String name;
+        
+        public SensitiveData(String cc, String ssn, String name) {
+            this.creditCard = cc;
+            this.ssn = ssn;
+            this.name = name;
         }
+        
+        @Override
+        public String toString() {
+            return "Name: " + name + ", CC: " + creditCard + ", SSN: " + ssn;
+        }
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("WARNING: This is an INSECURE example for educational purposes only!");
+        System.out.println("Never store sensitive data in plain text in production systems.\\n");
+        
+        // Test cases showing insecure storage
+        SensitiveData data1 = new SensitiveData("4532-1234-5678-9010", "123-45-6789", "John Doe");
+        SensitiveData data2 = new SensitiveData("5425-2334-3010-9876", "987-65-4321", "Jane Smith");
+        SensitiveData data3 = new SensitiveData("3782-822463-10005", "555-55-5555", "Bob Johnson");
+        SensitiveData data4 = new SensitiveData("6011-1111-1111-1117", "222-22-2222", "Alice Williams");
+        SensitiveData data5 = new SensitiveData("3056-9309-0259-04", "333-33-3333", "Charlie Brown");
+        
+        System.out.println("Insecurely stored data:");
+        System.out.println(data1);
+        System.out.println(data2);
+        System.out.println(data3);
+        System.out.println(data4);
+        System.out.println(data5);
     }
 }

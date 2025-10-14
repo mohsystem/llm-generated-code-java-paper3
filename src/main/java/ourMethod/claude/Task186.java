@@ -1,94 +1,101 @@
 package ourMethod.claude;
 
-class Task186 {
-    static class ListNode {
-        int val;
-        ListNode next;
-        ListNode(int val) {
-            this.val = val;
-        }
-    }
-    
+import java.util.PriorityQueue;
+import java.util.Comparator;
+
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode() {}
+    ListNode(int val) { this.val = val; }
+    ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+}
+
+public class Task186 {
     public static ListNode mergeKLists(ListNode[] lists) {
-        if (lists == null || lists.length == 0) return null;
-        
-        return mergeKListsHelper(lists, 0, lists.length - 1);
-    }
-    
-    private static ListNode mergeKListsHelper(ListNode[] lists, int start, int end) {
-        if (start == end) return lists[start];
-        if (start > end) return null;
-        
-        int mid = start + (end - start) / 2;
-        ListNode left = mergeKListsHelper(lists, start, mid);
-        ListNode right = mergeKListsHelper(lists, mid + 1, end);
-        return mergeTwoLists(left, right);
-    }
-    
-    private static ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        ListNode dummy = new ListNode(0);
-        ListNode curr = dummy;
-        
-        while (l1 != null && l2 != null) {
-            if (l1.val <= l2.val) {
-                curr.next = l1;
-                l1 = l1.next;
-            } else {
-                curr.next = l2;
-                l2 = l2.next;
-            }
-            curr = curr.next;
+        if (lists == null || lists.length == 0) {
+            return null;
         }
         
-        curr.next = (l1 != null) ? l1 : l2;
+        PriorityQueue<ListNode> minHeap = new PriorityQueue<>(
+            new Comparator<ListNode>() {
+                public int compare(ListNode a, ListNode b) {
+                    return Integer.compare(a.val, b.val);
+                }
+            }
+        );
+        
+        for (ListNode node : lists) {
+            if (node != null) {
+                minHeap.offer(node);
+            }
+        }
+        
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        while (!minHeap.isEmpty()) {
+            ListNode smallest = minHeap.poll();
+            current.next = smallest;
+            current = current.next;
+            
+            if (smallest.next != null) {
+                minHeap.offer(smallest.next);
+            }
+        }
+        
         return dummy.next;
     }
     
-    public static void main(String[] args) {
-        // Test case 1: [[1,4,5],[1,3,4],[2,6]]
-        ListNode[] test1 = new ListNode[3];
-        test1[0] = new ListNode(1);
-        test1[0].next = new ListNode(4);
-        test1[0].next.next = new ListNode(5);
-        
-        test1[1] = new ListNode(1);
-        test1[1].next = new ListNode(3);
-        test1[1].next.next = new ListNode(4);
-        
-        test1[2] = new ListNode(2);
-        test1[2].next = new ListNode(6);
-        
-        // Test case 2: []
-        ListNode[] test2 = new ListNode[0];
-        
-        // Test case 3: [[]]
-        ListNode[] test3 = new ListNode[1];
-        test3[0] = null;
-        
-        // Test case 4: [[1]]
-        ListNode[] test4 = new ListNode[1];
-        test4[0] = new ListNode(1);
-        
-        // Test case 5: [[1,2],[3,4]]
-        ListNode[] test5 = new ListNode[2];
-        test5[0] = new ListNode(1);
-        test5[0].next = new ListNode(2);
-        test5[1] = new ListNode(3);
-        test5[1].next = new ListNode(4);
-        
-        // Print results
-        printList(mergeKLists(test1));
-        printList(mergeKLists(test2));
-        printList(mergeKLists(test3));
-        printList(mergeKLists(test4));
-        printList(mergeKLists(test5));
+    private static ListNode createList(int[] values) {
+        if (values == null || values.length == 0) {
+            return null;
+        }
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        for (int val : values) {
+            current.next = new ListNode(val);
+            current = current.next;
+        }
+        return dummy.next;
     }
     
     private static void printList(ListNode head) {
+        System.out.print("[");
         while (head != null) {
-            System.out.print(head.val + " ");
+            System.out.print(head.val);
+            if (head.next != null) {
+                System.out.print(",");
+            }
             head = head.next;
         }
-        System.out.println();
+        System.out.println("]");
+    }
+    
+    public static void main(String[] args) {
+        ListNode[] lists1 = {
+            createList(new int[]{1, 4, 5}),
+            createList(new int[]{1, 3, 4}),
+            createList(new int[]{2, 6})
+        };
+        printList(mergeKLists(lists1));
+        
+        ListNode[] lists2 = {};
+        printList(mergeKLists(lists2));
+        
+        ListNode[] lists3 = {null};
+        printList(mergeKLists(lists3));
+        
+        ListNode[] lists4 = {
+            createList(new int[]{-2, -1, -1, 0}),
+            createList(new int[]{-3})
+        };
+        printList(mergeKLists(lists4));
+        
+        ListNode[] lists5 = {
+            createList(new int[]{1}),
+            createList(new int[]{0})
+        };
+        printList(mergeKLists(lists5));
     }
 }

@@ -1,35 +1,32 @@
 package ZeroShot.claude;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Task3 {
-    public static boolean isPangram(String str) {
-        str = str.toLowerCase();
-        boolean[] mark = new boolean[26];
+    public static boolean isPangram(String sentence) {
+        if (sentence == null || sentence.isEmpty()) {
+            return false;
+        }
         
-        for (int i = 0; i < str.length(); i++) {
-            char ch = str.charAt(i);
-            if (ch >= 'a' && ch <= 'z') {
-                mark[ch - 'a'] = true;
+        Set<Character> letters = new HashSet<>();
+        String lowerCase = sentence.toLowerCase();
+        
+        for (char c : lowerCase.toCharArray()) {
+            if (c >= 'a' && c <= 'z') {
+                letters.add(c);
             }
         }
         
-        for (boolean b : mark) {
-            if (!b) return false;
-        }
-        return true;
+        return letters.size() == 26;
     }
     
     public static void main(String[] args) {
-        String[] testCases = {
-            "The quick brown fox jumps over the lazy dog",
-            "Pack my box with five dozen liquor jugs",
-            "This is not a pangram",
-            "abcdefghijklmnopqrstuvwxyz",
-            "The five boxing wizards jump quickly"
-        };
-        
-        for (String test : testCases) {
-            System.out.println("Input: " + test);
-            System.out.println("Is Pangram: " + isPangram(test));
-        }
+        // Test cases
+        System.out.println("Test 1: " + isPangram("The quick brown fox jumps over the lazy dog")); // true
+        System.out.println("Test 2: " + isPangram("Hello World")); // false
+        System.out.println("Test 3: " + isPangram("abcdefghijklmnopqrstuvwxyz")); // true
+        System.out.println("Test 4: " + isPangram("Pack my box with five dozen liquor jugs")); // true
+        System.out.println("Test 5: " + isPangram("This is not a pangram sentence")); // false
     }
 }

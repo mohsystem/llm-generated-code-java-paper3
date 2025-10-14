@@ -1,54 +1,87 @@
 package ZeroShot.gemini;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-class Task83 {
-    public static String encrypt(String key) throws Exception {
-        // Generate a secure random key if no key is provided
-        if (key == null || key.isEmpty()) {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(128); // You can change the key size here (128, 192, or 256 bits)
-            SecretKey secretKey = keyGen.generateKey();
-            key = Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        }
-        
-        byte[] keyBytes = Base64.getDecoder().decode(key);
+public class Task83 {
 
+    private static final String ALGORITHM = "AES";
+    private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
+    private static final int KEY_SIZE = 256;
+    private static final int IV_LENGTH_BYTES = 16; // AES block size is 128 bits
 
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
-
-        // Generate a random IV (Initialization Vector)
-        byte[] iv = new byte[16];
+    /**
+     * Creates a Cipher using AES/CBC/PKCS5Padding, encrypts the given plaintext,
+     * and returns the IV prepended to the ciphertext.
+     *
+     * @param plainText The string to encrypt.
+     * @param key       The SecretKey to use for encryption.
+     * @return A byte array containing the IV followed by the ciphertext.
+     * @throws Exception if an encryption error occurs.
+     */
+    public static byte[] encrypt(String plainText, SecretKey key) throws Exception {
+        // 1. Generate a cryptographically strong random IV
+        byte[] iv = new byte[IV_LENGTH_BYTES];
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
+        // 2. Initialize Cipher in ENCRYPT_MODE
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
 
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+        // 3. Encrypt the plaintext
+        byte[] cipherText = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
 
+        // 4. Prepend the IV to the ciphertext for use during decryption
+        byte[] encryptedData = new byte[iv.length + cipherText.length];
+        System.arraycopy(iv, 0, encryptedData, 0, iv.length);
+        System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
 
-        byte[] encryptedBytes = cipher.doFinal(keyBytes);
-
-        // Concatenate IV and encrypted data for decryption later
-        byte[] combined = new byte[iv.length + encryptedBytes.length];
-        System.arraycopy(iv, 0, combined, 0, iv.length);
-        System.arraycopy(encryptedBytes, 0, combined, iv.length, encryptedBytes.length);
-
-        return Base64.getEncoder().encodeToString(combined);
+        return encryptedData;
     }
 
-    public static void main(String[] args) throws Exception {
-        String[] testCases = {"MySecretKey123", "AnotherKey456", "ShortKey", "LongKey7890123456", ""}; // Include an empty string test case
-        for (String testCase : testCases) {
-            String encryptedKey = encrypt(testCase);
-            System.out.println("Original Key: " + testCase + ", Encrypted Key: " + encryptedKey);
-        }
+    /**
+     * Main method with 5 test cases.
+     */
+    public static void main(String[] args) {
+        try {
+            // Generate a secure AES key. In a real application, this key would be
+            // managed securely (e.g., in a keystore).
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            keyGen.init(KEY_SIZE, new SecureRandom());
+            SecretKey secretKey = keyGen.generateKey();
 
+            System.out.println("Using AES Key (Base64): " + Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+            System.out.println("--- Running 5 Test Cases ---");
+
+            String[] testCases = {
+                "This is the first test case.",
+                "Encrypting another piece of data.",
+                "AES in CBC mode is secure with a random IV.",
+                "A short string.",
+                "A much longer string to test padding and block chaining properly, ensuring everything works as expected for various lengths of input data."
+            };
+
+            for (int i = 0; i < testCases.length; i++) {
+                String plainText = testCases[i];
+                System.out.println("\n--- Test Case " + (i + 1) + " ---");
+                System.out.println("Plaintext: " + plainText);
+
+                byte[] encryptedData = encrypt(plainText, secretKey);
+
+                System.out.println("Encrypted (Base64): " + Base64.getEncoder().encodeToString(encryptedData));
+            }
+
+        } catch (Exception e) {
+            // In a real application, use a proper logging framework instead of printing to stderr
+            System.err.println("An error occurred during encryption: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

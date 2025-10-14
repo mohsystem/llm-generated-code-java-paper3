@@ -2,14 +2,22 @@ package Vanilla.claude;
 
 public class Task167 {
     public static double cubeDiagonal(double volume) {
-        return Math.round(Math.sqrt(3) * Math.pow(volume, 1.0/3) * 100.0) / 100.0;
+        // Find the side length from volume: side = volume^(1/3)
+        double side = Math.cbrt(volume);
+        
+        // Calculate diagonal: diagonal = side * sqrt(3)
+        double diagonal = side * Math.sqrt(3);
+        
+        // Round to 2 decimal places
+        return Math.round(diagonal * 100.0) / 100.0;
     }
     
     public static void main(String[] args) {
-        System.out.println(cubeDiagonal(8)); // 3.46
-        System.out.println(cubeDiagonal(343)); // 12.12
-        System.out.println(cubeDiagonal(1157.625)); // 18.19
-        System.out.println(cubeDiagonal(27)); // 5.2
-        System.out.println(cubeDiagonal(125)); // 8.66
+        // Test cases
+        System.out.println(cubeDiagonal(8));          // Expected: 3.46
+        System.out.println(cubeDiagonal(343));        // Expected: 12.12
+        System.out.println(cubeDiagonal(1157.625));   // Expected: 18.19
+        System.out.println(cubeDiagonal(1));          // Expected: 1.73
+        System.out.println(cubeDiagonal(27));         // Expected: 5.20
     }
 }

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task26 {
     public static int findOddJava(int[] array) {
         int result = 0;

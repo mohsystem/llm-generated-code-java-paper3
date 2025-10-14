@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task71 {
     public static void main(String[] args) {
         for (String arg : args) {

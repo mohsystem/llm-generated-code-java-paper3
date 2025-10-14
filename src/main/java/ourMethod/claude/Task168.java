@@ -1,37 +1,73 @@
 package ourMethod.claude;
 
+import java.util.Arrays;
+
 public class Task168 {
-    public static String tweakLetters(String word, int[] arr) {
-        if (word == null || arr == null || word.length() != arr.length) {
-            return "";
+    public static String tweakLetters(String str, int[] tweaks) {
+        // Validate inputs
+        if (str == null || tweaks == null) {
+            throw new IllegalArgumentException("Input string and tweaks array cannot be null");
         }
         
-        StringBuilder result = new StringBuilder();
+        if (str.isEmpty()) {
+            return str;
+        }
         
-        for (int i = 0; i < word.length(); i++) {
-            char c = word.charAt(i);
-            int shift = arr[i];
-            
-            // Calculate new character position
-            int newPos = ((c - 'a' + shift) % 26);
-            // Handle negative shifts
-            if (newPos < 0) {
-                newPos += 26;
+        if (str.length() != tweaks.length) {
+            throw new IllegalArgumentException("String length must match tweaks array length");
+        }
+        
+        // Validate string contains only letters
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (!Character.isLetter(c)) {
+                throw new IllegalArgumentException("String must contain only letters");
             }
-            // Convert back to character
-            char newChar = (char)('a' + newPos);
-            result.append(newChar);
+        }
+        
+        // Validate tweaks array contains only -1, 0, or 1
+        for (int i = 0; i < tweaks.length; i++) {
+            if (tweaks[i] < -1 || tweaks[i] > 1) {
+                throw new IllegalArgumentException("Tweaks must be -1, 0, or 1");
+            }
+        }
+        
+        StringBuilder result = new StringBuilder(str.length());
+        
+        for (int i = 0; i < str.length(); i++) {
+            char c = Character.toLowerCase(str.charAt(i));
+            int tweak = tweaks[i];
+            
+            // Apply tweak with wrapping
+            int charValue = c - 'a';
+            charValue = (charValue + tweak + 26) % 26;
+            char tweakedChar = (char) ('a' + charValue);
+            
+            result.append(tweakedChar);
         }
         
         return result.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(tweakLetters("apple", new int[]{0, 1, -1, 0, -1})); // "aqold"
-        System.out.println(tweakLetters("many", new int[]{0, 0, 0, -1})); // "manx"
-        System.out.println(tweakLetters("rhino", new int[]{1, 1, 1, 1, 1})); // "sijop"
-        System.out.println(tweakLetters("xyz", new int[]{1, 1, 1})); // "yza"
-        System.out.println(tweakLetters("abc", new int[]{-1, -1, -1})); // "zab"
+        // Test case 1
+        String result1 = tweakLetters("apple", new int[]{0, 1, -1, 0, -1});
+        System.out.println("Test 1: " + result1 + " (expected: aqold)");
+        
+        // Test case 2
+        String result2 = tweakLetters("many", new int[]{0, 0, 0, -1});
+        System.out.println("Test 2: " + result2 + " (expected: manx)");
+        
+        // Test case 3
+        String result3 = tweakLetters("rhino", new int[]{1, 1, 1, 1, 1});
+        System.out.println("Test 3: " + result3 + " (expected: sijop)");
+        
+        // Test case 4
+        String result4 = tweakLetters("zebra", new int[]{1, 0, 0, 0, -1});
+        System.out.println("Test 4: " + result4 + " (expected: aebrq)");
+        
+        // Test case 5
+        String result5 = tweakLetters("code", new int[]{-1, -1, -1, -1});
+        System.out.println("Test 5: " + result5 + " (expected: bncd)");
     }
 }

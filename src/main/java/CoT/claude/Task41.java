@@ -1,39 +1,56 @@
 package CoT.claude;
 
+import java.util.Scanner;
+
 public class Task41 {
+    private static final int MAX_LENGTH = 1024;
+    
     public static String processString(String input) {
         if (input == null) {
-            return "";
+            return "Error: Null input";
         }
         
-        // Limit input length to prevent memory issues
-        final int MAX_LENGTH = 1024;
         if (input.length() > MAX_LENGTH) {
-            input = input.substring(0, MAX_LENGTH);
+            return "Error: Input exceeds maximum length of " + MAX_LENGTH;
         }
         
-        // Remove any non-printable characters
-        input = input.replaceAll("[^\\\\x20-\\\\x7E]", "");
+        // Safe string processing
+        StringBuilder processed = new StringBuilder();
+        processed.append("Processed: ");
+        processed.append(input.trim());
+        processed.append(" (Length: ").append(input.length()).append(")");
         
-        // Simple processing: reverse the string
-        StringBuilder reversed = new StringBuilder(input);
-        return reversed.reverse().toString();
+        return processed.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "Hello World!",
-            "Test123@#$",
-            "", // Empty string
-            "A".repeat(2000), // Long string
-            null // Null input
-        };
+        // Test case 1: Normal input
+        System.out.println("Test 1: " + processString("Hello World"));
         
-        for (String test : tests) {
-            System.out.println("Input: " + (test == null ? "null" : test));
-            System.out.println("Output: " + processString(test));
-            System.out.println();
+        // Test case 2: Empty string
+        System.out.println("Test 2: " + processString(""));
+        
+        // Test case 3: String with whitespace
+        System.out.println("Test 3: " + processString("  Test String  "));
+        
+        // Test case 4: Null input
+        System.out.println("Test 4: " + processString(null));
+        
+        // Test case 5: Long string
+        String longString = "A".repeat(500);
+        System.out.println("Test 5: " + processString(longString));
+        
+        // Interactive mode
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\\nEnter a string to process (or 'exit' to quit):");
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+            if (input.equals("exit")) {
+                break;
+            }
+            System.out.println(processString(input));
+            System.out.println("Enter another string (or 'exit' to quit):");
         }
+        scanner.close();
     }
 }

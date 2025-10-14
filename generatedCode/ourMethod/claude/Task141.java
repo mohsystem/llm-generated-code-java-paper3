@@ -35,8 +35,8 @@ public class Task141 {
         };
         
         for (String test : tests) {
-            System.out.println("Input: \\"" + test + "\\"");
-            System.out.println("Output: \\"" + reverseString(test) + "\\"");
+            System.out.println("Input: \"" + test + "\"");
+            System.out.println("Output: \"" + reverseString(test) + "\"");
             System.out.println();
         }
     }

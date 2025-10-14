@@ -1,33 +1,50 @@
 package ourMethod.claude;
 
+import java.util.Set;
+import java.util.TreeSet;
+import java.nio.charset.StandardCharsets;
+
 public class Task30 {
     public static String longest(String s1, String s2) {
-        // Combine strings and convert to char array
-        String combined = s1 + s2;
-        boolean[] seen = new boolean[26]; 
-        
-        // Mark each character as seen
-        for (char c : combined.toCharArray()) {
-            seen[c - 'a'] = true;
+        if (s1 == null || s2 == null) {
+            throw new IllegalArgumentException("Input strings must not be null");
         }
         
-        // Build result string with unique chars
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < 26; i++) {
-            if (seen[i]) {
-                result.append((char)(i + 'a'));
+        if (s1.length() > 10000 || s2.length() > 10000) {
+            throw new IllegalArgumentException("Input strings exceed maximum length");
+        }
+        
+        Set<Character> distinctChars = new TreeSet<>();
+        
+        for (int i = 0; i < s1.length(); i++) {
+            char c = s1.charAt(i);
+            if (c < 'a' || c > 'z') {
+                throw new IllegalArgumentException("Input must contain only lowercase letters a-z");
             }
+            distinctChars.add(c);
+        }
+        
+        for (int i = 0; i < s2.length(); i++) {
+            char c = s2.charAt(i);
+            if (c < 'a' || c > 'z') {
+                throw new IllegalArgumentException("Input must contain only lowercase letters a-z");
+            }
+            distinctChars.add(c);
+        }
+        
+        StringBuilder result = new StringBuilder(distinctChars.size());
+        for (Character c : distinctChars) {
+            result.append(c);
         }
         
         return result.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(longest("xyaabbbccccdefww", "xxxxyyyyabklmopq")); // "abcdefklmopqwxy"
-        System.out.println(longest("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz")); // "abcdefghijklmnopqrstuvwxyz" 
-        System.out.println(longest("aretheyhere", "yestheyarehere")); // "aehrsty"
-        System.out.println(longest("loopingisfunbutdangerous", "lessdangerousthancoding")); // "abcdefghilnoprstu"
-        System.out.println(longest("inmanylanguages", "theresapairoffunctions")); // "acefghilmnoprstuy"
+        System.out.println(longest("xyaabbbccccdefww", "xxxxyyyyabklmopq"));
+        System.out.println(longest("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz"));
+        System.out.println(longest("abc", "xyz"));
+        System.out.println(longest("aaa", "bbb"));
+        System.out.println(longest("", "abc"));
     }
 }

@@ -1,14 +1,35 @@
 package CoT.gemini;
-class Task141 {
-    public static String reverseString(String input) {
-        return new StringBuilder(input).reverse().toString();
+
+public class Task141 {
+
+    /**
+     * Reverses a given string.
+     *
+     * @param str The string to be reversed.
+     * @return The reversed string, or null if the input is null.
+     */
+    public static String reverseString(String str) {
+        // Check for null input to avoid NullPointerException
+        if (str == null) {
+            return null;
+        }
+        // Use StringBuilder's reverse() method for efficiency and simplicity
+        return new StringBuilder(str).reverse().toString();
     }
 
     public static void main(String[] args) {
-        System.out.println(reverseString("hello"));
-        System.out.println(reverseString("world"));
-        System.out.println(reverseString(""));
-        System.out.println(reverseString("12345"));
-        System.out.println(reverseString("racecar"));
+        // 5 test cases
+        String[] testCases = {
+            "hello world",
+            "12345",
+            "a",
+            "",
+            "Palindrome"
+        };
+
+        for (String test : testCases) {
+            String reversed = reverseString(test);
+            System.out.println("Original: \"" + test + "\", Reversed: \"" + reversed + "\"");
+        }
     }
 }

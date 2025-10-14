@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import org.json.JSONObject;
 
 public class Task62 {

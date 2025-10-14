@@ -1,32 +1,40 @@
 package CoT.gemini;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Task60 {
 
+    /**
+     * Converts a number to its expanded form string.
+     * For example: 70304 becomes "70000 + 300 + 4"
+     * @param num The positive integer to convert.
+     * @return The string representing the expanded form.
+     */
     public static String expandedForm(int num) {
-        List<String> parts = new ArrayList<>();
-        int divisor = 1;
+        String s = String.valueOf(num);
+        StringBuilder result = new StringBuilder();
 
-        while (num > 0) {
-            int digit = num % 10;
-            if (digit > 0) {
-                parts.add(Integer.toString(digit * divisor));
+        for (int i = 0; i < s.length(); i++) {
+            char digitChar = s.charAt(i);
+            if (digitChar != '0') {
+                if (result.length() > 0) {
+                    result.append(" + ");
+                }
+                result.append(digitChar);
+                for (int j = 0; j < s.length() - 1 - i; j++) {
+                    result.append('0');
+                }
             }
-            num /= 10;
-            divisor *= 10;
         }
-
-        Collections.reverse(parts);
-        return String.join(" + ", parts);
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        System.out.println(expandedForm(12)); // Should return "10 + 2"
-        System.out.println(expandedForm(42)); // Should return "40 + 2"
-        System.out.println(expandedForm(70304)); // Should return "70000 + 300 + 4"
-        System.out.println(expandedForm(800)); // Should return "800"
-        System.out.println(expandedForm(1000000)); // Should return "1000000"
+        int[] testCases = {12, 42, 70304, 9000000, 806};
+        for (int testCase : testCases) {
+            System.out.println("Input: " + testCase + ", Output: " + expandedForm(testCase));
+        }
     }
 }

@@ -1,52 +1,74 @@
 package CoT.gemini;
-import java.security.MessageDigest;
+
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.math.BigInteger;
 
 public class Task82 {
 
-    public static byte[] getSaltedHash(String password, byte[] salt) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        md.update(salt);
-        md.update(password.getBytes());
-        return md.digest();
+    private static final int ITERATIONS = 100000;
+    private static final int KEY_LENGTH = 256; // in bits
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+
+    /**
+     * Computes the hash of a password combined with a salt using PBKDF2.
+     *
+     * @param password The password to hash.
+     * @param salt     The salt to use.
+     * @return The hex-encoded hash string, or null on failure.
+     */
+    public static String computeHash(String password, String salt) {
+        try {
+            byte[] saltBytes = salt.getBytes(StandardCharsets.UTF_8);
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), saltBytes, ITERATIONS, KEY_LENGTH);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
+            byte[] hash = factory.generateSecret(spec).getEncoded();
+            return toHexString(hash);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            // In a real application, this should be logged.
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public static byte[] generateSalt() throws NoSuchAlgorithmException {
-        SecureRandom sr = SecureRandom.getInstance("");
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
+    /**
+     * Converts a byte array into a hexadecimal string.
+     *
+     * @param bytes The byte array to convert.
+     * @return The hexadecimal string representation.
+     */
+    private static String toHexString(byte[] bytes) {
+        BigInteger bi = new BigInteger(1, bytes);
+        String hex = bi.toString(16);
+        int paddingLength = (bytes.length * 2) - hex.length();
+        if (paddingLength > 0) {
+            return String.format("%0" + paddingLength + "d", 0) + hex;
+        } else {
+            return hex;
+        }
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        String password1 = "test1";
-        byte[] salt1 = generateSalt();
-        byte[] saltedHash1 = getSaltedHash(password1, salt1);
-        System.out.println("Password: " + password1 + ", Salt: " + Arrays.toString(salt1) + ", Hash: " + Arrays.toString(saltedHash1));
+    public static void main(String[] args) {
+        String[][] testCases = {
+            {"password123", "somesalt1"},
+            {"P@$$w0rd!", "anothersalt2"},
+            {"a_very_secure_password", "salty-salt-salt"},
+            {"", "emptypassword"}, // Edge case: empty password
+            {"test", ""}          // Edge case: empty salt
+        };
 
-
-        String password2 = "password123";
-        byte[] salt2 = generateSalt();
-        byte[] saltedHash2 = getSaltedHash(password2, salt2);
-        System.out.println("Password: " + password2 + ", Salt: " + Arrays.toString(salt2) + ", Hash: " + Arrays.toString(saltedHash2));
-
-        String password3 = "MyStrongPassword";
-        byte[] salt3 = generateSalt();
-        byte[] saltedHash3 = getSaltedHash(password3, salt3);
-        System.out.println("Password: " + password3 + ", Salt: " + Arrays.toString(salt3) + ", Hash: " + Arrays.toString(saltedHash3));
-
-        String password4 = "123456";
-        byte[] salt4 = generateSalt();
-        byte[] saltedHash4 = getSaltedHash(password4, salt4);
-        System.out.println("Password: " + password4 + ", Salt: " + Arrays.toString(salt4) + ", Hash: " + Arrays.toString(saltedHash4));
-
-        String password5 = "AnotherTest";
-        byte[] salt5 = generateSalt();
-        byte[] saltedHash5 = getSaltedHash(password5, salt5);
-        System.out.println("Password: " + password5 + ", Salt: " + Arrays.toString(salt5) + ", Hash: " + Arrays.toString(saltedHash5));
-
-
+        System.out.println("Java PBKDF2-HMAC-SHA256 Hashes:");
+        for (String[] testCase : testCases) {
+            String password = testCase[0];
+            String salt = testCase[1];
+            String hash = computeHash(password, salt);
+            System.out.println("Password: \"" + password + "\", Salt: \"" + salt + "\"");
+            System.out.println("Hash: " + hash);
+            System.out.println();
+        }
     }
 }

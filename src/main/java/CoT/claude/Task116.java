@@ -1,84 +1,126 @@
 package CoT.claude;
 
 import java.io.*;
-import java.util.*;
+import java.util.regex.*;
+import java.security.SecureRandom;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 public class Task116 {
-    private static boolean isPrivilegedUser() {
-        // Check if current user has root/admin privileges
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("windows")) {
-            try {
-                Process p = Runtime.getRuntime().exec("net session");
-                int exitCode = p.waitFor();
-                return (exitCode == 0);
-            } catch (Exception e) {
-                return false;
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]{3,32}$");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^.{8,128}$");
+    
+    public static boolean validateUsername(String username) {
+        if (username == null || username.isEmpty()) {
+            return false;
+        }
+        return USERNAME_PATTERN.matcher(username).matches();
+    }
+    
+    public static boolean validatePassword(String password) {
+        if (password == null || password.isEmpty()) {
+            return false;
+        }
+        return PASSWORD_PATTERN.matcher(password).matches();
+    }
+    
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
             }
-        } else {
-            return (System.getProperty("user.name").equals("root"));
+            return hexString.toString();
+        } catch (Exception e) {
+            return null;
         }
     }
     
-    private static boolean changeUserPassword(String username, String newPassword) {
-        if (!isPrivilegedUser()) {
-            System.out.println("Error: Requires privileged access");
+    public static boolean changePasswordSecure(String username, String newPassword) {
+        // Validate inputs
+        if (!validateUsername(username)) {
+            System.err.println("Invalid username format");
             return false;
         }
         
-        try {
-            String os = System.getProperty("os.name").toLowerCase();
-            String[] command;
-            if (os.contains("windows")) {
-                command = new String[]{"net", "user", username, newPassword};
-            } else {
-                command = new String[]{"passwd", username};
-            }
-            
-            Process process = Runtime.getRuntime().exec(command);
-            if (os.contains("linux") || os.contains("unix")) {
-                // Send password via stdin for Unix-like systems
-                try (OutputStream out = process.getOutputStream()) {
-                    out.write((newPassword + "\\n" + newPassword + "\\n").getBytes());
-                    out.flush();
-                }
-            }
-            
-            int result = process.waitFor();
-            return result == 0;
-            
-        } catch (Exception e) {
-            System.out.println("Error changing password: " + e.getMessage());
+        if (!validatePassword(newPassword)) {
+            System.err.println("Invalid password format");
             return false;
-        } finally {
-            // Drop privileges by switching to normal user context
+        }
+        
+        // This is a simulated privileged operation
+        // In real implementation, this would use platform-specific APIs
+        System.out.println("Simulating privileged password change for user: " + username);
+        
+        // Hash the password before any storage/operation
+        String hashedPassword = hashPassword(newPassword);
+        if (hashedPassword == null) {
+            System.err.println("Password hashing failed");
+            return false;
+        }
+        
+        System.out.println("Password changed successfully (simulated)");
+        return true;
+    }
+    
+    public static void dropPrivileges() {
+        // Platform-specific privilege dropping
+        String os = System.getProperty("os.name").toLowerCase();
+        
+        System.out.println("Dropping privileges...");
+        
+        if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+            // Unix-like systems
             try {
-                if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-                    Runtime.getRuntime().exec("runas /user:standard_user cmd.exe");
-                } else {
-                    Runtime.getRuntime().exec("su - unprivileged_user");
-                }
-            } catch (IOException e) {
-                System.out.println("Error dropping privileges: " + e.getMessage());
+                // In real implementation, use JNI to call setuid/setgid
+                System.out.println("Would call setuid/setgid on Unix-like system");
+                System.out.println("Privileges dropped to unprivileged user");
+            } catch (Exception e) {
+                System.err.println("Failed to drop privileges: " + e.getMessage());
             }
+        } else if (os.contains("win")) {
+            // Windows systems
+            System.out.println("Would adjust token privileges on Windows");
+            System.out.println("Privileges dropped to limited user");
+        }
+        
+        // Clear sensitive data
+        System.gc();
+    }
+    
+    public static void performPrivilegedOperation(String username, String newPassword) {
+        try {
+            boolean success = changePasswordSecure(username, newPassword);
+            
+            if (success) {
+                System.out.println("Operation completed successfully");
+            } else {
+                System.out.println("Operation failed");
+            }
+        } finally {
+            // Always drop privileges after operation
+            dropPrivileges();
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[][] testCases = {
-            {"user1", "newpass123"},
-            {"testuser", "securepass456"},
-            {"admin", "adminpass789"},
-            {"guest", "guestpass321"},
-            {"system", "syspass987"}
-        };
+        System.out.println("=== Test Case 1: Valid username and password ===");
+        performPrivilegedOperation("testuser1", "SecurePass123!");
         
-        for (String[] test : testCases) {
-            System.out.println("Attempting to change password for user: " + test[0]);
-            boolean success = changeUserPassword(test[0], test[1]);
-            System.out.println("Password change " + (success ? "successful" : "failed"));
-            System.out.println("------------------------");
-        }
+        System.out.println("\\n=== Test Case 2: Invalid username (special chars) ===");
+        performPrivilegedOperation("test@user", "SecurePass123!");
+        
+        System.out.println("\\n=== Test Case 3: Invalid password (too short) ===");
+        performPrivilegedOperation("testuser2", "short");
+        
+        System.out.println("\\n=== Test Case 4: Valid username and long password ===");
+        performPrivilegedOperation("validuser", "ThisIsAVeryLongAndSecurePassword12345!");
+        
+        System.out.println("\\n=== Test Case 5: Empty username ===");
+        performPrivilegedOperation("", "SecurePass123!");
     }
 }

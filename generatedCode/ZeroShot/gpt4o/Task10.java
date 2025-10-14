@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task10 {
     public static int sumBetween(int a, int b) {
         int min = Math.min(a, b);

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task9 {
     public static String sumOddOrEven(int[] numbers) {
         if (numbers == null || numbers.length == 0) {

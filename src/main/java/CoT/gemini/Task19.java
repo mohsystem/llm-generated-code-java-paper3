@@ -1,30 +1,58 @@
 package CoT.gemini;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.StringJoiner;
 
 public class Task19 {
 
+    /**
+     * Reverses words in a string that have five or more letters.
+     *
+     * @param sentence The input string of one or more words.
+     * @return The string with long words reversed.
+     */
     public static String spinWords(String sentence) {
-        String[] words = sentence.split(" ");
-        StringBuilder sb = new StringBuilder();
+        if (sentence == null || sentence.trim().isEmpty()) {
+            return sentence;
+        }
+
+        String[] words = sentence.split("\\s+");
+        StringJoiner result = new StringJoiner(" ");
+
         for (String word : words) {
             if (word.length() >= 5) {
-                List<String> letters = Arrays.asList(word.split(""));
-                Collections.reverse(letters);
-                sb.append(String.join("", letters)).append(" ");
+                result.add(new StringBuilder(word).reverse().toString());
             } else {
-                sb.append(word).append(" ");
+                result.add(word);
             }
         }
-        return sb.toString().trim();
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        System.out.println(spinWords("Hey fellow warriors")); // Output: Hey wollef sroirraw
-        System.out.println(spinWords("This is a test")); // Output: This is a test
-        System.out.println(spinWords("This is another test")); // Output: This is rehtona test
-        System.out.println(spinWords("Welcome")); // Output: emocleW
-        System.out.println(spinWords("to")); // Output: to
+        String[] testCases = {
+            "Hey fellow warriors",
+            "This is a test",
+            "This is another test",
+            "Welcome",
+            "Just kidding there is still one more"
+        };
+
+        String[] expectedResults = {
+            "Hey wollef sroirraw",
+            "This is a test",
+            "This is rehtona test",
+            "emocleW",
+            "Just gniddik ereht is llits one more"
+        };
+
+        for (int i = 0; i < testCases.length; i++) {
+            String result = spinWords(testCases[i]);
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Input:    \"" + testCases[i] + "\"");
+            System.out.println("Output:   \"" + result + "\"");
+            System.out.println("Expected: \"" + expectedResults[i] + "\"");
+            System.out.println("Result: " + (result.equals(expectedResults[i]) ? "Passed" : "Failed"));
+            System.out.println();
+        }
     }
 }

@@ -1,30 +1,26 @@
 package CoT.gemini;
+
 import java.util.concurrent.Semaphore;
 import java.util.function.IntConsumer;
 
-class Task189 {
+public class Task189 {
 
     static class ZeroEvenOdd {
         private int n;
-        private Semaphore zeroSem;
-        private Semaphore oddSem;
-        private Semaphore evenSem;
-        private int current;
+        private Semaphore zeroSem = new Semaphore(1);
+        private Semaphore evenSem = new Semaphore(0);
+        private Semaphore oddSem = new Semaphore(0);
 
         public ZeroEvenOdd(int n) {
             this.n = n;
-            this.zeroSem = new Semaphore(1);
-            this.oddSem = new Semaphore(0);
-            this.evenSem = new Semaphore(0);
-            this.current = 1;
         }
 
-        // printNumber.accept(x) outputs "x", where x is an integer.
+        // printNumber.accept(x) outputs x to the console.
         public void zero(IntConsumer printNumber) throws InterruptedException {
-            for (int i = 0; i < n; i++) {
+            for (int i = 1; i <= n; i++) {
                 zeroSem.acquire();
                 printNumber.accept(0);
-                if (current % 2 == 1) {
+                if (i % 2 == 1) {
                     oddSem.release();
                 } else {
                     evenSem.release();
@@ -36,74 +32,63 @@ class Task189 {
             for (int i = 2; i <= n; i += 2) {
                 evenSem.acquire();
                 printNumber.accept(i);
-                current++;
                 zeroSem.release();
             }
-
         }
 
         public void odd(IntConsumer printNumber) throws InterruptedException {
             for (int i = 1; i <= n; i += 2) {
                 oddSem.acquire();
                 printNumber.accept(i);
-                current++;
                 zeroSem.release();
-
             }
         }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        test(2);
-        test(5);
-        test(1);
-        test(10);
-        test(3);
-    }
+        int[] testCases = {1, 2, 5, 6, 10};
 
+        for (int n : testCases) {
+            System.out.print("Test Case n = " + n + ": ");
+            ZeroEvenOdd zeroEvenOdd = new ZeroEvenOdd(n);
+            IntConsumer printNumber = System.out::print;
 
-    private static void test(int n) {
-        ZeroEvenOdd zeo = new ZeroEvenOdd(n);
-        IntConsumer printNumber = System.out::print;
+            Thread threadA = new Thread(() -> {
+                try {
+                    zeroEvenOdd.zero(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
 
+            Thread threadB = new Thread(() -> {
+                try {
+                    zeroEvenOdd.even(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
 
-        Thread t1 = new Thread(() -> {
+            Thread threadC = new Thread(() -> {
+                try {
+                    zeroEvenOdd.odd(printNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+
+            threadA.start();
+            threadB.start();
+            threadC.start();
+
             try {
-                zeo.zero(printNumber);
+                threadA.join();
+                threadB.join();
+                threadC.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
-        });
-
-        Thread t2 = new Thread(() -> {
-            try {
-                zeo.even(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        Thread t3 = new Thread(() -> {
-            try {
-                zeo.odd(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("\n");
         }
-        System.out.println();
-
     }
 }

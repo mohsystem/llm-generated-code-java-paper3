@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task132 {
 
     public static void logEvent(String event) {

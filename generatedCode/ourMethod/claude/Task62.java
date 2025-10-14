@@ -20,11 +20,11 @@ public class Task62 {
     public static void main(String[] args) {
         // Test cases
         String[] testCases = {
-            "{\\"name\\":\\"John\\", \\"age\\":30}",
-            "{\\"employees\\":[{\\"name\\":\\"Tom\\", \\"age\\":25},{\\"name\\":\\"Jane\\", \\"age\\":28}]}",
+            "{\"name\":\"John\", \"age\":30}",
+            "{\"employees\":[{\"name\":\"Tom\", \"age\":25},{\"name\":\"Jane\", \"age\":28}]}",
             "{}",
-            "{\\"nested\\":{\\"key\\":\\"value\\"}}",
-            "{\\"array\\":[1,2,3,4,5]}"
+            "{\"nested\":{\"key\":\"value\"}}",
+            "{\"array\":[1,2,3,4,5]}"
         };
 
         for (int i = 0; i < testCases.length; i++) {

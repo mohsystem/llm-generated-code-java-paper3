@@ -1,35 +1,50 @@
 package ourMethod.claude;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Task60 {
     public static String expandedForm(int num) {
+        // Input validation: ensure num is greater than 0
         if (num <= 0) {
-            return "0";
+            throw new IllegalArgumentException("Number must be greater than 0");
         }
         
-        StringBuilder result = new StringBuilder();
-        int position = 1;
+        // Prevent integer overflow by checking bounds
+        if (num > Integer.MAX_VALUE || num < 0) {
+            throw new IllegalArgumentException("Number out of valid range");
+        }
         
-        while (num > 0) {
-            int digit = num % 10;
-            if (digit != 0) {
-                if (result.length() > 0) {
-                    result.insert(0, " + ");
-                }
-                result.insert(0, digit * position);
+        String numStr = String.valueOf(num);
+        List<String> parts = new ArrayList<>();
+        int length = numStr.length();
+        
+        for (int i = 0; i < length; i++) {
+            char digit = numStr.charAt(i);
+            if (digit != '0') {
+                int powerOfTen = length - i - 1;
+                long expandedValue = (digit - '0') * (long)Math.pow(10, powerOfTen);
+                parts.add(String.valueOf(expandedValue));
             }
-            num /= 10;
-            position *= 10;
         }
         
-        return result.toString();
+        return String.join(" + ", parts);
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(expandedForm(12));  // "10 + 2"
-        System.out.println(expandedForm(42));  // "40 + 2"
-        System.out.println(expandedForm(70304));  // "70000 + 300 + 4"
-        System.out.println(expandedForm(4982));  // "4000 + 900 + 80 + 2"
-        System.out.println(expandedForm(1));  // "1"
+        // Test case 1
+        System.out.println(expandedForm(12));
+        
+        // Test case 2
+        System.out.println(expandedForm(42));
+        
+        // Test case 3
+        System.out.println(expandedForm(70304));
+        
+        // Test case 4
+        System.out.println(expandedForm(9));
+        
+        // Test case 5
+        System.out.println(expandedForm(123456));
     }
 }

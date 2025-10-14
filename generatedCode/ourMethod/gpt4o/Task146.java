@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task146 {
 
     public static int findMissingNumber(int[] numbers, int n) {

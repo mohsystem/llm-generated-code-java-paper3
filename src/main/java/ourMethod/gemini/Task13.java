@@ -1,43 +1,56 @@
 package ourMethod.gemini;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-class Task13 {
-    public static boolean isValidWalk(List<Character> walk) {
-        if (walk.size() != 10) {
+public class Task13 {
+
+    /**
+     * Determines if a given walk is valid.
+     * A valid walk takes exactly 10 minutes and returns to the starting point.
+     *
+     * @param walk An array of characters representing directions ('n', 's', 'e', 'w').
+     * @return true if the walk is valid, false otherwise.
+     */
+    public static boolean isValidWalk(char[] walk) {
+        if (walk == null || walk.length != 10) {
             return false;
         }
 
-        Map<Character, Integer> counts = new HashMap<>();
-        counts.put('n', 0);
-        counts.put('s', 0);
-        counts.put('e', 0);
-        counts.put('w', 0);
+        int x = 0; // East-West displacement
+        int y = 0; // North-South displacement
 
         for (char direction : walk) {
-            counts.put(direction, counts.get(direction) + 1);
+            switch (direction) {
+                case 'n': y++; break;
+                case 's': y--; break;
+                case 'e': x++; break;
+                case 'w': x--; break;
+                default:
+                    // Per the prompt, input is always valid, so no action needed.
+                    break;
+            }
         }
 
-        return counts.get('n') == counts.get('s') && counts.get('e') == counts.get('w');
+        return x == 0 && y == 0;
     }
 
     public static void main(String[] args) {
-        List<Character> walk1 = List.of('n', 's', 'n', 's', 'n', 's', 'n', 's', 'n', 's');
-        System.out.println(isValidWalk(walk1)); // true
+        // Test Case 1: Valid walk
+        char[] walk1 = {'n','s','n','s','n','s','n','s','n','s'};
+        System.out.println("Test 1: " + isValidWalk(walk1)); // Expected: true
 
-        List<Character> walk2 = List.of('w', 'e', 'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e', 'w', 'e');
-        System.out.println(isValidWalk(walk2)); // false
+        // Test Case 2: Too long
+        char[] walk2 = {'w','e','w','e','w','e','w','e','w','e','w','e'};
+        System.out.println("Test 2: " + isValidWalk(walk2)); // Expected: false
 
-        List<Character> walk3 = List.of('w');
-        System.out.println(isValidWalk(walk3)); // false
+        // Test Case 3: Too short
+        char[] walk3 = {'w'};
+        System.out.println("Test 3: " + isValidWalk(walk3)); // Expected: false
 
-        List<Character> walk4 = List.of('n', 'n', 'n', 's', 'n', 's', 'n', 's', 'n', 's');
-        System.out.println(isValidWalk(walk4)); // false
-
-        List<Character> walk5 = List.of('e', 'w', 'n', 's', 'n', 's', 'e', 'w', 'n', 's');
-        System.out.println(isValidWalk(walk5)); // true
-
-
+        // Test Case 4: Correct length, but does not return to start
+        char[] walk4 = {'n','n','n','s','n','s','n','s','n','s'};
+        System.out.println("Test 4: " + isValidWalk(walk4)); // Expected: false
+        
+        // Test Case 5: Valid walk, different order
+        char[] walk5 = {'e', 'w', 'e', 'w', 'n', 's', 'n', 's', 'e', 'w'};
+        System.out.println("Test 5: " + isValidWalk(walk5)); // Expected: true
     }
 }

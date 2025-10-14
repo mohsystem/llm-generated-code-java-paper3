@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;

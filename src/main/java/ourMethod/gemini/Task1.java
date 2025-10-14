@@ -1,46 +1,53 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-class Task1 {
-    public static int peopleOnBus(List<int[]> stops) {
-        int people = 0;
-        for (int[] stop : stops) {
-            people += stop[0] - stop[1];
+import java.util.Arrays;
+
+public class Task1 {
+
+    /**
+     * Calculates the number of people still on the bus after the last bus stop.
+     *
+     * @param stops A 2D array of integer pairs. Each pair represents [people get on, people get off].
+     * @return The number of people left on the bus.
+     */
+    public static int countPassengers(int[][] stops) {
+        if (stops == null) {
+            return 0;
         }
-        return people;
+        int peopleOnBus = 0;
+        for (int[] stop : stops) {
+            if (stop != null && stop.length == 2) {
+                peopleOnBus += stop[0];
+                peopleOnBus -= stop[1];
+            }
+        }
+        return peopleOnBus;
     }
 
     public static void main(String[] args) {
-        List<int[]> stops1 = new ArrayList<>();
-        stops1.add(new int[]{10, 0});
-        stops1.add(new int[]{3, 5});
-        stops1.add(new int[]{2, 5});
-        System.out.println(peopleOnBus(stops1)); // Output: 2
+        // Test Case 1
+        int[][] stops1 = {{10, 0}, {3, 5}, {5, 8}};
+        System.out.println("Test Case 1: " + Arrays.deepToString(stops1));
+        System.out.println("Remaining passengers: " + countPassengers(stops1)); // Expected: 5
 
-        List<int[]> stops2 = new ArrayList<>();
-        stops2.add(new int[]{3, 0});
-        stops2.add(new int[]{9, 1});
-        stops2.add(new int[]{4, 10});
-        stops2.add(new int[]{12, 2});
-        stops2.add(new int[]{6, 1});
-        stops2.add(new int[]{7, 10});
-        System.out.println(peopleOnBus(stops2)); // Output: 17
+        // Test Case 2
+        int[][] stops2 = {{3, 0}, {9, 1}, {4, 10}, {12, 2}, {6, 1}, {7, 10}};
+        System.out.println("\nTest Case 2: " + Arrays.deepToString(stops2));
+        System.out.println("Remaining passengers: " + countPassengers(stops2)); // Expected: 17
 
-        List<int[]> stops3 = new ArrayList<>();
-        stops3.add(new int[]{3, 0});
-        stops3.add(new int[]{9, 1});
-        stops3.add(new int[]{4, 8});
-        stops3.add(new int[]{12, 2});
-        stops3.add(new int[]{6, 1});
-        stops3.add(new int[]{7, 8});
-        System.out.println(peopleOnBus(stops3)); // Output: 17
+        // Test Case 3
+        int[][] stops3 = {{3, 0}, {9, 1}, {4, 8}, {12, 2}, {6, 1}, {7, 8}};
+        System.out.println("\nTest Case 3: " + Arrays.deepToString(stops3));
+        System.out.println("Remaining passengers: " + countPassengers(stops3)); // Expected: 21
 
-        List<int[]> stops4 = Arrays.asList(new int[]{1, 0}, new int[]{2, 0}, new int[]{3, 0});
-        System.out.println(peopleOnBus(stops4));
+        // Test Case 4
+        int[][] stops4 = {{0, 0}};
+        System.out.println("\nTest Case 4: " + Arrays.deepToString(stops4));
+        System.out.println("Remaining passengers: " + countPassengers(stops4)); // Expected: 0
 
-        List<int[]> stops5 = Arrays.asList(new int[]{0, 0});
-        System.out.println(peopleOnBus(stops5));
+        // Test Case 5
+        int[][] stops5 = {{100, 0}, {0, 50}, {20, 30}};
+        System.out.println("\nTest Case 5: " + Arrays.deepToString(stops5));
+        System.out.println("Remaining passengers: " + countPassengers(stops5)); // Expected: 40
     }
 }

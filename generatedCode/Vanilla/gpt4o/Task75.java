@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.lang.management.ManagementFactory;
 import java.lang.ProcessBuilder;
 import java.io.IOException;

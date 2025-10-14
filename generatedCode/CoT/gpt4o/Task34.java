@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task34 {
     public static boolean isNarcissistic(int number) {
         int originalNumber = number;

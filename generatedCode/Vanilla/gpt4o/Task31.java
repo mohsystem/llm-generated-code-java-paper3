@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task31 {
     public static String DNAStrand(String dna) {
         StringBuilder complementaryStrand = new StringBuilder();

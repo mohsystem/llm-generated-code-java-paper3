@@ -1,79 +1,73 @@
 package Vanilla.gemini;
-class Task199 {
-    private int minutes;
 
-    public Task199(int hours, int minutes) {
-        this.minutes = (hours * 60 + minutes) % (24 * 60);
-        if (this.minutes < 0) {
-            this.minutes += 24 * 60;
+public class Task199 {
+
+    static class Clock {
+        private int totalMinutes;
+        private static final int MINUTES_IN_DAY = 24 * 60;
+
+        public Clock(int hours, int minutes) {
+            int initialTotalMinutes = hours * 60 + minutes;
+            // Handle negative results of % correctly for wraparound
+            this.totalMinutes = (initialTotalMinutes % MINUTES_IN_DAY + MINUTES_IN_DAY) % MINUTES_IN_DAY;
         }
-    }
 
-    public Task199(int minutes) {
-        this.minutes = minutes % (24 * 60);
-        if (this.minutes < 0) {
-            this.minutes += 24 * 60;
+        public void add(int minutes) {
+            this.totalMinutes = (this.totalMinutes + minutes % MINUTES_IN_DAY + MINUTES_IN_DAY) % MINUTES_IN_DAY;
         }
-    }
 
-
-
-    public void add(int minutes) {
-        this.minutes = (this.minutes + minutes) % (24 * 60);
-        if (this.minutes < 0) {
-            this.minutes += 24 * 60;
+        public void subtract(int minutes) {
+            add(-minutes);
         }
-    }
 
-    public void subtract(int minutes) {
-        this.minutes = (this.minutes - minutes) % (24 * 60);
-        if (this.minutes < 0) {
-            this.minutes += 24 * 60;
+        @Override
+        public String toString() {
+            int hours = totalMinutes / 60;
+            int minutes = totalMinutes % 60;
+            return String.format("%02d:%02d", hours, minutes);
         }
-    }
 
-    public int getHours() {
-        return (minutes / 60) % 24;
-    }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            Clock clock = (Clock) obj;
+            // Normalize the other clock's time for comparison as well
+            return this.totalMinutes == clock.totalMinutes;
+        }
 
-    public int getMinutes() {
-        return minutes % 60;
-    }
-
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Task199 clock = (Task199) obj;
-        return minutes == clock.minutes;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%02d:%02d", getHours(), getMinutes());
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(totalMinutes);
+        }
     }
 
     public static void main(String[] args) {
-        Task199 clock1 = new Task199(10, 30);
-        clock1.add(30);
-        System.out.println(clock1); // Output: 11:00
+        System.out.println("Java Test Cases:");
+        
+        // Test 1: Creation and ToString
+        Clock c1 = new Clock(8, 0);
+        System.out.println("Test 1: Create 08:00 -> " + c1.toString());
 
-        Task199 clock2 = new Task199(23, 59);
-        clock2.add(1);
-        System.out.println(clock2); // Output: 00:00
+        // Test 2: Equality
+        Clock c2 = new Clock(8, 0);
+        Clock c3 = new Clock(9, 0);
+        System.out.println("Test 2: 08:00 == 08:00 -> " + c1.equals(c2));
+        System.out.println("Test 2: 08:00 == 09:00 -> " + c1.equals(c3));
 
-        Task199 clock3 = new Task199(0, 0);
-        clock3.subtract(1);
-        System.out.println(clock3); // Output: 23:59
+        // Test 3: Addition
+        Clock c4 = new Clock(10, 0);
+        c4.add(63);
+        System.out.println("Test 3: 10:00 + 63 mins -> " + c4.toString());
 
-        Task199 clock4 = new Task199(12, 0);
-        Task199 clock5 = new Task199(0, 720); // 12 hours * 60 = 720 minutes
+        // Test 4: Subtraction with rollover
+        Clock c5 = new Clock(0, 30);
+        c5.subtract(60);
+        System.out.println("Test 4: 00:30 - 60 mins -> " + c5.toString());
 
-        System.out.println(clock4.equals(clock5)); //true
-        System.out.println(clock4); //12:00
-        System.out.println(clock5); //12:00
-
-
+        // Test 5: Complex Addition with rollover
+        Clock c6 = new Clock(23, 45);
+        c6.add(180);
+        System.out.println("Test 5: 23:45 + 180 mins -> " + c6.toString());
     }
 }

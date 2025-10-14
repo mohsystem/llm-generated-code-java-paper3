@@ -1,57 +1,79 @@
 package CoT.gemini;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class Task190 {
-    public static String transposeFile(String filename) throws IOException {
-        List<List<String>> data = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] row = line.split(" ");
-                List<String> rowList = new ArrayList<>();
-                for (String item : row) {
-                    rowList.add(item);
-                }
-                data.add(rowList);
-            }
+public class Task190 {
+
+    /**
+     * Transposes the given content where rows are separated by newlines
+     * and columns by spaces.
+     *
+     * @param content The string content to transpose.
+     * @return The transposed string content.
+     */
+    public static String transposeContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return "";
         }
 
-        StringBuilder sb = new StringBuilder();
-        int numRows = data.size();
-        int numCols = data.get(0).size(); // Assuming all rows have the same number of columns
+        String[] lines = content.split("\n");
+        if (lines.length == 0) {
+            return "";
+        }
 
+        List<String[]> rows = new ArrayList<>();
+        for (String line : lines) {
+            // Skips any empty lines that might result from multiple newlines
+            if (!line.trim().isEmpty()) {
+                rows.add(line.split(" "));
+            }
+        }
+        
+        if (rows.isEmpty()) {
+            return "";
+        }
+
+        int numRows = rows.size();
+        // Assumes all rows have the same number of columns as the first one
+        int numCols = rows.get(0).length;
+
+        StringBuilder transposedContent = new StringBuilder();
         for (int j = 0; j < numCols; j++) {
             for (int i = 0; i < numRows; i++) {
-                sb.append(data.get(i).get(j));
+                // This check adds robustness for potentially jagged inputs
+                if (j < rows.get(i).length) {
+                    transposedContent.append(rows.get(i)[j]);
+                }
                 if (i < numRows - 1) {
-                    sb.append(" ");
+                    transposedContent.append(" ");
                 }
             }
-            sb.append("\n");
+            if (j < numCols - 1) {
+                transposedContent.append("\n");
+            }
         }
 
-        return sb.toString();
+        return transposedContent.toString();
     }
 
-    public static void main(String[] args) throws IOException {
-        String test1 = transposeFile("file1.txt");
-        System.out.println(test1);
+    public static void main(String[] args) {
+        String[] testCases = {
+            "name age\nalice 21\nryan 30",
+            "a b c\nd e f\ng h i",
+            "one two three four",
+            "apple\nbanana\ncherry",
+            ""
+        };
 
-        String test2 = transposeFile("file2.txt");
-        System.out.println(test2);
-
-        String test3 = transposeFile("file3.txt");
-        System.out.println(test3);
-
-
-        String test4 = transposeFile("file4.txt");
-        System.out.println(test4);
-
-        String test5 = transposeFile("file5.txt");
-        System.out.println(test5);
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Input:");
+            System.out.println(testCases[i].isEmpty() ? "<empty>" : testCases[i]);
+            System.out.println("Output:");
+            String result = transposeContent(testCases[i]);
+            System.out.println(result.isEmpty() ? "<empty>" : result);
+            System.out.println("--------------------");
+        }
     }
 }

@@ -1,26 +1,78 @@
 package ZeroShot.claude;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class Task75 {
-    public static boolean terminateProcess(int pid) {
+    public static String terminateProcess(String pid) {
         try {
-            Process process = Runtime.getRuntime().exec("taskkill /F /PID " + pid);
-            process.waitFor();
-            return process.exitValue() == 0;
-        } catch (IOException | InterruptedException e) {
-            return false;
+            // Validate PID is numeric
+            int processId = Integer.parseInt(pid);
+            if (processId <= 0) {
+                return "Error: Invalid PID. Must be a positive number.";
+            }
+            
+            String os = System.getProperty("os.name").toLowerCase();
+            Process process;
+            
+            if (os.contains("win")) {
+                // Windows command
+                process = Runtime.getRuntime().exec("taskkill /F /PID " + processId);
+            } else {
+                // Unix/Linux/Mac command
+                process = Runtime.getRuntime().exec("kill -9 " + processId);
+            }
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            
+            StringBuilder output = new StringBuilder();
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\\n");
+            }
+            
+            while ((line = errorReader.readLine()) != null) {
+                output.append(line).append("\\n");
+            }
+            
+            int exitCode = process.waitFor();
+            
+            if (exitCode == 0) {
+                return "Process " + processId + " terminated successfully.";
+            } else {
+                return "Error terminating process " + processId + ": " + output.toString();
+            }
+            
+        } catch (NumberFormatException e) {
+            return "Error: Invalid PID format. Must be a number.";
+        } catch (SecurityException e) {
+            return "Error: Permission denied. Run as administrator/root.";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
     }
     
     public static void main(String[] args) {
-        // Test cases
-        int[] testPids = {1234, 5678, 9012, 3456, 7890};
-        
-        for(int pid : testPids) {
-            System.out.println("Attempting to terminate process with PID: " + pid);
-            boolean result = terminateProcess(pid);
-            System.out.println("Process termination " + (result ? "successful" : "failed"));
+        if (args.length > 0) {
+            System.out.println(terminateProcess(args[0]));
+        } else {
+            // Test cases (Note: These are example PIDs that likely don't exist)
+            System.out.println("Test Case 1 (Invalid PID - negative):");
+            System.out.println(terminateProcess("-1"));
+            
+            System.out.println("\\nTest Case 2 (Invalid PID - zero):");
+            System.out.println(terminateProcess("0"));
+            
+            System.out.println("\\nTest Case 3 (Invalid format):");
+            System.out.println(terminateProcess("abc"));
+            
+            System.out.println("\\nTest Case 4 (Non-existent PID):");
+            System.out.println(terminateProcess("999999"));
+            
+            System.out.println("\\nTest Case 5 (Empty string):");
+            System.out.println(terminateProcess(""));
         }
     }
 }

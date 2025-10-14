@@ -57,7 +57,7 @@ public class Task40 extends HttpServlet {
     
     private String sanitizeInput(String input) {
         if (input == null) return "";
-        return input.replaceAll("[<>\\"'&]", "");
+        return input.replaceAll("[<>\"'&]", "");
     }
     
     private static String bytesToHex(byte[] bytes) {

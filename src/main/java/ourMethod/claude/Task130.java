@@ -1,62 +1,135 @@
 package ourMethod.claude;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
 
-public class Task130 implements Filter {
-    private static final String ALLOWED_ORIGINS = "https://trusted-domain.com";
-    private static final String ALLOWED_METHODS = "GET, POST, OPTIONS";
-    private static final String ALLOWED_HEADERS = "Content-Type, Authorization";
-    private static final String MAX_AGE = "3600";
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Task130 {
+    private static final Set<String> ALLOWED_ORIGINS = new HashSet<>(Arrays.asList(
+        "https://example.com",
+        "https://app.example.com"
+    ));
     
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // Initialization if needed
-    }
+    private static final Set<String> ALLOWED_METHODS = new HashSet<>(Arrays.asList(
+        "GET", "POST", "OPTIONS"
+    ));
     
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        
-        // Validate origin
-        String origin = httpRequest.getHeader("Origin");
-        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
-            httpResponse.setHeader("Access-Control-Allow-Origin", origin);
-            httpResponse.setHeader("Access-Control-Allow-Methods", ALLOWED_METHODS);
-            httpResponse.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS);
-            httpResponse.setHeader("Access-Control-Max-Age", MAX_AGE);
-            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+    private static final Set<String> ALLOWED_HEADERS = new HashSet<>(Arrays.asList(
+        "Content-Type", "Authorization"
+    ));
+    
+    private static final int MAX_AGE = 3600;
+
+    static class CORSHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String origin = exchange.getRequestHeaders().getFirst("Origin");
+            String method = exchange.getRequestMethod();
+            
+            if (origin != null && origin.length() <= 256) {
+                origin = sanitizeHeader(origin);
+                if (ALLOWED_ORIGINS.contains(origin)) {
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Origin", origin);
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
+                    exchange.getResponseHeaders().set("Vary", "Origin");
+                }
+            }
+            
+            if ("OPTIONS".equals(method)) {
+                handlePreflightRequest(exchange);
+            } else if (ALLOWED_METHODS.contains(method)) {
+                handleActualRequest(exchange, method);
+            } else {
+                sendResponse(exchange, 405, "Method Not Allowed");
+            }
         }
         
-        // Handle preflight requests
-        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
-            httpResponse.setStatus(HttpServletResponse.SC_OK);
-            return;
+        private void handlePreflightRequest(HttpExchange exchange) throws IOException {
+            String requestMethod = exchange.getRequestHeaders().getFirst("Access-Control-Request-Method");
+            String requestHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
+            
+            if (requestMethod != null && requestMethod.length() <= 20) {
+                requestMethod = sanitizeHeader(requestMethod);
+                if (ALLOWED_METHODS.contains(requestMethod)) {
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Methods", 
+                        String.join(", ", ALLOWED_METHODS));
+                }
+            }
+            
+            if (requestHeaders != null && requestHeaders.length() <= 256) {
+                requestHeaders = sanitizeHeader(requestHeaders);
+                String[] headers = requestHeaders.split(",");
+                boolean allAllowed = true;
+                for (String header : headers) {
+                    String trimmed = header.trim();
+                    if (!ALLOWED_HEADERS.contains(trimmed)) {
+                        allAllowed = false;
+                        break;
+                    }
+                }
+                if (allAllowed) {
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Headers", 
+                        String.join(", ", ALLOWED_HEADERS));
+                }
+            }
+            
+            exchange.getResponseHeaders().set("Access-Control-Max-Age", String.valueOf(MAX_AGE));
+            sendResponse(exchange, 204, "");
         }
         
-        chain.doFilter(request, response);
+        private void handleActualRequest(HttpExchange exchange, String method) throws IOException {
+            String response = "{\"status\":\"success\",\"method\":\"" + escapeJson(method) + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            sendResponse(exchange, 200, response);
+        }
+        
+        private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+            byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(statusCode, responseBytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
+            }
+        }
+        
+        private String sanitizeHeader(String header) {
+            if (header == null) {
+                return "";
+            }
+            return header.replaceAll("[^a-zA-Z0-9:/.\\\\-_,\\\\s]", "");
+        }
+        
+        private String escapeJson(String input) {
+            if (input == null) {
+                return "";
+            }
+            return input.replace("\\", "").replace("\"", "\"")
+                       .replace("\\n", "\\\\n")
+                       .replace("\\r", "\\\\r");
+        }
     }
-    
-    @Override
-    public void destroy() {
-        // Cleanup if needed
-    }
-    
-    public static void main(String[] args) {
-        System.out.println("Test cases for CORS implementation:");
-        System.out.println("1. Valid origin request - should allow access");
-        System.out.println("2. Invalid origin request - should deny access");
-        System.out.println("3. Preflight OPTIONS request - should handle properly");
-        System.out.println("4. Request with valid headers - should allow");
-        System.out.println("5. Request with invalid headers - should deny");
+
+    public static void main(String[] args) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        server.createContext("/api/data", new CORSHandler());
+        server.setExecutor(null);
+        server.start();
+        
+        System.out.println("Test Case 1: Server started on port 8080");
+        System.out.println("Test Case 2: Allowed origins: " + ALLOWED_ORIGINS);
+        System.out.println("Test Case 3: Allowed methods: " + ALLOWED_METHODS);
+        System.out.println("Test Case 4: Allowed headers: " + ALLOWED_HEADERS);
+        System.out.println("Test Case 5: Max age: " + MAX_AGE + " seconds");
+        
+        Thread.sleep(5000);
+        server.stop(0);
+        System.out.println("Server stopped");
     }
 }

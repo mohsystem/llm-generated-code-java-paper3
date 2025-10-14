@@ -2,23 +2,31 @@ package ZeroShot.claude;
 
 public class Task58 {
     public static boolean XO(String str) {
-        str = str.toLowerCase();
-        int xCount = 0;
-        int oCount = 0;
-        
-        for(char c : str.toCharArray()) {
-            if(c == 'x') xCount++;
-            if(c == 'o') oCount++;
+        if (str == null) {
+            return true;
         }
         
-        return xCount == oCount;
+        String lowerStr = str.toLowerCase();
+        int countX = 0;
+        int countO = 0;
+        
+        for (int i = 0; i < lowerStr.length(); i++) {
+            char ch = lowerStr.charAt(i);
+            if (ch == 'x') {
+                countX++;
+            } else if (ch == 'o') {
+                countO++;
+            }
+        }
+        
+        return countX == countO;
     }
     
     public static void main(String[] args) {
-        System.out.println(XO("ooxx"));     // true
-        System.out.println(XO("xooxx"));    // false 
-        System.out.println(XO("ooxXm"));    // true
-        System.out.println(XO("zpzpzpp"));  // true
-        System.out.println(XO("zzoo"));     // false
+        System.out.println("Test 1: XO(\"ooxx\") = " + XO("ooxx") + " (expected: true)");
+        System.out.println("Test 2: XO(\"xooxx\") = " + XO("xooxx") + " (expected: false)");
+        System.out.println("Test 3: XO(\"ooxXm\") = " + XO("ooxXm") + " (expected: true)");
+        System.out.println("Test 4: XO(\"zpzpzpp\") = " + XO("zpzpzpp") + " (expected: true)");
+        System.out.println("Test 5: XO(\"zzoo\") = " + XO("zzoo") + " (expected: false)");
     }
 }

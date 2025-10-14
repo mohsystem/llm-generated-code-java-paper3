@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task58 {
 
     public static boolean XO(String str) {

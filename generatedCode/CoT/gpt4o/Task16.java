@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task16 {
     public static boolean solution(String str, String ending) {
         if (str == null || ending == null) return false;

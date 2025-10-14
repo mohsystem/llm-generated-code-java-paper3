@@ -1,4 +1,5 @@
 package ourMethod.gemini;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,90 +10,89 @@ class TreeNode {
 
     TreeNode(int val) {
         this.val = val;
+        this.left = null;
+        this.right = null;
     }
 }
 
 public class Task156 {
 
-    public List<Integer> preorderTraversal(TreeNode root) {
-        List<Integer> result = new ArrayList<>();
-        preorder(root, result);
-        return result;
-    }
-
-    private void preorder(TreeNode node, List<Integer> result) {
-        if (node != null) {
-            result.add(node.val);
-            preorder(node.left, result);
-            preorder(node.right, result);
+    // Preorder traversal: Root -> Left -> Right
+    public static void preorderTraversal(TreeNode root, List<Integer> result) {
+        if (root == null) {
+            return;
         }
+        result.add(root.val);
+        preorderTraversal(root.left, result);
+        preorderTraversal(root.right, result);
     }
 
-
-    public List<Integer> inorderTraversal(TreeNode root) {
-        List<Integer> result = new ArrayList<>();
-        inorder(root, result);
-        return result;
-    }
-
-    private void inorder(TreeNode node, List<Integer> result) {
-        if (node != null) {
-            inorder(node.left, result);
-            result.add(node.val);
-            inorder(node.right, result);
+    // Inorder traversal: Left -> Root -> Right
+    public static void inorderTraversal(TreeNode root, List<Integer> result) {
+        if (root == null) {
+            return;
         }
+        inorderTraversal(root.left, result);
+        result.add(root.val);
+        inorderTraversal(root.right, result);
     }
 
-    public List<Integer> postorderTraversal(TreeNode root) {
-        List<Integer> result = new ArrayList<>();
-        postorder(root, result);
-        return result;
-    }
-
-    private void postorder(TreeNode node, List<Integer> result) {
-        if (node != null) {
-            postorder(node.left, result);
-            postorder(node.right, result);
-            result.add(node.val);
+    // Postorder traversal: Left -> Right -> Root
+    public static void postorderTraversal(TreeNode root, List<Integer> result) {
+        if (root == null) {
+            return;
         }
+        postorderTraversal(root.left, result);
+        postorderTraversal(root.right, result);
+        result.add(root.val);
+    }
+
+    private static void runTestCase(String name, TreeNode root) {
+        System.out.println("--- " + name + " ---");
+        
+        List<Integer> preorderResult = new ArrayList<>();
+        preorderTraversal(root, preorderResult);
+        System.out.println("Preorder:  " + preorderResult);
+
+        List<Integer> inorderResult = new ArrayList<>();
+        inorderTraversal(root, inorderResult);
+        System.out.println("Inorder:   " + inorderResult);
+
+        List<Integer> postorderResult = new ArrayList<>();
+        postorderTraversal(root, postorderResult);
+        System.out.println("Postorder: " + postorderResult);
+        System.out.println();
     }
 
     public static void main(String[] args) {
-        Task156 task = new Task156();
+        // Test Case 1: A balanced binary tree
+        TreeNode root1 = new TreeNode(4);
+        root1.left = new TreeNode(2);
+        root1.right = new TreeNode(7);
+        root1.left.left = new TreeNode(1);
+        root1.left.right = new TreeNode(3);
+        root1.right.left = new TreeNode(6);
+        root1.right.right = new TreeNode(9);
+        runTestCase("Test Case 1: Balanced Tree", root1);
 
-        // Test case 1
-        TreeNode root1 = new TreeNode(1);
-        root1.right = new TreeNode(2);
-        root1.right.left = new TreeNode(3);
-        System.out.println("Preorder: " + task.preorderTraversal(root1));
-        System.out.println("Inorder: " + task.inorderTraversal(root1));
-        System.out.println("Postorder: " + task.postorderTraversal(root1));
+        // Test Case 2: A left-skewed tree
+        TreeNode root2 = new TreeNode(3);
+        root2.left = new TreeNode(2);
+        root2.left.left = new TreeNode(1);
+        runTestCase("Test Case 2: Left-Skewed Tree", root2);
 
-
-        // Test case 2
-        TreeNode root2 = null;
-        System.out.println("Preorder: " + task.preorderTraversal(root2));
-        System.out.println("Inorder: " + task.inorderTraversal(root2));
-        System.out.println("Postorder: " + task.postorderTraversal(root2));
-
-        // Test case 3
+        // Test Case 3: A right-skewed tree
         TreeNode root3 = new TreeNode(1);
-        System.out.println("Preorder: " + task.preorderTraversal(root3));
-        System.out.println("Inorder: " + task.inorderTraversal(root3));
-        System.out.println("Postorder: " + task.postorderTraversal(root3));
+        root3.right = new TreeNode(2);
+        root3.right.right = new TreeNode(3);
+        runTestCase("Test Case 3: Right-Skewed Tree", root3);
+        
+        // Test Case 4: A single node tree
+        TreeNode root4 = new TreeNode(5);
+        runTestCase("Test Case 4: Single Node Tree", root4);
 
-        // Test case 4
-        TreeNode root4 = new TreeNode(1);
-        root4.left = new TreeNode(2);
-        System.out.println("Preorder: " + task.preorderTraversal(root4));
-        System.out.println("Inorder: " + task.inorderTraversal(root4));
-        System.out.println("Postorder: " + task.postorderTraversal(root4));
-
-        // Test case 5
-        TreeNode root5 = new TreeNode(1);
-        root5.right = new TreeNode(2);
-        System.out.println("Preorder: " + task.preorderTraversal(root5));
-        System.out.println("Inorder: " + task.inorderTraversal(root5));
-        System.out.println("Postorder: " + task.postorderTraversal(root5));
+        // Test Case 5: An empty tree
+        TreeNode root5 = null;
+        runTestCase("Test Case 5: Empty Tree", root5);
     }
 }

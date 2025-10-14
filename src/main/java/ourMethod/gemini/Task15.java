@@ -1,38 +1,58 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.Arrays;
 
 public class Task15 {
 
-    public static List<String> towerBuilder(int nFloors) {
-        List<String> tower = new ArrayList<>();
-        int width = 2 * nFloors - 1;
-
-        for (int i = 1; i <= nFloors; i++) {
-            int numStars = 2 * i - 1;
-            int numSpaces = (width - numStars) / 2;
-            StringBuilder floor = new StringBuilder();
-            for (int j = 0; j < numSpaces; j++) {
-                floor.append(" ");
-            }
-            for (int j = 0; j < numStars; j++) {
-                floor.append("*");
-            }
-            for (int j = 0; j < numSpaces; j++) {
-                floor.append(" ");
-            }
-            tower.add(floor.toString());
+    /**
+     * Builds a pyramid-shaped tower.
+     *
+     * @param nFloors The number of floors in the tower (must be positive).
+     * @return An array of strings representing the tower.
+     */
+    public static String[] buildTower(int nFloors) {
+        if (nFloors <= 0) {
+            return new String[0];
         }
+
+        String[] tower = new String[nFloors];
+        int towerWidth = 2 * nFloors - 1;
+
+        for (int i = 0; i < nFloors; i++) {
+            int stars = 2 * i + 1;
+            int padding = (towerWidth - stars) / 2;
+            
+            StringBuilder sb = new StringBuilder(towerWidth);
+            for (int j = 0; j < padding; j++) {
+                sb.append(' ');
+            }
+            for (int j = 0; j < stars; j++) {
+                sb.append('*');
+            }
+            for (int j = 0; j < padding; j++) {
+                sb.append(' ');
+            }
+            tower[i] = sb.toString();
+        }
+
         return tower;
     }
 
-
     public static void main(String[] args) {
-        System.out.println(towerBuilder(1));
-        System.out.println(towerBuilder(2));
-        System.out.println(towerBuilder(3));
-        System.out.println(towerBuilder(4));
-        System.out.println(towerBuilder(6));
-
+        int[] testCases = {1, 3, 6, 0, -5};
+        for (int floors : testCases) {
+            System.out.println("Tower with " + floors + " floors:");
+            String[] tower = buildTower(floors);
+            if (tower.length == 0) {
+                System.out.println("[]");
+            } else {
+                System.out.println("[");
+                for (String floor : tower) {
+                    System.out.println("  \"" + floor + "\"");
+                }
+                System.out.println("]");
+            }
+            System.out.println();
+        }
     }
 }

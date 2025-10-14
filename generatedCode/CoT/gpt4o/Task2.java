@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task2 {
     public static String createPhoneNumber(int[] numbers) {
         if (numbers.length != 10) {

@@ -1,30 +1,87 @@
 package Vanilla.claude;
 
-class Task136 {
-    public static boolean authenticate(String username, String password) {
-        // Hardcoded credentials for demo
-        String[][] validUsers = {
-            {"admin", "admin123"},
-            {"user1", "pass123"},
-            {"john", "doe123"},
-            {"test", "test123"},
-            {"demo", "demo123"}
-        };
-        
-        for(String[] user : validUsers) {
-            if(user[0].equals(username) && user[1].equals(password)) {
-                return true;
-            }
-        }
-        return false;
-    }
+import java.util.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
+class Task136 {
+    private Map<String, String> userDatabase;
+    
+    public Task136() {
+        this.userDatabase = new HashMap<>();
+    }
+    
+    public boolean registerUser(String username, String password) {
+        if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
+            return false;
+        }
+        if (userDatabase.containsKey(username)) {
+            return false;
+        }
+        String hashedPassword = hashPassword(password);
+        userDatabase.put(username, hashedPassword);
+        return true;
+    }
+    
+    public boolean authenticateUser(String username, String password) {
+        if (username == null || password == null || !userDatabase.containsKey(username)) {
+            return false;
+        }
+        String hashedPassword = hashPassword(password);
+        return userDatabase.get(username).equals(hashedPassword);
+    }
+    
+    public boolean deleteUser(String username) {
+        if (username == null || !userDatabase.containsKey(username)) {
+            return false;
+        }
+        userDatabase.remove(username);
+        return true;
+    }
+    
+    public boolean changePassword(String username, String oldPassword, String newPassword) {
+        if (!authenticateUser(username, oldPassword)) {
+            return false;
+        }
+        String hashedPassword = hashPassword(newPassword);
+        userDatabase.put(username, hashedPassword);
+        return true;
+    }
+    
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(authenticate("admin", "admin123")); // true
-        System.out.println(authenticate("user1", "pass123")); // true
-        System.out.println(authenticate("john", "wrong")); // false
-        System.out.println(authenticate("invalid", "test123")); // false
-        System.out.println(authenticate("demo", "demo123")); // true
+        Task136 auth = new Task136();
+        
+        // Test Case 1: Register a new user
+        System.out.println("Test 1 - Register user 'john': " + auth.registerUser("john", "password123"));
+        
+        // Test Case 2: Authenticate with correct credentials
+        System.out.println("Test 2 - Authenticate 'john' with correct password: " + auth.authenticateUser("john", "password123"));
+        
+        // Test Case 3: Authenticate with incorrect credentials
+        System.out.println("Test 3 - Authenticate 'john' with wrong password: " + auth.authenticateUser("john", "wrongpassword"));
+        
+        // Test Case 4: Register duplicate user
+        System.out.println("Test 4 - Register duplicate user 'john': " + auth.registerUser("john", "newpassword"));
+        
+        // Test Case 5: Change password
+        System.out.println("Test 5 - Change password for 'john': " + auth.changePassword("john", "password123", "newpassword123"));
+        System.out.println("Test 5 - Authenticate with new password: " + auth.authenticateUser("john", "newpassword123"));
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;

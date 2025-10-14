@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task18 {
     public static int binaryArrayToInt(int[] binaryArray) {
         int result = 0;

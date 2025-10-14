@@ -1,62 +1,61 @@
 package ZeroShot.gemini;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
 
-@WebServlet("/Task38")
-public class Task38 extends HttpServlet {
+public class Task38 {
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
-
-        String userInput = request.getParameter("userInput");
-
-        out.println("<html>");
-        out.println("<head><title>User Input Display</title></head>");
-        out.println("<body>");
-        if (userInput != null) {
-            out.println("<p>You entered: " + escapeHtml(userInput) + "</p>");
+    /**
+     * Securely escapes user input to prevent Cross-Site Scripting (XSS) and
+     * wraps it in a basic HTML structure for display.
+     *
+     * @param userInput The raw string from the user.
+     * @return A string containing a complete HTML page with the sanitized input.
+     */
+    public static String secureDisplay(String userInput) {
+        if (userInput == null) {
+            userInput = "";
         }
-        out.println("<form method=\"get\">");
-        out.println("<input type=\"text\" name=\"userInput\">");
-        out.println("<input type=\"submit\" value=\"Submit\">");
-        out.println("</form>");
-        out.println("</body></html>");
-
+        StringBuilder sanitizedInput = new StringBuilder();
+        for (int i = 0; i < userInput.length(); i++) {
+            char c = userInput.charAt(i);
+            switch (c) {
+                case '<':
+                    sanitizedInput.append("&lt;");
+                    break;
+                case '>':
+                    sanitizedInput.append("&gt;");
+                    break;
+                case '&':
+                    sanitizedInput.append("&amp;");
+                    break;
+                case '"':
+                    sanitizedInput.append("&quot;");
+                    break;
+                case '\'':
+                    sanitizedInput.append("&#39;");
+                    break;
+                default:
+                    sanitizedInput.append(c);
+                    break;
+            }
+        }
+        return "<html><body><h1>User Input:</h1><p>" + sanitizedInput.toString() + "</p></body></html>";
     }
 
-    private String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;");
+    public static void main(String[] args) {
+        // 5 Test Cases
+        String[] testCases = {
+            "Hello, World!", // Normal input
+            "<script>alert('XSS');</script>", // Malicious script
+            "John & Doe > Company", // Input with special HTML characters
+            "This is a \"quote\".", // Input with quotes
+            "1 < 2 && 3 > 1" // Another input with special characters
+        };
+
+        System.out.println("--- Running Java Test Cases ---");
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("\nTest Case " + (i + 1) + ":");
+            System.out.println("Original Input: " + testCases[i]);
+            String safeHtml = secureDisplay(testCases[i]);
+            System.out.println("Generated Safe HTML: " + safeHtml);
+        }
     }
-
-
-    public static void main(String[] args) throws Exception {
-        // Test cases (These would typically be run in a web server environment)
-        // You could use a testing framework like JUnit for more robust testing
-
-        // Test 1: No input
-        // URL: /Task38
-        // Expected output: Form displayed, no user input shown
-
-        // Test 2: Simple text input
-        // URL: /Task38?userInput=Hello
-        // Expected output: Form displayed, "You entered: Hello" shown
-
-        // Test 3: Input with special characters
-        // URL: /Task38?userInput=<script>alert('XSS')</script>
-        // Expected output: Form displayed, "You entered: &lt;script&gt;alert('XSS')&lt;/script&gt;" shown (XSS prevented)
-
-        // Test 4: Input with HTML tags
-        // URL: /Task38?userInput=<b>bold</b>
-        // Expected output: Form displayed, "You entered: &lt;b&gt;bold&lt;/b&gt;" shown (HTML rendered as text)
-
-        // Test 5: Empty input
-        // URL: /Task38?userInput=
-        // Expected output: Form displayed, "You entered: " shown
-
-    }
-
-
 }

@@ -1,30 +1,41 @@
 package Vanilla.gemini;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-class Task182 {
-    public String cleanPhoneNumber(String phoneNumber) {
-        String cleanedNumber = phoneNumber.replaceAll("[^0-9]", "");
-        if (cleanedNumber.startsWith("1") && cleanedNumber.length() == 11) {
-            return cleanedNumber.substring(1);
+public class Task182 {
+
+    /**
+     * Cleans up user-entered phone numbers.
+     * Removes punctuation and the country code (1) if present.
+     * @param phoneNumber The raw phone number string.
+     * @return A 10-digit phone number string, or an empty string if the input is not a valid NANP number.
+     */
+    public static String cleanPhoneNumber(String phoneNumber) {
+        // Remove all non-digit characters
+        String digits = phoneNumber.replaceAll("[^\\d]", "");
+
+        // Check for country code and length
+        if (digits.length() == 11) {
+            if (digits.startsWith("1")) {
+                return digits.substring(1);
+            }
+        } else if (digits.length() == 10) {
+            return digits;
         }
-        if (cleanedNumber.length() == 10) {
-            return cleanedNumber;
-        }
-        return null; // Or throw an exception, return an empty string, etc.
+
+        // Return empty for invalid formats
+        return "";
     }
 
     public static void main(String[] args) {
-        Task182 task = new Task182();
         String[] testCases = {
-                "+1 (613)-995-0253",
-                "613-995-0253",
-                "1 613 995 0253",
-                "613.995.0253",
-                "1234567890123" // Invalid
+            "+1 (613)-995-0253",
+            "613-995-0253",
+            "1 613 995 0253",
+            "613.995.0253",
+            "(223) 456-7890"
         };
+
         for (String testCase : testCases) {
-            System.out.println(task.cleanPhoneNumber(testCase));
+            System.out.println("Input: \"" + testCase + "\", Output: \"" + cleanPhoneNumber(testCase) + "\"");
         }
     }
 }

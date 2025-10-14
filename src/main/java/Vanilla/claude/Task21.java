@@ -1,50 +1,48 @@
 package Vanilla.claude;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Task21 {
-    public static int[] removeSmallest(int[] numbers) {
-        if (numbers == null || numbers.length == 0) return new int[]{};
+    public static List<Integer> removeSmallest(List<Integer> numbers) {
+        if (numbers == null || numbers.isEmpty()) {
+            return new ArrayList<>();
+        }
         
+        List<Integer> result = new ArrayList<>(numbers);
         int minIndex = 0;
-        for (int i = 1; i < numbers.length; i++) {
-            if (numbers[i] < numbers[minIndex]) {
+        int minValue = numbers.get(0);
+        
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i) < minValue) {
+                minValue = numbers.get(i);
                 minIndex = i;
             }
         }
         
-        int[] result = new int[numbers.length-1];
-        for (int i = 0, j = 0; i < numbers.length; i++) {
-            if (i != minIndex) {
-                result[j++] = numbers[i];
-            }
-        }
+        result.remove(minIndex);
         return result;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println("Test case 1:");
-        int[] arr1 = {1,2,3,4,5};
-        int[] result1 = removeSmallest(arr1);
-        for(int num : result1) System.out.print(num + " ");
+        // Test case 1
+        List<Integer> test1 = new ArrayList<>(List.of(1, 2, 3, 4, 5));
+        System.out.println("Input: " + test1 + ", Output: " + removeSmallest(test1));
         
-        System.out.println("\\nTest case 2:");
-        int[] arr2 = {5,3,2,1,4};
-        int[] result2 = removeSmallest(arr2);
-        for(int num : result2) System.out.print(num + " ");
+        // Test case 2
+        List<Integer> test2 = new ArrayList<>(List.of(5, 3, 2, 1, 4));
+        System.out.println("Input: " + test2 + ", Output: " + removeSmallest(test2));
         
-        System.out.println("\\nTest case 3:");
-        int[] arr3 = {2,2,1,2,1};
-        int[] result3 = removeSmallest(arr3);
-        for(int num : result3) System.out.print(num + " ");
+        // Test case 3
+        List<Integer> test3 = new ArrayList<>(List.of(2, 2, 1, 2, 1));
+        System.out.println("Input: " + test3 + ", Output: " + removeSmallest(test3));
         
-        System.out.println("\\nTest case 4:");
-        int[] arr4 = {};
-        int[] result4 = removeSmallest(arr4);
-        for(int num : result4) System.out.print(num + " ");
+        // Test case 4
+        List<Integer> test4 = new ArrayList<>();
+        System.out.println("Input: " + test4 + ", Output: " + removeSmallest(test4));
         
-        System.out.println("\\nTest case 5:");
-        int[] arr5 = {1};
-        int[] result5 = removeSmallest(arr5);
-        for(int num : result5) System.out.print(num + " ");
+        // Test case 5
+        List<Integer> test5 = new ArrayList<>(List.of(10));
+        System.out.println("Input: " + test5 + ", Output: " + removeSmallest(test5));
     }
 }

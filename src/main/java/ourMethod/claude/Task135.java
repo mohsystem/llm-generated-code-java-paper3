@@ -1,98 +1,206 @@
 package ourMethod.claude;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Task135 {
-    private static final SecureRandom RANDOM = new SecureRandom();
-    private static final Map<String, String> tokenStore = new HashMap<>();
-    
-    // Generate a secure random token
-    public static String generateToken(String sessionId) {
-        byte[] bytes = new byte[32];
-        RANDOM.nextBytes(bytes);
-        String token = Base64.getEncoder().encodeToString(bytes);
-        tokenStore.put(sessionId, token);
+    private static final int TOKEN_LENGTH = 32;
+    private static final long TOKEN_EXPIRY_MS = 3600000; // 1 hour
+    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final Map<String, TokenData> tokenStore = new ConcurrentHashMap<>();
+    private static final byte[] hmacKey = generateSecureKey();
+
+    private static class TokenData {
+        final String sessionId;
+        final long expiryTime;
+
+        TokenData(String sessionId, long expiryTime) {
+            this.sessionId = sessionId;
+            this.expiryTime = expiryTime;
+        }
+    }
+
+    private static byte[] generateSecureKey() {
+        byte[] key = new byte[32];
+        secureRandom.nextBytes(key);
+        return key;
+    }
+
+    public static String generateCSRFToken(String sessionId) {
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Session ID cannot be null or empty");
+        }
+
+        byte[] randomBytes = new byte[TOKEN_LENGTH];
+        secureRandom.nextBytes(randomBytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        long expiryTime = System.currentTimeMillis() + TOKEN_EXPIRY_MS;
+        tokenStore.put(token, new TokenData(sessionId, expiryTime));
+
+        cleanExpiredTokens();
         return token;
     }
-    
-    // Validate the CSRF token
-    public static boolean validateToken(HttpServletRequest request) {
-        String sessionId = request.getSession(false).getId();
-        String storedToken = tokenStore.get(sessionId);
-        String receivedToken = request.getParameter("csrf_token");
-        
-        if (storedToken == null || receivedToken == null) {
+
+    public static boolean validateCSRFToken(String token, String sessionId) {
+        if (token == null || token.trim().isEmpty()) {
             return false;
         }
-        
-        return storedToken.equals(receivedToken);
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            return false;
+        }
+
+        TokenData data = tokenStore.get(token);
+        if (data == null) {
+            return false;
+        }
+
+        if (System.currentTimeMillis() > data.expiryTime) {
+            tokenStore.remove(token);
+            return false;
+        }
+
+        boolean isValid = constantTimeEquals(data.sessionId, sessionId);
+        if (isValid) {
+            tokenStore.remove(token);
+        }
+
+        return isValid;
     }
-    
-    // Set CSRF cookie with secure attributes
-    public static void setCSRFCookie(HttpServletResponse response, String token) {
-        Cookie csrfCookie = new Cookie("CSRF-TOKEN", token);
-        csrfCookie.setHttpOnly(true);
-        csrfCookie.setSecure(true);
-        //todo cannot find symbol method setSameSite(String)
-//        csrfCookie.setSameSite("Strict");
-        csrfCookie.setPath("/");
-        response.addCookie(csrfCookie);
+
+    public static String generateHMACToken(String sessionId, String action) {
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Session ID cannot be null or empty");
+        }
+        if (action == null || action.trim().isEmpty()) {
+            throw new IllegalArgumentException("Action cannot be null or empty");
+        }
+
+        try {
+            long timestamp = System.currentTimeMillis();
+            String message = sessionId + ":" + action + ":" + timestamp;
+
+            Mac hmac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(hmacKey, "HmacSHA256");
+            hmac.init(secretKey);
+
+            byte[] hash = hmac.doFinal(message.getBytes(StandardCharsets.UTF_8));
+            String signature = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+
+            return signature + ":" + timestamp;
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException("HMAC generation failed", e);
+        }
     }
-    
-//    public static void main(String[] args) {
-//        // Test cases
-//        class MockHttpSession implements HttpSession {
-//            private String id;
-//            public MockHttpSession(String id) { this.id = id; }
-//            public String getId() { return id; }
-//            // Other required methods would be implemented here
-//        }
-//
-//        class MockHttpServletRequest {
-//            private HttpSession session;
-//            private String token;
-//            public MockHttpServletRequest(HttpSession session, String token) {
-//                this.session = session;
-//                this.token = token;
-//            }
-//            public HttpSession getSession(boolean create) { return session; }
-//            public String getParameter(String name) { return token; }
-//        }
-//
-//        // Test Case 1: Generate and validate valid token
-//        String sessionId1 = "session1";
-//        String token1 = generateToken(sessionId1);
-//        MockHttpServletRequest request1 = new MockHttpServletRequest(
-//            new MockHttpSession(sessionId1), token1);
-//        System.out.println("Test 1 - Valid token: " + validateToken(request1));
-//
-//        // Test Case 2: Invalid token
-//        MockHttpServletRequest request2 = new MockHttpServletRequest(
-//            new MockHttpSession(sessionId1), "invalid_token");
-//        System.out.println("Test 2 - Invalid token: " + validateToken(request2));
-//
-//        // Test Case 3: Missing token
-//        MockHttpServletRequest request3 = new MockHttpServletRequest(
-//            new MockHttpSession(sessionId1), null);
-//        System.out.println("Test 3 - Missing token: " + validateToken(request3));
-//
-//        // Test Case 4: Different session
-//        String sessionId2 = "session2";
-//        String token2 = generateToken(sessionId2);
-//        MockHttpServletRequest request4 = new MockHttpServletRequest(
-//            new MockHttpSession(sessionId1), token2);
-//        System.out.println("Test 4 - Wrong session: " + validateToken(request4));
-//
-//        // Test Case 5: Generate multiple tokens
-//        String token3 = generateToken(sessionId1);
-//        String token4 = generateToken(sessionId1);
-//        System.out.println("Test 5 - Tokens different: " + !token3.equals(token4));
-//    }
+
+    public static boolean validateHMACToken(String token, String sessionId, String action) {
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            return false;
+        }
+        if (action == null || action.trim().isEmpty()) {
+            return false;
+        }
+
+        String[] parts = token.split(":");
+        if (parts.length != 2) {
+            return false;
+        }
+
+        try {
+            String providedSignature = parts[0];
+            long timestamp = Long.parseLong(parts[1]);
+
+            if (System.currentTimeMillis() - timestamp > TOKEN_EXPIRY_MS) {
+                return false;
+            }
+
+            String message = sessionId + ":" + action + ":" + timestamp;
+            Mac hmac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(hmacKey, "HmacSHA256");
+            hmac.init(secretKey);
+
+            byte[] hash = hmac.doFinal(message.getBytes(StandardCharsets.UTF_8));
+            String expectedSignature = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+
+            return constantTimeEquals(providedSignature, expectedSignature);
+        } catch (NumberFormatException | NoSuchAlgorithmException | InvalidKeyException e) {
+            return false;
+        }
+    }
+
+    private static boolean constantTimeEquals(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+            a.getBytes(StandardCharsets.UTF_8),
+            b.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
+    private static void cleanExpiredTokens() {
+        long currentTime = System.currentTimeMillis();
+        tokenStore.entrySet().removeIf(entry -> currentTime > entry.getValue().expiryTime);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("CSRF Protection Implementation Test Cases\\n");
+
+        // Test Case 1: Generate and validate token
+        System.out.println("Test 1: Generate and validate CSRF token");
+        String sessionId1 = "session123";
+        String token1 = generateCSRFToken(sessionId1);
+        System.out.println("Generated token: " + token1);
+        boolean valid1 = validateCSRFToken(token1, sessionId1);
+        System.out.println("Validation result: " + valid1);
+        System.out.println();
+
+        // Test Case 2: Invalid session ID
+        System.out.println("Test 2: Validate with wrong session ID");
+        String sessionId2 = "session456";
+        String token2 = generateCSRFToken(sessionId2);
+        boolean valid2 = validateCSRFToken(token2, "wrongSession");
+        System.out.println("Validation result (should be false): " + valid2);
+        System.out.println();
+
+        // Test Case 3: Token reuse protection
+        System.out.println("Test 3: Token reuse protection");
+        String sessionId3 = "session789";
+        String token3 = generateCSRFToken(sessionId3);
+        boolean firstUse = validateCSRFToken(token3, sessionId3);
+        boolean secondUse = validateCSRFToken(token3, sessionId3);
+        System.out.println("First use: " + firstUse);
+        System.out.println("Second use (should be false): " + secondUse);
+        System.out.println();
+
+        // Test Case 4: HMAC-based token generation and validation
+        System.out.println("Test 4: HMAC-based CSRF token");
+        String sessionId4 = "sessionABC";
+        String action4 = "deleteAccount";
+        String hmacToken = generateHMACToken(sessionId4, action4);
+        System.out.println("Generated HMAC token: " + hmacToken);
+        boolean validHMAC = validateHMACToken(hmacToken, sessionId4, action4);
+        System.out.println("HMAC validation result: " + validHMAC);
+        System.out.println();
+
+        // Test Case 5: HMAC token with wrong action
+        System.out.println("Test 5: HMAC token with wrong action");
+        String sessionId5 = "sessionXYZ";
+        String action5 = "updateProfile";
+        String hmacToken5 = generateHMACToken(sessionId5, action5);
+        boolean validHMAC5 = validateHMACToken(hmacToken5, sessionId5, "wrongAction");
+        System.out.println("HMAC validation result (should be false): " + validHMAC5);
+    }
 }

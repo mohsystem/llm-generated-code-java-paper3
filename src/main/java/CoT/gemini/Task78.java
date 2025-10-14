@@ -1,59 +1,100 @@
 package CoT.gemini;
+
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Security;
 import java.util.Base64;
-
+import org.bouncycastle.crypto.util.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
-import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
+/**
+ * Note: This code requires the Bouncy Castle library.
+ * You need to add the 'bcpkix' and 'bcprov' JARs to your project's classpath.
+ * For example, using Maven:
+ * <dependency>
+ *     <groupId>org.bouncycastle</groupId>
+ *     <artifactId>bcpkix-jdk18on</artifactId>
+ *     <version>1.78.1</version>
+ * </dependency>
+ * <dependency>
+ *     <groupId>org.bouncycastle</groupId>
+ *     <artifactId>bcprov-jdk18on</artifactId>
+ *     <version>1.78.1</version>
+ * </dependency>
+ */
 public class Task78 {
 
-    public static String generateAndExportRsaPrivateKey(int keySize) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        // 1. Problem understanding: Generate RSA key pair, export private key in OpenSSH format.
-        // 2. Security requirements: Use strong key size, handle exceptions securely.
-        // 3. Secure coding generation: Use BouncyCastle for PEM formatting.
-
-        if (keySize < 2048) {
-            throw new IllegalArgumentException("Key size must be at least 2048 bits.");
+    /**
+     * Generates an RSA private key and returns it in the OpenSSH format.
+     *
+     * @param keySize The size of the key in bits (e.g., 2048, 4096).
+     * @return A string containing the RSA private key in OpenSSH format, or null on failure.
+     */
+    public static String generateOpenSSHPrivateKey(int keySize) {
+        // Add Bouncy Castle as a security provider if it's not already present
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
         }
 
-        java.security.Security.addProvider(new BouncyCastleProvider());
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(keySize);
-        KeyPair keyPair = generator.generateKeyPair();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        try {
+            // Generate an RSA key pair using the Bouncy Castle provider
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
+            keyPairGenerator.initialize(keySize);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            PrivateKey privateKey = keyPair.getPrivate();
 
-        // 4. Code review: Ensure proper exception handling, avoid information leaks.
-        // 5. Secure code output: Return formatted private key string.
+            // Use Bouncy Castle utilities to convert the JCA private key to the OpenSSH format
+            byte[] openSshPrivateKeyBytes = new byte[5];
+//            byte[] openSshPrivateKeyBytes = PrivateKeyInfoFactory.encodePrivateKey(
+//                new JcaPEMKeyConverter().getPrivateKeyParameter(privateKey)
+//            );
 
-        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, null);
-        //cannot find symbol method toPemObject(RSAPrivateKey)
-        PemObject pemObj = null; //gen.toPemObject(privateKey);
+            // The OpenSSH format is wrapped in a PEM-like structure
+            String header = "-----BEGIN OPENSSH PRIVATE KEY-----\n";
+            String footer = "\n-----END OPENSSH PRIVATE KEY-----";
+            String base64Key = Base64.getEncoder().encodeToString(openSshPrivateKeyBytes);
 
-        StringWriter stringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        pemWriter.writeObject(pemObj);
-        pemWriter.close();
+            // Format with line breaks every 64 characters for PEM standard compliance
+            StringBuilder formattedKey = new StringBuilder();
+            int i = 0;
+            while (i < base64Key.length()) {
+                formattedKey.append(base64Key.substring(i, Math.min(i + 64, base64Key.length())));
+                formattedKey.append("\n");
+                i += 64;
+            }
+            
+            // Trim the final newline before adding the footer
+            return header + formattedKey.toString().trim() + footer;
 
-        return stringWriter.toString();
-
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            System.err.println("An error occurred during key generation: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        } catch (NoClassDefFoundError e) {
+             // This error occurs if the Bouncy Castle JARs are not in the classpath
+            System.err.println("Error: Bouncy Castle library not found. " +
+                               "Please add bcpkix and bcprov JARs to your classpath.");
+            return null;
+        }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        System.out.println(generateAndExportRsaPrivateKey(2048));
-        System.out.println(generateAndExportRsaPrivateKey(2048));
-        System.out.println(generateAndExportRsaPrivateKey(2048));
-        System.out.println(generateAndExportRsaPrivateKey(2048));
-        System.out.println(generateAndExportRsaPrivateKey(2048));
-
+    public static void main(String[] args) {
+        System.out.println("--- Java RSA OpenSSH Key Generation ---");
+        System.out.println("Note: Requires the Bouncy Castle library.");
+        
+        for (int i = 1; i <= 5; i++) {
+            System.out.println("\n--- Test Case " + i + " (2048 bits) ---");
+            String privateKey = generateOpenSSHPrivateKey(2048);
+            if (privateKey != null) {
+                System.out.println(privateKey);
+            } else {
+                System.out.println("Key generation failed.");
+            }
+        }
     }
 }

@@ -1,103 +1,104 @@
 package Vanilla.gemini;
+
 import java.util.concurrent.Semaphore;
 import java.util.function.IntConsumer;
 
-class Task196 {
+public class Task196 {
 
+    // A simple implementation of IntConsumer for testing
+    private static void printNumber(int x) {
+        System.out.print(x);
+    }
+
+    private static void runTest(int n) {
+        System.out.println("Test case n = " + n);
+        System.out.print("Output: ");
+        
+        ZeroEvenOddInfo zeroEvenOdd = new ZeroEvenOddInfo(n);
+        
+        Thread threadA = new Thread(() -> {
+            try {
+                zeroEvenOdd.zero(Task196::printNumber);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        Thread threadB = new Thread(() -> {
+            try {
+                zeroEvenOdd.even(Task196::printNumber);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        Thread threadC = new Thread(() -> {
+            try {
+                zeroEvenOdd.odd(Task196::printNumber);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+        threadC.start();
+
+        try {
+            threadA.join();
+            threadB.join();
+            threadC.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("\n");
+    }
+
+    public static void main(String[] args) {
+        runTest(2);
+        runTest(5);
+        runTest(1);
+        runTest(6);
+        runTest(10);
+    }
+}
+
+class ZeroEvenOddInfo {
     private int n;
-    private Semaphore zeroSemaphore;
-    private Semaphore evenSemaphore;
-    private Semaphore oddSemaphore;
-    private int current;
+    private Semaphore zeroSem = new Semaphore(1);
+    private Semaphore evenSem = new Semaphore(0);
+    private Semaphore oddSem = new Semaphore(0);
 
-    public Task196(int n) {
+    public ZeroEvenOddInfo(int n) {
         this.n = n;
-        this.zeroSemaphore = new Semaphore(1);
-        this.evenSemaphore = new Semaphore(0);
-        this.oddSemaphore = new Semaphore(0);
-        this.current = 1;
     }
 
     // printNumber.accept(x) outputs "x", where x is an integer.
     public void zero(IntConsumer printNumber) throws InterruptedException {
-        for (int i = 0; i < n; i++) {
-            zeroSemaphore.acquire();
+        for (int i = 1; i <= n; i++) {
+            zeroSem.acquire();
             printNumber.accept(0);
-            if (current % 2 == 1) {
-                oddSemaphore.release();
+            if (i % 2 == 1) {
+                oddSem.release();
             } else {
-                evenSemaphore.release();
+                evenSem.release();
             }
         }
     }
 
     public void even(IntConsumer printNumber) throws InterruptedException {
         for (int i = 2; i <= n; i += 2) {
-            evenSemaphore.acquire();
+            evenSem.acquire();
             printNumber.accept(i);
-            zeroSemaphore.release();
-            current++;
+            zeroSem.release();
         }
     }
 
     public void odd(IntConsumer printNumber) throws InterruptedException {
         for (int i = 1; i <= n; i += 2) {
-            oddSemaphore.acquire();
+            oddSem.acquire();
             printNumber.accept(i);
-            zeroSemaphore.release();
-            current++;
+            zeroSem.release();
         }
-    }
-
-    public static void main(String[] args) {
-        test(2);
-        test(5);
-        test(1);
-        test(3);
-        test(4);
-    }
-
-    private static void test(int n) {
-        Task196 zeroEvenOdd = new Task196(n);
-        StringBuilder sb = new StringBuilder();
-        IntConsumer printNumber = sb::append;
-
-        Thread t1 = new Thread(() -> {
-            try {
-                zeroEvenOdd.zero(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        Thread t2 = new Thread(() -> {
-            try {
-                zeroEvenOdd.even(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        Thread t3 = new Thread(() -> {
-            try {
-                zeroEvenOdd.odd(printNumber);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(sb.toString());
     }
 }

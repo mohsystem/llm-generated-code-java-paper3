@@ -1,78 +1,120 @@
 package ourMethod.claude;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 class Task187 {
-    private Semaphore hydrogenSemaphore = new Semaphore(2);
-    private Semaphore oxygenSemaphore = new Semaphore(1);
-    private Semaphore barrier = new Semaphore(0);
-    private volatile int hydrogenCount = 0;
-    private final Object lock = new Object();
-    private StringBuilder result = new StringBuilder();
+    private Semaphore hSem;
+    private Semaphore oSem;
+    private ReentrantLock lock;
+    private int hCount;
+    private int oCount;
+    private StringBuilder result;
 
-    public void hydrogen() throws InterruptedException {
-        hydrogenSemaphore.acquire();
-        synchronized(lock) {
-            hydrogenCount++;
-            result.append("H");
-            if (hydrogenCount == 2) {
-                hydrogenCount = 0;
-                barrier.release();
+    public Task187() {
+        hSem = new Semaphore(2);
+        oSem = new Semaphore(1);
+        lock = new ReentrantLock();
+        hCount = 0;
+        oCount = 0;
+        result = new StringBuilder();
+    }
+
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        hSem.acquire();
+        lock.lock();
+        try {
+            releaseHydrogen.run();
+            hCount++;
+            if (hCount == 2 && oCount == 1) {
+                hCount = 0;
+                oCount = 0;
+                oSem.release();
+                hSem.release(2);
             }
+        } finally {
+            lock.unlock();
         }
-        barrier.acquire();
-        hydrogenSemaphore.release();
     }
 
-    public void oxygen() throws InterruptedException {
-        oxygenSemaphore.acquire();
-        result.append("O");
-        barrier.release();
-        barrier.acquire();
-        oxygenSemaphore.release();
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        oSem.acquire();
+        lock.lock();
+        try {
+            releaseOxygen.run();
+            oCount++;
+            if (hCount == 2 && oCount == 1) {
+                hCount = 0;
+                oCount = 0;
+                oSem.release();
+                hSem.release(2);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public String buildWater(String water) throws InterruptedException {
+    public String processWater(String water) {
+        if (water == null || water.length() == 0 || water.length() % 3 != 0) {
+            return "";
+        }
+        
         result = new StringBuilder();
         Thread[] threads = new Thread[water.length()];
         
         for (int i = 0; i < water.length(); i++) {
-            final int index = i;
-            if (water.charAt(i) == 'H') {
-                threads[i] = new Thread(() -> {
-                    try {
-                        hydrogen();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-            } else {
-                threads[i] = new Thread(() -> {
-                    try {
-                        oxygen();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
+            final char c = water.charAt(i);
+            if (c != 'H' && c != 'O') {
+                return "";
             }
+            
+            threads[i] = new Thread(() -> {
+                try {
+                    if (c == 'H') {
+                        hydrogen(() -> {
+                            synchronized (result) {
+                                result.append('H');
+                            }
+                        });
+                    } else {
+                        oxygen(() -> {
+                            synchronized (result) {
+                                result.append('O');
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
             threads[i].start();
         }
-
+        
         for (Thread thread : threads) {
-            thread.join();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
         
         return result.toString();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        Task187 task = new Task187();
-        String[] testCases = {"HOH", "OOHHHH", "HOHHHO", "OHHHHO", "HHOHOH"};
+    public static void main(String[] args) {
+        Task187 t1 = new Task187();
+        System.out.println("Test 1: " + t1.processWater("HOH"));
         
-        for (String test : testCases) {
-            System.out.println("Input: " + test);
-            System.out.println("Output: " + task.buildWater(test));
-            System.out.println();
-        }
+        Task187 t2 = new Task187();
+        System.out.println("Test 2: " + t2.processWater("OOHHHH"));
+        
+        Task187 t3 = new Task187();
+        System.out.println("Test 3: " + t3.processWater("HHHOOO"));
+        
+        Task187 t4 = new Task187();
+        System.out.println("Test 4: " + t4.processWater("HHO"));
+        
+        Task187 t5 = new Task187();
+        System.out.println("Test 5: " + t5.processWater("HHHHHHOOO"));
     }
 }

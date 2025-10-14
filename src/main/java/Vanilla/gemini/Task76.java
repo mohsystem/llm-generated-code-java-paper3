@@ -1,44 +1,72 @@
 package Vanilla.gemini;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Task76 {
 
-    public static String extractTitle(String httpsUrl) throws Exception {
-        URL url = new URL(httpsUrl);
-        URLConnection connection = url.openConnection();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        StringBuilder htmlContent = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            htmlContent.append(line);
-        }
-        reader.close();
+    /**
+     * Fetches the content of a URL and extracts the page title from the HTML.
+     *
+     * @param urlString The HTTPS URL to fetch.
+     * @return The extracted page title, or an error/not found message.
+     */
+    public static String getPageTitle(String urlString) {
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
 
-        Pattern titlePattern = Pattern.compile("<title>(.*?)</title>");
-        Matcher matcher = titlePattern.matcher(htmlContent.toString());
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        } else {
-            return "Title not found";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlString))
+                    .header("User-Agent", "Mozilla/5.0 (Java HttpClient)")
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String html = response.body();
+
+            // Use regex to find the title tag. Case-insensitive and dotall mode.
+            Pattern pattern = Pattern.compile("<title.*?>(.*?)</title>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(html);
+
+            if (matcher.find()) {
+                // The first capturing group contains the title text.
+                return matcher.group(1).trim();
+            } else {
+                return "Title not found.";
+            }
+        } catch (Exception e) {
+            return "Error fetching URL: " + e.getMessage();
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        String url1 = "https://www.example.com";
-        String url2 = "https://www.google.com";
-        String url3 = "https://www.amazon.com";
-        String url4 = "https://www.wikipedia.org";
-        String url5 = "https://www.youtube.com";
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            System.out.println("Processing URL from command line: " + args[0]);
+            String title = getPageTitle(args[0]);
+            System.out.println("Title: " + title);
+            System.out.println("\n--- Running built-in test cases ---");
+        }
 
-        System.out.println("Title for " + url1 + ": " + extractTitle(url1));
-        System.out.println("Title for " + url2 + ": " + extractTitle(url2));
-        System.out.println("Title for " + url3 + ": " + extractTitle(url3));
-        System.out.println("Title for " + url4 + ": " + extractTitle(url4));
-        System.out.println("Title for " + url5 + ": " + extractTitle(url5));
+        String[] testUrls = {
+            "https://www.google.com",
+            "https://github.com",
+            "https://www.oracle.com/java/",
+            "https://www.python.org",
+            "https://isocpp.org"
+        };
+
+        for (String url : testUrls) {
+            System.out.println("Fetching title for: " + url);
+            String title = getPageTitle(url);
+            System.out.println("-> Title: " + title);
+            System.out.println();
+        }
     }
 }

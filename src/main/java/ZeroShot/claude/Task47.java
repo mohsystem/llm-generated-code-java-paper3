@@ -3,58 +3,115 @@ package ZeroShot.claude;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import java.util.*;
+import java.util.regex.*;
 
 public class Task47 {
-    public static void scrapeAndStore(String url, String dbPath) {
+    private static final String DB_URL = "jdbc:sqlite:scraped_data.db";
+    
+    public static void scrapeAndStore(String url, String tableName) {
         try {
-            // Input validation
-            if (url == null || url.isEmpty() || !url.startsWith("http")) {
-                throw new IllegalArgumentException("Invalid URL");
+            // Validate URL
+            if (!isValidUrl(url)) {
+                System.out.println("Invalid URL provided");
+                return;
             }
             
-            // Connect to website with timeout and user-agent
-            Document doc = Jsoup.connect(url)
-                              .timeout(5000)
-                              .userAgent("Mozilla/5.0")
-                              .get();
+            // Initialize database
+            initializeDatabase(tableName);
             
-            String title = doc.title();
-            String content = doc.body().text();
+            // Scrape data
+            String content = scrapeWebsite(url);
             
-            // SQL injection prevention using prepared statement
-            String dbUrl = "jdbc:sqlite:" + dbPath;
-            try (Connection conn = DriverManager.getConnection(dbUrl)) {
-                // Create table if not exists
-                String createTable = "CREATE TABLE IF NOT EXISTS scraped_data " +
-                                   "(id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                   "url TEXT NOT NULL, title TEXT, content TEXT)";
-                                   
-                PreparedStatement createStmt = conn.prepareStatement(createTable);
-                createStmt.execute();
-                
-                // Insert data
-                String insertQuery = "INSERT INTO scraped_data (url, title, content) VALUES (?, ?, ?)";
-                PreparedStatement pstmt = conn.prepareStatement(insertQuery);
-                pstmt.setString(1, url);
-                pstmt.setString(2, title);
-                pstmt.setString(3, content);
-                pstmt.executeUpdate();
-            }
-        } catch (IOException e) {
-            System.err.println("Error scraping website: " + e.getMessage());
-        } catch (SQLException e) {
-            System.err.println("Database error: " + e.getMessage());
+            // Store in database
+            storeData(tableName, url, content);
+            
+            System.out.println("Data scraped and stored successfully");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
-
+    
+    private static boolean isValidUrl(String url) {
+        try {
+            new URL(url);
+            return url.startsWith("http://") || url.startsWith("https://");
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+    
+    private static void initializeDatabase(String tableName) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement()) {
+            
+            String sql = "CREATE TABLE IF NOT EXISTS " + sanitizeTableName(tableName) + 
+                        " (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "url TEXT NOT NULL, " +
+                        "content TEXT, " +
+                        "scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+            stmt.execute(sql);
+        }
+    }
+    
+    private static String sanitizeTableName(String name) {
+        return name.replaceAll("[^a-zA-Z0-9_]", "_");
+    }
+    
+    private static String scrapeWebsite(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+        
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\\n");
+            }
+        }
+        
+        return content.toString();
+    }
+    
+    private static void storeData(String tableName, String url, String content) 
+            throws SQLException {
+        String sql = "INSERT INTO " + sanitizeTableName(tableName) + 
+                    " (url, content) VALUES (?, ?)";
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, url);
+            pstmt.setString(2, content);
+            pstmt.executeUpdate();
+        }
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        scrapeAndStore("https://example.com", "scraper.db");
-        scrapeAndStore("https://opensource.org", "scraper.db");
-        scrapeAndStore("https://apache.org", "scraper.db");
-        scrapeAndStore("https://github.com", "scraper.db");
-        scrapeAndStore("https://wikipedia.org", "scraper.db");
+        System.out.println("=== Web Scraper Test Cases ===\\n");
+        
+        // Test Case 1: Valid URL
+        System.out.println("Test 1: Scraping example.com");
+        scrapeAndStore("http://example.com", "test_data");
+        
+        // Test Case 2: Invalid URL
+        System.out.println("\\nTest 2: Invalid URL");
+        scrapeAndStore("invalid-url", "test_data");
+        
+        // Test Case 3: HTTPS URL
+        System.out.println("\\nTest 3: HTTPS URL");
+        scrapeAndStore("https://example.com", "secure_data");
+        
+        // Test Case 4: Different table name
+        System.out.println("\\nTest 4: Different table");
+        scrapeAndStore("http://example.com", "website_content");
+        
+        // Test Case 5: Special characters in table name
+        System.out.println("\\nTest 5: Table name sanitization");
+        scrapeAndStore("http://example.com", "data-table-2024");
     }
 }

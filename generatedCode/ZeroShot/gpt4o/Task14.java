@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task14 {
     public static int findEqualIndex(int[] arr) {
         int totalSum = 0, leftSum = 0;

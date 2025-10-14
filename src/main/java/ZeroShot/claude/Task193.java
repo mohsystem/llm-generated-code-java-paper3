@@ -1,28 +1,28 @@
 package ZeroShot.claude;
 
-class Task193 {
+public class Task193 {
     public static boolean xorGame(int[] nums) {
-        if (nums.length % 2 == 0) return true;
-        
         int xor = 0;
         for (int num : nums) {
             xor ^= num;
         }
-        return xor == 0;
+        return xor == 0 || nums.length % 2 == 0;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        int[][] testCases = {
-            {1, 1, 2},
-            {0, 1},
-            {1, 2, 3},
-            {1, 2, 3, 4},
-            {0, 0, 0}
-        };
+        // Test case 1
+        System.out.println(xorGame(new int[]{1, 1, 2})); // false
         
-        for (int i = 0; i < testCases.length; i++) {
-            System.out.println("Test case " + (i + 1) + ": " + xorGame(testCases[i]));
-        }
+        // Test case 2
+        System.out.println(xorGame(new int[]{0, 1})); // true
+        
+        // Test case 3
+        System.out.println(xorGame(new int[]{1, 2, 3})); // true
+        
+        // Test case 4
+        System.out.println(xorGame(new int[]{1})); // true
+        
+        // Test case 5
+        System.out.println(xorGame(new int[]{2, 2, 2, 2})); // true
     }
 }

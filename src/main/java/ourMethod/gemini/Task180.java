@@ -1,79 +1,91 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class Task180 {
 
-    public static Map<Integer, List<Integer>> reparentTree(Map<Integer, List<Integer>> tree, int newRoot) {
-        Map<Integer, List<Integer>> newTree = new HashMap<>();
-        Map<Integer, Integer> parentMap = new HashMap<>();
-
-        // Build parent map using DFS
-        buildParentMap(tree, 0, -1, parentMap);
-
-
-        if (!parentMap.containsKey(newRoot)) {
-            return tree; // Or throw exception if newRoot is invalid
-        }
-
-        // Build new tree using parent map
-        buildNewTree(newTree, parentMap, newRoot, -1);
+    /**
+     * Reparents a tree on the given newRoot node.
+     *
+     * @param adjacencyList An adjacency list representing the undirected tree.
+     * @param newRoot       The ID of the node to become the new root.
+     * @return A map representing the new directed tree (parent -> children),
+     *         ordered by a pre-order traversal from the new root.
+     */
+    public static Map<Integer, List<Integer>> reparentTree(Map<Integer, List<Integer>> adjacencyList, int newRoot) {
+        // LinkedHashMap preserves the insertion order, which will be a pre-order traversal.
+        Map<Integer, List<Integer>> newTree = new LinkedHashMap<>();
+        buildNewTreeDfs(newRoot, -1, adjacencyList, newTree);
         return newTree;
     }
 
+    private static void buildNewTreeDfs(int currentNode, int parentNode,
+                                        Map<Integer, List<Integer>> oldAdj,
+                                        Map<Integer, List<Integer>> newTree) {
+        
+        newTree.put(currentNode, new ArrayList<>());
 
-    private static void buildParentMap(Map<Integer, List<Integer>> tree, int node, int parent, Map<Integer, Integer> parentMap) {
-        parentMap.put(node, parent);
-        if (!tree.containsKey(node)) return;
+        if (!oldAdj.containsKey(currentNode)) {
+            return;
+        }
 
-        for (int child : tree.get(node)) {
-            if (child != parent) {
-                buildParentMap(tree, child, node, parentMap);
+        List<Integer> neighbors = new ArrayList<>(oldAdj.get(currentNode));
+        Collections.sort(neighbors); // Sort for deterministic output
+
+        for (int neighbor : neighbors) {
+            if (neighbor != parentNode) {
+                newTree.get(currentNode).add(neighbor);
+                buildNewTreeDfs(neighbor, currentNode, oldAdj, newTree);
             }
         }
     }
 
-    private static void buildNewTree(Map<Integer, List<Integer>> newTree, Map<Integer, Integer> parentMap, int node, int parent) {
-        newTree.putIfAbsent(node, new ArrayList<>());
-        if (parent != -1) {
-            newTree.get(node).add(parent);
-        }
+    // --- Test Cases ---
+    public static void main(String[] args) {
+        runTestCase(1, "Example from prompt",
+            new int[][]{{0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {2, 6}, {2, 7}, {3, 8}, {3, 9}}, 6);
+        runTestCase(2, "Simple line graph",
+            new int[][]{{0, 1}, {1, 2}, {2, 3}, {3, 4}}, 2);
+        runTestCase(3, "Star graph, reparent on root",
+            new int[][]{{0, 1}, {0, 2}, {0, 3}, {0, 4}}, 0);
+        runTestCase(4, "Star graph, reparent on a leaf",
+            new int[][]{{0, 1}, {0, 2}, {0, 3}, {0, 4}}, 3);
+        runTestCase(5, "A more complex tree",
+            new int[][]{{1, 2}, {1, 3}, {1, 4}, {2, 5}, {2, 6}, {4, 7}, {4, 8}}, 4);
+    }
 
-        int originalParent = parentMap.get(node);
-        if (originalParent != -1 && originalParent != parent) {
-            buildNewTree(newTree, parentMap, originalParent, node);
-        }
+    private static void runTestCase(int testNum, String description, int[][] edges, int newRoot) {
+        System.out.println("--- Test Case " + testNum + ": " + description + " ---");
 
-        if (!parentMap.containsKey(node)) return;
-        for (Map.Entry<Integer,Integer> entry : parentMap.entrySet()) {
-            if (entry.getValue() == node && entry.getKey() != parent && entry.getKey() != originalParent)
-                buildNewTree(newTree, parentMap, entry.getKey(), node);
+        Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
+        buildAdjList(adjacencyList, edges);
+        
+        System.out.println("Reparenting on node: " + newRoot);
+
+        Map<Integer, List<Integer>> reparentedTree = reparentTree(adjacencyList, newRoot);
+        System.out.println("Reparented Tree (Parent -> Children):");
+        printMap(reparentedTree);
+        System.out.println();
+    }
+
+    private static void buildAdjList(Map<Integer, List<Integer>> adj, int[][] edges) {
+        Set<Integer> nodes = new HashSet<>();
+        for (int[] edge : edges) {
+            nodes.add(edge[0]);
+            nodes.add(edge[1]);
+        }
+        for (int node : nodes) {
+            adj.put(node, new ArrayList<>());
+        }
+        for (int[] edge : edges) {
+            adj.get(edge[0]).add(edge[1]);
+            adj.get(edge[1]).add(edge[0]);
         }
     }
 
-
-    public static void main(String[] args) {
-        // Test cases
-        Map<Integer, List<Integer>> tree1 = new HashMap<>();
-        tree1.put(0, List.of(1, 2, 3));
-        tree1.put(1, List.of(4, 5));
-        tree1.put(2, List.of(6, 7));
-        tree1.put(3, List.of(8, 9));
-
-        System.out.println(reparentTree(tree1, 6));
-        System.out.println(reparentTree(tree1, 0));
-        System.out.println(reparentTree(tree1, 9));
-
-
-
-        Map<Integer, List<Integer>> tree2 = new HashMap<>();
-        tree2.put(1, List.of(2, 3));
-        tree2.put(2, List.of(4));
-
-        System.out.println(reparentTree(tree2, 4));
-        System.out.println(reparentTree(tree2, 1));
-
+    private static void printMap(Map<Integer, List<Integer>> map) {
+        for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + " -> " + entry.getValue());
+        }
     }
 }

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task144 {
 
     public static int[] mergeSortedArrays(int[] arr1, int[] arr2) {

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task51 {
     public static String encrypt(String input) {
         StringBuilder encrypted = new StringBuilder();

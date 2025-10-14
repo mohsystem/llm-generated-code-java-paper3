@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task145 {
     public static int maxSubArraySum(int[] nums) {
         int maxSum = nums[0];

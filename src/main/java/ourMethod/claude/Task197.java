@@ -2,46 +2,64 @@ package ourMethod.claude;
 
 import java.util.Random;
 
-public class Task197 {
-    private double radius;
-    private double xCenter;
-    private double yCenter;
-    private Random random;
-
-    public Task197(double radius, double x_center, double y_center) {
+class Task197 {
+    private final double radius;
+    private final double xCenter;
+    private final double yCenter;
+    private final Random random;
+    
+    public Task197(double radius, double xCenter, double yCenter) {
+        // Validate inputs
         if (radius <= 0 || radius > 1e8) {
-            throw new IllegalArgumentException("Invalid radius");
+            throw new IllegalArgumentException("Radius must be in range (0, 10^8]");
         }
-        if (Math.abs(x_center) > 1e7 || Math.abs(y_center) > 1e7) {
-            throw new IllegalArgumentException("Invalid center coordinates");
+        if (Math.abs(xCenter) > 1e7 || Math.abs(yCenter) > 1e7) {
+            throw new IllegalArgumentException("Center coordinates must be in range [-10^7, 10^7]");
         }
+        
         this.radius = radius;
-        this.xCenter = x_center;
-        this.yCenter = y_center;
+        this.xCenter = xCenter;
+        this.yCenter = yCenter;
         this.random = new Random();
     }
     
     public double[] randPoint() {
-        double len = Math.sqrt(random.nextDouble()) * radius;
+        // Use rejection sampling for uniform distribution
+        // Generate random angle and radius with proper distribution
         double angle = random.nextDouble() * 2 * Math.PI;
+        // Use sqrt for uniform distribution in circular area
+        double r = Math.sqrt(random.nextDouble()) * radius;
         
-        double x = xCenter + len * Math.cos(angle);
-        double y = yCenter + len * Math.sin(angle);
+        double x = xCenter + r * Math.cos(angle);
+        double y = yCenter + r * Math.sin(angle);
         
         return new double[]{x, y};
     }
-
+    
     public static void main(String[] args) {
-        Task197 solution = new Task197(1.0, 0.0, 0.0);
+        // Test case 1
+        Task197 solution1 = new Task197(1.0, 0.0, 0.0);
+        double[] point1 = solution1.randPoint();
+        System.out.println("Test 1: [" + point1[0] + ", " + point1[1] + "]");
         
-        // Test cases
-        for (int i = 0; i < 5; i++) {
-            double[] point = solution.randPoint();
-            System.out.printf("Random point %d: [%.5f, %.5f]%n", i+1, point[0], point[1]);
-            
-            // Verify point is inside circle
-            double distance = Math.sqrt(Math.pow(point[0] - 0.0, 2) + Math.pow(point[1] - 0.0, 2));
-            System.out.printf("Distance from center: %.5f (should be <= 1.0)%n", distance);
-        }
+        // Test case 2
+        Task197 solution2 = new Task197(10.0, 5.0, -7.5);
+        double[] point2 = solution2.randPoint();
+        System.out.println("Test 2: [" + point2[0] + ", " + point2[1] + "]");
+        
+        // Test case 3
+        Task197 solution3 = new Task197(2.0, 0.0, 0.0);
+        double[] point3 = solution3.randPoint();
+        System.out.println("Test 3: [" + point3[0] + ", " + point3[1] + "]");
+        
+        // Test case 4
+        Task197 solution4 = new Task197(5.0, 10.0, 10.0);
+        double[] point4 = solution4.randPoint();
+        System.out.println("Test 4: [" + point4[0] + ", " + point4[1] + "]");
+        
+        // Test case 5
+        Task197 solution5 = new Task197(0.5, -3.0, 4.0);
+        double[] point5 = solution5.randPoint();
+        System.out.println("Test 5: [" + point5[0] + ", " + point5[1] + "]");
     }
 }

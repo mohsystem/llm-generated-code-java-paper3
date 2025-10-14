@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task192 {
     public static boolean xorGame(int[] nums) {
         int xorSum = 0;

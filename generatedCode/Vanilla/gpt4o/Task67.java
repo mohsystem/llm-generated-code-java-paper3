@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

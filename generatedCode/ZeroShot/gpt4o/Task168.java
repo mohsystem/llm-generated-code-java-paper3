@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task168 {
     public static String tweakLetters(String str, int[] tweaks) {
         if (str == null || tweaks == null || str.length() != tweaks.length) {

@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.util.Deque;
 import java.util.LinkedList;
 

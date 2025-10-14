@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task95 {
     public static double getCurrentProcessorTimeInSeconds() {
         return (double) System.nanoTime() / 1_000_000_000.0;

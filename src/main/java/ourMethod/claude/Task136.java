@@ -1,95 +1,145 @@
 package ourMethod.claude;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Task136 {
-    private static final int MAX_LOGIN_ATTEMPTS = 3;
-    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final int SALT_LENGTH = 16;
+    private static final int ITERATIONS = 210000;
+    private static final int KEY_LENGTH = 256;
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 128;
+    private static final SecureRandom secureRandom = new SecureRandom();
     
-    private static class User {
-        private String username;
-        private byte[] passwordHash;
-        private byte[] salt;
-        private int loginAttempts;
-        private boolean isLocked;
+    private Map<String, UserCredentials> userDatabase;
+    
+    public Task136() {
+        this.userDatabase = new HashMap<>();
+    }
+    
+    private static class UserCredentials {
+        byte[] passwordHash;
+        byte[] salt;
         
-        public User(String username, String password) {
-            this.username = username;
-            this.salt = generateSalt();
-            this.passwordHash = hashPassword(password, salt);
-            this.loginAttempts = 0;
-            this.isLocked = false;
+        UserCredentials(byte[] passwordHash, byte[] salt) {
+            this.passwordHash = passwordHash;
+            this.salt = salt;
         }
     }
     
-    private static byte[] generateSalt() {
-        // Generate random salt using SecureRandom
-        java.security.SecureRandom random = new java.security.SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
-    
-    private static byte[] hashPassword(String password, byte[] salt) {
-        try {
-            // Use PBKDF2 with SHA-256 for password hashing
-            javax.crypto.spec.PBEKeySpec spec = new javax.crypto.spec.PBEKeySpec(
-                password.toCharArray(), salt, 65536, 256);
-            javax.crypto.SecretKeyFactory factory = javax.crypto.SecretKeyFactory
-                .getInstance("PBKDF2WithHmacSHA256");
-            return factory.generateSecret(spec).getEncoded();
-        } catch (Exception e) {
-            throw new RuntimeException("Error hashing password", e);
+    public boolean registerUser(String username, String password) {
+        if (username == null || username.trim().isEmpty() || username.length() > 100) {
+            return false;
         }
-    }
-    
-    private static boolean authenticate(User user, String password) {
-        if(user.isLocked) {
-            System.out.println("Account is locked. Please contact administrator.");
+        if (password == null || password.length() < 8 || password.length() > 128) {
             return false;
         }
         
-        byte[] hash = hashPassword(password, user.salt);
+        username = username.trim();
         
-        if(!java.util.Arrays.equals(hash, user.passwordHash)) {
-            user.loginAttempts++;
-            if(user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                user.isLocked = true;
-                System.out.println("Account locked due to too many failed attempts");
-            }
+        if (userDatabase.containsKey(username)) {
             return false;
         }
         
-        // Reset login attempts on successful auth
-        user.loginAttempts = 0;
+        byte[] salt = new byte[SALT_LENGTH];
+        secureRandom.nextBytes(salt);
+        
+        byte[] passwordHash = hashPassword(password, salt);
+        if (passwordHash == null) {
+            return false;
+        }
+        
+        userDatabase.put(username, new UserCredentials(passwordHash, salt));
         return true;
     }
     
-    public static void main(String[] args) {
-        // Test cases
-        String[] usernames = {"user1", "user2", "user3", "user4", "user5"};
-        String[] passwords = {"Password123!", "weak", "TestPass456$", "Pass789#", "ShortPw"};
-        
-        for(int i = 0; i < usernames.length; i++) {
-            if(passwords[i].length() < MIN_PASSWORD_LENGTH) {
-                System.out.println("Password too short for " + usernames[i]);
-                continue;
-            }
-            
-            User user = new User(usernames[i], passwords[i]);
-            
-            // Test valid password
-            System.out.println("\\nTesting " + usernames[i]);
-            System.out.println("Valid password: " + authenticate(user, passwords[i]));
-            
-            // Test invalid password
-            System.out.println("Invalid password: " + authenticate(user, "wrongpass"));
-            
-            // Test account lockout
-            for(int j = 0; j < MAX_LOGIN_ATTEMPTS; j++) {
-                authenticate(user, "wrongpass");
-            }
-            
-            // Test after lockout
-            System.out.println("After lockout: " + authenticate(user, passwords[i]));
+    public boolean authenticateUser(String username, String password) {
+        if (username == null || username.trim().isEmpty() || username.length() > 100) {
+            return false;
         }
+        if (password == null || password.length() < 8 || password.length() > 128) {
+            return false;
+        }
+        
+        username = username.trim();
+        
+        UserCredentials credentials = userDatabase.get(username);
+        if (credentials == null) {
+            return false;
+        }
+        
+        byte[] computedHash = hashPassword(password, credentials.salt);
+        if (computedHash == null) {
+            return false;
+        }
+        
+        return MessageDigest.isEqual(computedHash, credentials.passwordHash);
+    }
+    
+    private byte[] hashPassword(String password, byte[] salt) {
+        try {
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            return factory.generateSecret(spec).getEncoded();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public boolean deleteUser(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        return userDatabase.remove(username.trim()) != null;
+    }
+    
+    public boolean userExists(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        return userDatabase.containsKey(username.trim());
+    }
+    
+    public static void main(String[] args) {
+        Task136 auth = new Task136();
+        
+        // Test case 1: Register and authenticate valid user
+        System.out.println("Test 1 - Register and authenticate:");
+        boolean registered1 = auth.registerUser("alice", "SecurePass123!");
+        boolean authenticated1 = auth.authenticateUser("alice", "SecurePass123!");
+        System.out.println("Registered: " + registered1 + ", Authenticated: " + authenticated1);
+        
+        // Test case 2: Authenticate with wrong password
+        System.out.println("\\nTest 2 - Wrong password:");
+        boolean authenticated2 = auth.authenticateUser("alice", "WrongPassword");
+        System.out.println("Authenticated with wrong password: " + authenticated2);
+        
+        // Test case 3: Register duplicate user
+        System.out.println("\\nTest 3 - Duplicate registration:");
+        boolean registered3 = auth.registerUser("alice", "AnotherPass456!");
+        System.out.println("Duplicate registration: " + registered3);
+        
+        // Test case 4: Authenticate non-existent user
+        System.out.println("\\nTest 4 - Non-existent user:");
+        boolean authenticated4 = auth.authenticateUser("bob", "SomePass789!");
+        System.out.println("Non-existent user authenticated: " + authenticated4);
+        
+        // Test case 5: Invalid input validation
+        System.out.println("\\nTest 5 - Invalid inputs:");
+        boolean registered5a = auth.registerUser("", "password123");
+        boolean registered5b = auth.registerUser("charlie", "short");
+        boolean registered5c = auth.registerUser(null, "password123");
+        System.out.println("Empty username: " + registered5a + ", Short password: " + registered5b + ", Null username: " + registered5c);
     }
 }

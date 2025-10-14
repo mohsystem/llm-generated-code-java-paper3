@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 // CSRF protection in Java typically involves frameworks like Spring Security.
 // However, for basic demonstration purposes, we can illustrate CSRF token generation and validation conceptually.
 

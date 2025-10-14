@@ -1,43 +1,94 @@
 package Vanilla.gemini;
-import java.io.File;
-import java.io.FileNotFoundException;
+
+import java.io.*;
 import java.util.*;
 
-class Task94 {
-    public static List<Map.Entry<String, String>> sortKeyValuePairs(String filePath) throws FileNotFoundException {
-        File file = new File(filePath);
-        Scanner scanner = new Scanner(file);
-        Map<String, String> keyValuePairs = new HashMap<>();
+public class Task94 {
 
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            String[] parts = line.split("=", 2); // Split into key-value
-            if (parts.length == 2) {
-                keyValuePairs.put(parts[0].trim(), parts[1].trim());
-            }
+    static class KeyValuePair implements Comparable<KeyValuePair> {
+        String key;
+        String value;
+
+        public KeyValuePair(String key, String value) {
+            this.key = key;
+            this.value = value;
         }
-        scanner.close();
 
-        List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(keyValuePairs.entrySet());
-        Collections.sort(sortedEntries, Comparator.comparing(Map.Entry::getKey));
-        return sortedEntries;
+        @Override
+        public int compareTo(KeyValuePair other) {
+            return this.key.compareTo(other.key);
+        }
+
+        @Override
+        public String toString() {
+            return key + ":" + value;
+        }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        List<Map.Entry<String, String>> sortedPairs1 = sortKeyValuePairs("test1.txt");
-        System.out.println(sortedPairs1);
+    public static List<KeyValuePair> sortFileRecords(String filename) {
+        List<KeyValuePair> records = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Split only on the first colon to allow colons in the value
+                String[] parts = line.split(":", 2);
+                if (parts.length == 2) {
+                    records.add(new KeyValuePair(parts[0].trim(), parts[1].trim()));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+            return null;
+        }
+        Collections.sort(records);
+        return records;
+    }
 
-        List<Map.Entry<String, String>> sortedPairs2 = sortKeyValuePairs("test2.txt");
-        System.out.println(sortedPairs2);
+    public static void main(String[] args) {
+        String[] testContents = {
+            // Test 1: Standard case
+            "banana:fruit\napple:fruit\ncarrot:vegetable",
+            // Test 2: Already sorted
+            "alpha:1\nbeta:2\ngamma:3",
+            // Test 3: Reverse sorted
+            "zulu:end\nyankee:middle\nxray:start",
+            // Test 4: Empty file
+            "",
+            // Test 5: Single entry
+            "one:1"
+        };
 
+        for (int i = 0; i < testContents.length; i++) {
+            String testFilename = "test_file_java_" + i + ".txt";
+            File testFile = new File(testFilename);
+            try {
+                // Create a temporary file for the test case
+                try (FileWriter writer = new FileWriter(testFile)) {
+                    writer.write(testContents[i]);
+                }
 
-        List<Map.Entry<String, String>> sortedPairs3 = sortKeyValuePairs("test3.txt");
-        System.out.println(sortedPairs3);
+                System.out.println("--- Test Case " + (i + 1) + " (Java) ---");
+                System.out.println("Input from " + testFilename + ":");
+                System.out.println(testContents[i].isEmpty() ? "<empty>" : testContents[i]);
 
-        List<Map.Entry<String, String>> sortedPairs4 = sortKeyValuePairs("test4.txt");
-        System.out.println(sortedPairs4);
+                List<KeyValuePair> sortedRecords = sortFileRecords(testFilename);
 
-        List<Map.Entry<String, String>> sortedPairs5 = sortKeyValuePairs("test5.txt");
-        System.out.println(sortedPairs5);
+                System.out.println("\nSorted Output:");
+                if (sortedRecords != null && !sortedRecords.isEmpty()) {
+                    for (KeyValuePair kvp : sortedRecords) {
+                        System.out.println(kvp);
+                    }
+                } else {
+                    System.out.println("<no records to sort>");
+                }
+                System.out.println();
+
+            } catch (IOException e) {
+                System.err.println("Test setup failed: " + e.getMessage());
+            } finally {
+                // Clean up the temporary file
+                testFile.delete();
+            }
+        }
     }
 }

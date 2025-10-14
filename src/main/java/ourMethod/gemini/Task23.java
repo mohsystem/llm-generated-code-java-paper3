@@ -1,24 +1,32 @@
 package ourMethod.gemini;
+
 public class Task23 {
 
     public static long findNb(long m) {
         long n = 0;
-        long totalVolume = 0;
-        while (totalVolume < m) {
+        long remainingVolume = m;
+        while (remainingVolume > 0) {
             n++;
-            totalVolume += n * n * n;
+            long cubeVolume = n * n * n;
+            remainingVolume -= cubeVolume;
         }
-        return totalVolume == m ? n : -1;
+
+        if (remainingVolume == 0) {
+            return n;
+        } else {
+            return -1;
+        }
     }
 
     public static void main(String[] args) {
-        System.out.println(findNb(4183059834009L)); // Expected: 2022
-        System.out.println(findNb(24723578342962L)); // Expected: -1
-        System.out.println(findNb(135440716410000L));// Expected: 4824
-        System.out.println(findNb(40539911473216L)); // Expected: 3568
-        System.out.println(findNb(1071225)); // Expected: 45
-        System.out.println(findNb(91716553919377L)); // Expected: -1
+        // Test cases
+        long[] testM = {1071225L, 91716553919377L, 4183059834009L, 24723578342962L, 1L};
+        long[] expectedN = {45L, -1L, 2022L, -1L, 1L};
 
-
+        for (int i = 0; i < testM.length; i++) {
+            long result = findNb(testM[i]);
+            System.out.println("findNb(" + testM[i] + ") -> " + result +
+                               " (Expected: " + expectedN[i] + ")");
+        }
     }
 }

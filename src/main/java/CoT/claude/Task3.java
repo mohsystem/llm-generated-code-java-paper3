@@ -1,38 +1,41 @@
 package CoT.claude;
 
-public class Task3 {
-    public static boolean isPangram(String str) {
-        // Convert to lowercase and remove non-alphabetic characters
-        str = str.toLowerCase().replaceAll("[^a-z]", "");
-        
-        // Create boolean array to mark presence of each letter
-        boolean[] letters = new boolean[26];
-        
-        // Mark each letter found in string
-        for(char c : str.toCharArray()) {
-            letters[c - 'a'] = true;
-        }
-        
-        // Check if all letters are present
-        for(boolean present : letters) {
-            if(!present) return false;
-        }
-        return true;
-    }
+import java.util.HashSet;
+import java.util.Set;
 
-    public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "The quick brown fox jumps over the lazy dog",
-            "Pack my box with five dozen liquor jugs",
-            "This is not a pangram",
-            "abcdefghijklmnopqrstuvwxyz",
-            "The Five boxing wizards jump quickly"
-        };
-        
-        for(String test : tests) {
-            System.out.println("Input: " + test);
-            System.out.println("Is Pangram: " + isPangram(test));
+public class Task3 {
+    public static boolean isPangram(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
         }
+        
+        Set<Character> alphabetSet = new HashSet<>();
+        String lowerText = text.toLowerCase();
+        
+        for (int i = 0; i < lowerText.length(); i++) {
+            char c = lowerText.charAt(i);
+            if (c >= 'a' && c <= 'z') {
+                alphabetSet.add(c);
+            }
+        }
+        
+        return alphabetSet.size() == 26;
+    }
+    
+    public static void main(String[] args) {
+        // Test case 1: Classic pangram
+        System.out.println("Test 1: " + isPangram("The quick brown fox jumps over the lazy dog"));
+        
+        // Test case 2: Pangram with numbers and punctuation
+        System.out.println("Test 2: " + isPangram("Pack my box with five dozen liquor jugs!123"));
+        
+        // Test case 3: Not a pangram
+        System.out.println("Test 3: " + isPangram("Hello World"));
+        
+        // Test case 4: Empty string
+        System.out.println("Test 4: " + isPangram(""));
+        
+        // Test case 5: All letters with special characters
+        System.out.println("Test 5: " + isPangram("abcdefghijklmnopqrstuvwxyz!!!"));
     }
 }

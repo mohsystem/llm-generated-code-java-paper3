@@ -1,50 +1,80 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
+
 public class Task12 {
-    public static String highestScoringWord(String str) {
-        if (str == null || str.trim().isEmpty()) {
+    private static final Pattern VALID_INPUT_PATTERN = Pattern.compile("^[a-z ]*$");
+    private static final int MAX_INPUT_LENGTH = 10000;
+    
+    public static String highestScoringWord(String input) {
+        // Validate input
+        if (input == null) {
+            throw new IllegalArgumentException("Input cannot be null");
+        }
+        
+        // Validate length
+        if (input.length() > MAX_INPUT_LENGTH) {
+            throw new IllegalArgumentException("Input exceeds maximum length");
+        }
+        
+        // Validate input contains only lowercase letters and spaces
+        if (!VALID_INPUT_PATTERN.matcher(input).matches()) {
+            throw new IllegalArgumentException("Input must contain only lowercase letters and spaces");
+        }
+        
+        String trimmedInput = input.trim();
+        if (trimmedInput.isEmpty()) {
             return "";
         }
         
-        String[] words = str.trim().split("\\\\s+");
-        if (words.length == 0) {
-            return "";
-        }
+        String[] words = trimmedInput.split(" ");
+        String highestWord = "";
+        int highestScore = 0;
         
-        String maxWord = words[0];
-        int maxScore = getWordScore(words[0]);
-        
-        for (int i = 1; i < words.length; i++) {
-            int currentScore = getWordScore(words[i]);
-            if (currentScore > maxScore) {
-                maxScore = currentScore;
-                maxWord = words[i];
+        for (String word : words) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            
+            int score = calculateScore(word);
+            if (score > highestScore) {
+                highestScore = score;
+                highestWord = word;
             }
         }
         
-        return maxWord;
+        return highestWord;
     }
     
-    private static int getWordScore(String word) {
-        if (word == null || word.isEmpty()) {
-            return 0;
-        }
-        
+    private static int calculateScore(String word) {
         int score = 0;
-        for (char c : word.toCharArray()) {
-            if (c >= 'a' && c <= 'z') {
-                score += (c - 'a' + 1);
+        byte[] bytes = word.getBytes(StandardCharsets.UTF_8);
+        
+        for (byte b : bytes) {
+            // Validate byte is lowercase letter (a-z: 97-122)
+            if (b >= 97 && b <= 122) {
+                score += (b - 96); // a=1, b=2, etc.
             }
         }
+        
         return score;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(highestScoringWord("man i need a taxi up to ubud")); // "taxi"
-        System.out.println(highestScoringWord("what time are we climbing up to the volcano")); // "volcano"
-        System.out.println(highestScoringWord("take me to semynak")); // "semynak"
-        System.out.println(highestScoringWord("aa b")); // "aa"
-        System.out.println(highestScoringWord("b aa")); // "b"
+        // Test case 1
+        System.out.println("Test 1: " + highestScoringWord("man i need a taxi up to ubud"));
+        
+        // Test case 2
+        System.out.println("Test 2: " + highestScoringWord("what time are we climbing up the volcano"));
+        
+        // Test case 3
+        System.out.println("Test 3: " + highestScoringWord("take me to semynak"));
+        
+        // Test case 4
+        System.out.println("Test 4: " + highestScoringWord("aa b"));
+        
+        // Test case 5
+        System.out.println("Test 5: " + highestScoringWord("a z ba"));
     }
 }

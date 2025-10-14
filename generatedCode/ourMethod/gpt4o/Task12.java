@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task12 {
     public static String highestScoringWord(String sentence) {
         String[] words = sentence.split(" ");

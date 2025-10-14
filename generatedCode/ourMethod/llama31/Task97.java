@@ -22,7 +22,7 @@ public class Task97 {
         String xmlFile = args[1];
 
         // Validate file path to prevent path traversal
-        if (xmlFile.contains("../") || xmlFile.contains("..\\") || xmlFile.startsWith("/") || xmlFile.startsWith("\\")) {
+        if (xmlFile.contains("../") || xmlFile.contains("..\") || xmlFile.startsWith("/") || xmlFile.startsWith("\")) {
             System.out.println("Invalid file path");
             return;
         }

@@ -1,37 +1,49 @@
 package ourMethod.gemini;
+
 import java.util.Arrays;
 
-class Task168 {
-    public String tweakLetters(String str, int[] arr) {
-        if (str == null || arr == null || str.length() != arr.length) {
-            return null; // Or throw an exception
+public class Task168 {
+
+    /**
+     * Tweaks letters in a string by one forward (+1) or backward (-1) according to an array.
+     *
+     * @param str The input string (assumed to be lowercase letters).
+     * @param tweaks An array of integers (0, 1, or -1) of the same length as str.
+     * @return A new string with the tweaked letters.
+     * @throws IllegalArgumentException if inputs are null or have mismatched lengths.
+     */
+    public static String tweakLetters(String str, int[] tweaks) {
+        if (str == null || tweaks == null) {
+            throw new IllegalArgumentException("Input string and tweaks array cannot be null.");
+        }
+        if (str.length() != tweaks.length) {
+            throw new IllegalArgumentException("Input string and tweaks array must have the same length.");
         }
 
-        char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) (chars[i] + arr[i]);
+        StringBuilder result = new StringBuilder(str.length());
+        for (int i = 0; i < str.length(); i++) {
+            char originalChar = str.charAt(i);
+            int tweakValue = tweaks[i];
+            char tweakedChar = (char) (originalChar + tweakValue);
+            result.append(tweakedChar);
         }
-        return new String(chars);
-
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        Task168 task168 = new Task168();
-
-        String test1 = task168.tweakLetters("apple", new int[]{0, 1, -1, 0, -1});
-        System.out.println("Test 1: " + test1); // Output: aqold
-
-
-        String test2 = task168.tweakLetters("many", new int[]{0, 0, 0, -1});
-        System.out.println("Test 2: " + test2); // Output: manx
-
-        String test3 = task168.tweakLetters("rhino", new int[]{1, 1, 1, 1, 1});
-        System.out.println("Test 3: " + test3); // Output: sijop
-
-         String test4 = task168.tweakLetters("hello", new int[]{0, 1, 0, -1, 0});
-        System.out.println("Test 4: " + test4); // Output: hfmkp
-
-        String test5 = task168.tweakLetters("world", new int[]{-1, 0, 1, 0, -1});
-        System.out.println("Test 5: " + test5); // Output: vnqsc
+        // Test Case 1
+        System.out.println("Test 1: 'apple', {0, 1, -1, 0, -1} -> " + tweakLetters("apple", new int[]{0, 1, -1, 0, -1}));
+        
+        // Test Case 2
+        System.out.println("Test 2: 'many', {0, 0, 0, -1} -> " + tweakLetters("many", new int[]{0, 0, 0, -1}));
+        
+        // Test Case 3
+        System.out.println("Test 3: 'rhino', {1, 1, 1, 1, 1} -> " + tweakLetters("rhino", new int[]{1, 1, 1, 1, 1}));
+        
+        // Test Case 4: Empty string
+        System.out.println("Test 4: '', {} -> " + tweakLetters("", new int[]{}));
+        
+        // Test Case 5: All zeros
+        System.out.println("Test 5: 'hello', {0, 0, 0, 0, 0} -> " + tweakLetters("hello", new int[]{0, 0, 0, 0, 0}));
     }
 }

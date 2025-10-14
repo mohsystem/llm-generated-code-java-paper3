@@ -1,60 +1,78 @@
 package ZeroShot.gemini;
+
 import javax.net.ssl.*;
 import java.io.IOException;
-import java.net.URL;
-import java.security.KeyManagementException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 
 public class Task105 {
 
-    public static void establishSSLConnection(String urlString) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
+    /**
+     * Establishes a secure SSL/TLS connection to a remote server.
+     *
+     * @param host The hostname of the server.
+     * @param port The port number of the server.
+     * @return true if the connection was successful, false otherwise.
+     */
+    public static boolean establishSecureConnection(String host, int port) {
+        SSLSocketFactory factory;
+        try {
+            // Create an SSLContext that uses a secure protocol.
+            // TLSv1.3 is preferred, TLSv1.2 is also secure.
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            sslContext.init(null, null, null); // Use default KeyManager, TrustManager, and SecureRandom
+            factory = sslContext.getSocketFactory();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("TLSv1.3 is not available, falling back to default. Error: " + e.getMessage());
+            factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        } catch (Exception e) {
+            System.err.println("Could not initialize SSLContext. Error: " + e.getMessage());
+            return false;
+        }
 
-        // Install the all-trusting trust manager
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        try (SSLSocket sslSocket = (SSLSocket) factory.createSocket(host, port)) {
 
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
+            // Enable hostname verification, which is crucial for security.
+            SSLParameters sslParams = sslSocket.getSSLParameters();
+            sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+            sslSocket.setSSLParameters(sslParams);
 
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            // Start the TLS handshake explicitly.
+            sslSocket.startHandshake();
 
+            SSLSession session = sslSocket.getSession();
+            System.out.println("Successfully connected to " + host + ":" + port);
+            System.out.println("SSL Session Info:");
+            System.out.println("\tProtocol: " + session.getProtocol());
+            System.out.println("\tCipher Suite: " + session.getCipherSuite());
+            System.out.println("\tPeer Principal: " + session.getPeerPrincipal());
 
-        URL url = new URL(urlString);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            return true;
 
-        // Now you can access the secure connection
-        int responseCode = connection.getResponseCode();
-        System.out.println("Response Code : " + responseCode);
+        } catch (SSLHandshakeException e) {
+            // This can happen for expired certs, wrong host, untrusted CAs, etc.
+            System.err.println("SSL Handshake Failed for " + host + ":" + port + ". Error: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            System.err.println("Could not resolve host: " + host);
+        } catch (IOException e) {
+            System.err.println("I/O error when connecting to " + host + ":" + port + ". Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred for " + host + ":" + port + ". Error: " + e.getMessage());
+        }
 
-
-        connection.disconnect();
-
+        return false;
     }
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        establishSSLConnection("https://www.google.com");
-        establishSSLConnection("https://www.example.com");
-        establishSSLConnection("https://www.amazon.com");
-        establishSSLConnection("https://www.bing.com");
-        establishSSLConnection("https://www.github.com");
+    public static void main(String[] args) {
+        String[] hosts = {"google.com", "github.com", "expired.badssl.com", "wrong.host.badssl.com", "nonexistent-domain-xyz123.com"};
+        int port = 443;
+
+        for (int i = 0; i < hosts.length; i++) {
+            System.out.println("\n--- Test Case " + (i + 1) + ": Connecting to " + hosts[i] + ":" + port + " ---");
+            boolean success = establishSecureConnection(hosts[i], port);
+            System.out.println("Connection status: " + (success ? "SUCCESS" : "FAILURE"));
+            System.out.println("----------------------------------------------------");
+        }
     }
 }

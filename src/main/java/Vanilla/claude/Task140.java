@@ -1,5 +1,7 @@
 package Vanilla.claude;
 
+import java.util.Scanner;
+
 public class Task140 {
     public static double calculate(double num1, double num2, char operator) {
         switch (operator) {
@@ -10,24 +12,31 @@ public class Task140 {
             case '*':
                 return num1 * num2;
             case '/':
-                if (num2 != 0)
-                    return num1 / num2;
-                throw new ArithmeticException("Division by zero!");
+                if (num2 == 0) {
+                    System.out.println("Error: Division by zero");
+                    return Double.NaN;
+                }
+                return num1 / num2;
             default:
-                throw new IllegalArgumentException("Invalid operator!");
+                System.out.println("Error: Invalid operator");
+                return Double.NaN;
         }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(calculate(10, 5, '+')); // Expected: 15.0
-        System.out.println(calculate(10, 5, '-')); // Expected: 5.0
-        System.out.println(calculate(10, 5, '*')); // Expected: 50.0
-        System.out.println(calculate(10, 5, '/')); // Expected: 2.0
-        try {
-            System.out.println(calculate(10, 0, '/')); // Should throw exception
-        } catch (ArithmeticException e) {
-            System.out.println("Division by zero error");
-        }
+        // Test case 1: Addition
+        System.out.println("Test 1: 10 + 5 = " + calculate(10, 5, '+'));
+        
+        // Test case 2: Subtraction
+        System.out.println("Test 2: 20 - 8 = " + calculate(20, 8, '-'));
+        
+        // Test case 3: Multiplication
+        System.out.println("Test 3: 7 * 6 = " + calculate(7, 6, '*'));
+        
+        // Test case 4: Division
+        System.out.println("Test 4: 50 / 2 = " + calculate(50, 2, '/'));
+        
+        // Test case 5: Division by zero
+        System.out.println("Test 5: 10 / 0 = " + calculate(10, 0, '/'));
     }
 }

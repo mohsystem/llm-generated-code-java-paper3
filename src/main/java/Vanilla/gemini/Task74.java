@@ -1,45 +1,75 @@
 package Vanilla.gemini;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Task74 {
 
-    public static Connection getPostgresConnection(String url, String user, String password) throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+    /**
+     * Creates and returns a connection to a PostgreSQL database.
+     * Note: You need to have the PostgreSQL JDBC driver in your classpath.
+     * Example Maven dependency:
+     * <dependency>
+     *     <groupId>org.postgresql</groupId>
+     *     <artifactId>postgresql</artifactId>
+     *     <version>42.6.0</version>
+     * </dependency>
+     *
+     * @param host     The database server host.
+     * @param port     The database server port.
+     * @param dbName   The name of the database.
+     * @param user     The username for authentication.
+     * @param password The password for authentication.
+     * @return A Connection object or null if connection fails.
+     */
+    public static Connection createConnection(String host, int port, String dbName, String user, String password) {
+        Connection connection = null;
+        try {
+            String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
+            connection = DriverManager.getConnection(url, user, password);
+        } catch (SQLException e) {
+            // In a real application, you would log this error.
+            // e.printStackTrace();
+            return null;
+        }
+        return connection;
     }
 
     public static void main(String[] args) {
-        try {
-            // Replace with your PostgreSQL database credentials
-            String url = "jdbc:postgresql://localhost:5432/your_database_name";
-            String user = "your_username";
-            String password = "your_password";
+        // --- Test Cases ---
 
-            Connection conn1 = getPostgresConnection(url, user, password);
-            if (conn1 != null) System.out.println("Test 1: Connection successful!");
-            conn1.close();
+        // Test Case 1: Standard localhost connection (likely to fail without a running DB and correct credentials)
+        runTestCase(1, "localhost", 5432, "testdb", "user", "password");
 
+        // Test Case 2: Using IP address for localhost
+        runTestCase(2, "127.0.0.1", 5432, "postgres", "postgres", "admin123");
 
-            Connection conn2 = getPostgresConnection(url, user, password);
-            if (conn2 != null) System.out.println("Test 2: Connection successful!");
-            conn2.close();
+        // Test Case 3: Different database and user
+        runTestCase(3, "localhost", 5432, "mydatabase", "dbuser", "secret");
 
-            Connection conn3 = getPostgresConnection(url, user, password);
-            if (conn3 != null) System.out.println("Test 3: Connection successful!");
-            conn3.close();
+        // Test Case 4: Invalid host to simulate connection failure
+        runTestCase(4, "nonexistent.host.com", 5432, "testdb", "user", "password");
 
-            Connection conn4 = getPostgresConnection(url, user, password);
-            if (conn4 != null) System.out.println("Test 4: Connection successful!");
-            conn4.close();
+        // Test Case 5: Invalid port
+        runTestCase(5, "localhost", 9999, "testdb", "user", "password");
+    }
 
-            Connection conn5 = getPostgresConnection(url, user, password);
-            if (conn5 != null) System.out.println("Test 5: Connection successful!");
-            conn5.close();
-
-
-        } catch (SQLException e) {
-            System.err.println("Error connecting to the database: " + e.getMessage());
+    private static void runTestCase(int caseNum, String host, int port, String dbName, String user, String password) {
+        System.out.println("--- Test Case " + caseNum + " ---");
+        System.out.printf("Attempting to connect to postgresql://%s@%s:%d/%s%n", user, host, port, dbName);
+        Connection conn = createConnection(host, port, dbName, user, password);
+        if (conn != null) {
+            System.out.println("Connection successful!");
+            try {
+                conn.close();
+                System.out.println("Connection closed.");
+            } catch (SQLException e) {
+                System.err.println("Failed to close connection: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Connection failed.");
         }
+        System.out.println();
     }
 }

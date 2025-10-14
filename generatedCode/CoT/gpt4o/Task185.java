@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task185 {
     public static double findMedianSortedArrays(int[] nums1, int[] nums2) {
         int m = nums1.length;

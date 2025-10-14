@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task114 {
     public static String copyString(String input) {
         return new String(input);

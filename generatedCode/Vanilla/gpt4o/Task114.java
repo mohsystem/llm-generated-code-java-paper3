@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task114 {
     public static String copyString(String str) {
         return new String(str);

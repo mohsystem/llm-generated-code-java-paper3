@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;

@@ -3,38 +3,54 @@ package Vanilla.claude;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Task101 {
-    public static boolean createExecutableScript() {
+    public static boolean createExecutableScript(String filename) {
         try {
-            // Create file
-            File scriptFile = new File("script.sh");
-            FileWriter writer = new FileWriter(scriptFile);
-            writer.write("#!/bin/bash\\necho \"Hello from script\"");
+            // Create the file
+            File file = new File(filename);
+            FileWriter writer = new FileWriter(file);
+            writer.write("#!/bin/bash\\n");
+            writer.write("echo 'Hello from script.sh'\\n");
             writer.close();
             
-            // Make executable
-            return scriptFile.setExecutable(true);
+            // Make it executable
+            Set<PosixFilePermission> perms = new HashSet<>();
+            perms.add(PosixFilePermission.OWNER_READ);
+            perms.add(PosixFilePermission.OWNER_WRITE);
+            perms.add(PosixFilePermission.OWNER_EXECUTE);
+            perms.add(PosixFilePermission.GROUP_READ);
+            perms.add(PosixFilePermission.GROUP_EXECUTE);
+            perms.add(PosixFilePermission.OTHERS_READ);
+            perms.add(PosixFilePermission.OTHERS_EXECUTE);
+            
+            Files.setPosixFilePermissions(Paths.get(filename), perms);
+            return true;
         } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
     }
-
+    
     public static void main(String[] args) {
-        // Test case 1: Create new script file
-        System.out.println("Test 1: " + createExecutableScript());
+        // Test case 1: Create script.sh
+        System.out.println("Test 1: " + createExecutableScript("script.sh"));
         
-        // Test case 2: Create script file again (overwrite)
-        System.out.println("Test 2: " + createExecutableScript());
+        // Test case 2: Create test1.sh
+        System.out.println("Test 2: " + createExecutableScript("test1.sh"));
         
-        // Test case 3: Verify file exists
-        System.out.println("Test 3: " + new File("script.sh").exists());
+        // Test case 3: Create test2.sh
+        System.out.println("Test 3: " + createExecutableScript("test2.sh"));
         
-        // Test case 4: Verify file is executable
-        System.out.println("Test 4: " + new File("script.sh").canExecute());
+        // Test case 4: Create test3.sh
+        System.out.println("Test 4: " + createExecutableScript("test3.sh"));
         
-        // Test case 5: Create script in invalid location
-        new File("script.sh").setWritable(false);
-        System.out.println("Test 5: " + createExecutableScript());
+        // Test case 5: Create test4.sh
+        System.out.println("Test 5: " + createExecutableScript("test4.sh"));
     }
 }

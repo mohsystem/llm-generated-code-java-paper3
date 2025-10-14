@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task146 {
     public static int findMissingNumber(int[] nums, int n) {
         int expectedSum = n * (n + 1) / 2;

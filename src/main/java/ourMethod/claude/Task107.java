@@ -1,70 +1,115 @@
 package ourMethod.claude;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.util.Properties;
+import javax.naming.*;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class Task107 {
-    private static final String INITIAL_CONTEXT_FACTORY = "com.sun.jndi.rmi.registry.RegistryContextFactory";
-    private static final String PROVIDER_URL = "rmi://localhost:1099";
+    private static final Pattern SAFE_JNDI_PATTERN = Pattern.compile("^java:comp/env/[a-zA-Z0-9/_-]+$");
+    private static final Set<String> ALLOWED_SCHEMES = Collections.unmodifiableSet(
+        new HashSet<>(Arrays.asList("java:comp/env"))
+    );
     
-    public static Object lookupResource(String jndiName) throws NamingException {
+    public static Object safeLookup(String jndiName) {
         if (jndiName == null || jndiName.trim().isEmpty()) {
             throw new IllegalArgumentException("JNDI name cannot be null or empty");
         }
         
-        // Validate JNDI name format
-        if (!isValidJndiName(jndiName)) {
-            throw new IllegalArgumentException("Invalid JNDI name format");
+        String trimmedName = jndiName.trim();
+        
+        // Validate JNDI name format - only allow safe local lookups
+        if (!SAFE_JNDI_PATTERN.matcher(trimmedName).matches()) {
+            throw new IllegalArgumentException("Invalid JNDI name format. Only java:comp/env/ namespace allowed");
+        }
+        
+        // Check for path traversal attempts
+        if (trimmedName.contains("..") || trimmedName.contains("//")) {
+            throw new IllegalArgumentException("Path traversal detected in JNDI name");
         }
         
         Context context = null;
         try {
-            Properties env = new Properties();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
-            env.put(Context.PROVIDER_URL, PROVIDER_URL);
-            
-            // Disable LDAP deserialization
-            env.put("com.sun.jndi.ldap.object.trustURLCodebase", "false");
+            // Use InitialContext with restricted environment
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
+            env.put(Context.OBJECT_FACTORIES, "");
             
             context = new InitialContext(env);
-            return context.lookup(jndiName);
+            
+            Object result = context.lookup(trimmedName);
+            
+            // Validate result is not a remote reference
+            if (result instanceof Reference || result instanceof Referenceable) {
+                throw new NamingException("Remote references not allowed");
+            }
+            
+            return result;
+        } catch (NamingException e) {
+            System.err.println("JNDI lookup failed: " + e.getMessage());
+            return null;
         } finally {
             if (context != null) {
                 try {
                     context.close();
                 } catch (NamingException e) {
-                    // Log error but don't expose details
-                    System.err.println("Error closing context");
+                    System.err.println("Error closing context: " + e.getMessage());
                 }
             }
         }
     }
     
-    private static boolean isValidJndiName(String jndiName) {
-        // Basic JNDI name validation
-        return jndiName.matches("^[a-zA-Z][a-zA-Z0-9_/.-]*$");
-    }
-    
     public static void main(String[] args) {
-        // Test cases
-        String[] testCases = {
-            "java:comp/env/jdbc/TestDB",
-            "java:comp/env/ejb/TestEJB",
-            "java:comp/env/resource/TestResource",
-            "rmi://localhost/TestService",
-            "ldap://localhost/dc=example,dc=com"
-        };
+        System.out.println("JNDI Secure Lookup Examples:");
+        System.out.println("=" .repeat(50));
         
-        for (String testCase : testCases) {
-            try {
-                System.out.println("Looking up: " + testCase);
-                Object result = lookupResource(testCase);
-                System.out.println("Result: " + result);
-            } catch (Exception e) {
-                System.out.println("Error looking up " + testCase + ": " + e.getMessage());
-            }
+        // Test case 1: Valid JNDI name
+        String testName1 = "java:comp/env/jdbc/myDataSource";
+        System.out.println("\\nTest 1 - Valid name: " + testName1);
+        try {
+            Object result = safeLookup(testName1);
+            System.out.println("Result: " + (result != null ? "Success (simulated)" : "Not found"));
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        
+        // Test case 2: Invalid scheme
+        String testName2 = "ldap://malicious.com/exploit";
+        System.out.println("\\nTest 2 - Invalid scheme: " + testName2);
+        try {
+            Object result = safeLookup(testName2);
+            System.out.println("Result: " + result);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        
+        // Test case 3: Path traversal attempt
+        String testName3 = "java:comp/env/../../../etc/passwd";
+        System.out.println("\\nTest 3 - Path traversal: " + testName3);
+        try {
+            Object result = safeLookup(testName3);
+            System.out.println("Result: " + result);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        
+        // Test case 4: Null input
+        String testName4 = null;
+        System.out.println("\\nTest 4 - Null input: " + testName4);
+        try {
+            Object result = safeLookup(testName4);
+            System.out.println("Result: " + result);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        
+        // Test case 5: Empty string
+        String testName5 = "";
+        System.out.println("\\nTest 5 - Empty string: '" + testName5 + "'");
+        try {
+            Object result = safeLookup(testName5);
+            System.out.println("Result: " + result);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

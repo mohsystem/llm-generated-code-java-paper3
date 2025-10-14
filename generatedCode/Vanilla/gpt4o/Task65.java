@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task60 {
     public static String expandedForm(int num) {
         StringBuilder result = new StringBuilder();

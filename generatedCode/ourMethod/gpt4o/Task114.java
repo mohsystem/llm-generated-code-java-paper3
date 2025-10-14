@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task114 {
     public String copyString(String input) {
         if (input == null) return null;

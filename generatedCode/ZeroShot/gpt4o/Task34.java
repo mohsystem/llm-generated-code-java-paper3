@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task34 {
     public static boolean isNarcissistic(int number) {
         int originalNumber = number;

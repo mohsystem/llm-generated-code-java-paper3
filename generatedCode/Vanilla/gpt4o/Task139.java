@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task139 {
     public static double calculateArea(double radius) {
         return Math.PI * radius * radius;

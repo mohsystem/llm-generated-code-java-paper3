@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 // Java code to create a UDP socket for DNS requests
 import java.net.*;
 

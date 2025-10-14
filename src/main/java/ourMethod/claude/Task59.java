@@ -1,39 +1,48 @@
 package ourMethod.claude;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Task59 {
-    public static String accum(String input) {
-        if (input == null) {
-            return "";
+    public static String accum(String s) {
+        if (s == null) {
+            throw new IllegalArgumentException("Input cannot be null");
         }
         
-        if (!input.matches("^[a-zA-Z]*$")) {
-            return "";
+        if (s.length() > 10000) {
+            throw new IllegalArgumentException("Input string too long");
         }
         
-        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+                throw new IllegalArgumentException("Input must contain only letters a-z and A-Z");
+            }
+        }
         
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            result.append(Character.toUpperCase(c));
+        List<String> parts = new ArrayList<>();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            char upper = Character.toUpperCase(c);
+            char lower = Character.toLowerCase(c);
             
+            StringBuilder part = new StringBuilder();
+            part.append(upper);
             for (int j = 0; j < i; j++) {
-                result.append(Character.toLowerCase(c));
+                part.append(lower);
             }
-            
-            if (i < input.length() - 1) {
-                result.append('-');
-            }
+            parts.add(part.toString());
         }
         
-        return result.toString();
+        return String.join("-", parts);
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(accum("abcd"));      // "A-Bb-Ccc-Dddd"
-        System.out.println(accum("RqaEzty"));   // "R-Qq-Aaa-Eeee-Zzzzz-Tttttt-Yyyyyyy"
-        System.out.println(accum("cwAt"));      // "C-Ww-Aaa-Tttt"
-        System.out.println(accum(""));          // ""
-        System.out.println(accum("Z"));         // "Z"
+        System.out.println(accum("abcd"));
+        System.out.println(accum("RqaEzty"));
+        System.out.println(accum("cwAt"));
+        System.out.println(accum("ZpglnRxqenU"));
+        System.out.println(accum("NyffsGeyylB"));
     }
 }

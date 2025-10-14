@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task24 {
     public static boolean isValidPIN(String pin) {
         if (pin == null) return false;

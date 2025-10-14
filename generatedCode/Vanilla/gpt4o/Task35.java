@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task35 {
     public static int numberOfPeopleOnBus(int[][] stops) {
         int peopleOnBus = 0;

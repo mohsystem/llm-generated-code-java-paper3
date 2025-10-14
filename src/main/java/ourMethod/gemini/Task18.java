@@ -1,30 +1,46 @@
 package ourMethod.gemini;
+
+import java.util.List;
 import java.util.Arrays;
 
 public class Task18 {
-    public static int binaryArrayToInt(int[] binaryArray) {
-        int result = 0;
-        for (int i = 0; i < binaryArray.length; i++) {
-            if (binaryArray[i] != 0 && binaryArray[i] != 1) {
-                throw new IllegalArgumentException("Array elements must be 0 or 1.");
-            }
-            result = (result << 1) | binaryArray[i]; // Avoids potential integer overflow.
+
+    /**
+     * Given an array of ones and zeroes, convert the equivalent binary value to an integer.
+     * @param binary A list of integers (0s and 1s).
+     * @return The integer representation of the binary value.
+     */
+    public static int binaryArrayToInteger(List<Integer> binary) {
+        if (binary == null) {
+            return 0;
         }
-        return result;
+        int number = 0;
+        for (int bit : binary) {
+            // Left shift the current number by 1 and add the new bit.
+            number = (number << 1) | bit;
+        }
+        return number;
     }
 
     public static void main(String[] args) {
-        int[] test1 = {0, 0, 0, 1};
-        int[] test2 = {0, 0, 1, 0};
-        int[] test3 = {0, 1, 0, 1};
-        int[] test4 = {1, 0, 0, 1};
-        int[] test5 = {1, 1, 1, 1};
+        // Test Case 1
+        List<Integer> test1 = Arrays.asList(0, 0, 0, 1);
+        System.out.println("Testing: [0, 0, 0, 1] ==> " + binaryArrayToInteger(test1));
 
+        // Test Case 2
+        List<Integer> test2 = Arrays.asList(0, 0, 1, 0);
+        System.out.println("Testing: [0, 0, 1, 0] ==> " + binaryArrayToInteger(test2));
 
-        System.out.println("Testing: " + Arrays.toString(test1) + " ==> " + binaryArrayToInt(test1));
-        System.out.println("Testing: " + Arrays.toString(test2) + " ==> " + binaryArrayToInt(test2));
-        System.out.println("Testing: " + Arrays.toString(test3) + " ==> " + binaryArrayToInt(test3));
-        System.out.println("Testing: " + Arrays.toString(test4) + " ==> " + binaryArrayToInt(test4));
-        System.out.println("Testing: " + Arrays.toString(test5) + " ==> " + binaryArrayToInt(test5));
+        // Test Case 3
+        List<Integer> test3 = Arrays.asList(0, 1, 0, 1);
+        System.out.println("Testing: [0, 1, 0, 1] ==> " + binaryArrayToInteger(test3));
+
+        // Test Case 4
+        List<Integer> test4 = Arrays.asList(1, 0, 0, 1);
+        System.out.println("Testing: [1, 0, 0, 1] ==> " + binaryArrayToInteger(test4));
+
+        // Test Case 5
+        List<Integer> test5 = Arrays.asList(1, 1, 1, 1);
+        System.out.println("Testing: [1, 1, 1, 1] ==> " + binaryArrayToInteger(test5));
     }
 }

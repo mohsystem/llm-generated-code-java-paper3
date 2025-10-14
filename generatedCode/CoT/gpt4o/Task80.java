@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;

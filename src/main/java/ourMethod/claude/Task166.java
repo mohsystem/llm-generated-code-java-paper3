@@ -1,51 +1,62 @@
 package ourMethod.claude;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Task166 {
-    public static int[] posNegSort(int[] arr) {
-        if (arr == null || arr.length == 0) {
-            return new int[0];
+    public static List<Integer> posNegSort(List<Integer> arr) {
+        if (arr == null) {
+            return new ArrayList<>();
         }
         
-        // Get positive numbers
-        int posCount = 0;
-        for (int num : arr) {
+        // Create a copy to avoid modifying the input
+        List<Integer> result = new ArrayList<>(arr);
+        
+        // Extract positive numbers and sort them
+        List<Integer> positives = new ArrayList<>();
+        for (Integer num : result) {
             if (num > 0) {
-                posCount++;
+                positives.add(num);
             }
         }
+        Collections.sort(positives);
         
-        // Create array of positive numbers
-        int[] positives = new int[posCount];
+        // Replace positive numbers in result with sorted ones
         int posIndex = 0;
-        for (int num : arr) {
-            if (num > 0) {
-                positives[posIndex++] = num;
-            }
-        }
-        
-        // Sort positive numbers
-        java.util.Arrays.sort(positives);
-        
-        // Create result array by placing sorted positives in original positions
-        int[] result = new int[arr.length];
-        posIndex = 0;
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] > 0) {
-                result[i] = positives[posIndex++];
-            } else {
-                result[i] = arr[i];
+        for (int i = 0; i < result.size(); i++) {
+            if (result.get(i) > 0) {
+                result.set(i, positives.get(posIndex));
+                posIndex++;
             }
         }
         
         return result;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(java.util.Arrays.toString(posNegSort(new int[]{6, 3, -2, 5, -8, 2, -2})));
-        System.out.println(java.util.Arrays.toString(posNegSort(new int[]{6, 5, 4, -1, 3, 2, -1, 1})));
-        System.out.println(java.util.Arrays.toString(posNegSort(new int[]{-5, -5, -5, -5, 7, -5})));
-        System.out.println(java.util.Arrays.toString(posNegSort(new int[]{})));
-        System.out.println(java.util.Arrays.toString(posNegSort(new int[]{1, 2, 3, 4, 5})));
+        // Test case 1
+        List<Integer> test1 = new ArrayList<>();
+        test1.add(6); test1.add(3); test1.add(-2); test1.add(5); test1.add(-8); test1.add(2); test1.add(-2);
+        System.out.println(posNegSort(test1));
+        
+        // Test case 2
+        List<Integer> test2 = new ArrayList<>();
+        test2.add(6); test2.add(5); test2.add(4); test2.add(-1); test2.add(3); test2.add(2); test2.add(-1); test2.add(1);
+        System.out.println(posNegSort(test2));
+        
+        // Test case 3
+        List<Integer> test3 = new ArrayList<>();
+        test3.add(-5); test3.add(-5); test3.add(-5); test3.add(-5); test3.add(7); test3.add(-5);
+        System.out.println(posNegSort(test3));
+        
+        // Test case 4
+        List<Integer> test4 = new ArrayList<>();
+        System.out.println(posNegSort(test4));
+        
+        // Test case 5
+        List<Integer> test5 = new ArrayList<>();
+        test5.add(-1); test5.add(-2); test5.add(-3);
+        System.out.println(posNegSort(test5));
     }
 }

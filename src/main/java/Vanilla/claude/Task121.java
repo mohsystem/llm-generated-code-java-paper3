@@ -1,45 +1,102 @@
 package Vanilla.claude;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
 
 public class Task121 {
-    public boolean uploadFile(String sourcePath, String destinationPath) {
-        File sourceFile = new File(sourcePath);
-        File destFile = new File(destinationPath);
-        
-        if (!sourceFile.exists()) {
-            return false;
-        }
+    private static final String UPLOAD_DIRECTORY = "uploads";
 
+    public static boolean uploadFile(String sourceFilePath, String destinationFileName) {
         try {
-            FileInputStream fis = new FileInputStream(sourceFile);
-            FileOutputStream fos = new FileOutputStream(destFile);
-            FileChannel source = fis.getChannel();
-            FileChannel destination = fos.getChannel();
-            destination.transferFrom(source, 0, source.size());
-            
-            source.close();
-            destination.close();
-            fis.close();
-            fos.close();
+            // Create upload directory if it doesn't exist           
+            File uploadDir = new File(UPLOAD_DIRECTORY);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }                        // Read source file
+            File sourceFile = new File(sourceFilePath);
+            if (!sourceFile.exists()) {
+                System.out.println("Source file does not exist: " + sourceFilePath);
+                return false;
+            }
+            // Copy file to upload directory
+            Path source = sourceFile.toPath();
+            Path destination = Paths.get(UPLOAD_DIRECTORY, destinationFileName);
+            Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("File uploaded successfully: " + destinationFileName);
             return true;
         } catch (IOException e) {
+            System.out.println("Error uploading file: " + e.getMessage());
             return false;
         }
     }
 
+    public static boolean uploadFileWithContent(String fileName, String content) {
+        try {            // Create upload directory if it doesn't exist
+            File uploadDir = new File(UPLOAD_DIRECTORY);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            // Write content to file
+            Path destination = Paths.get(UPLOAD_DIRECTORY, fileName);
+            Files.write(destination, content.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            System.out.println("File uploaded successfully: " + fileName);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error uploading file: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static List<String> listUploadedFiles() {
+        List<String> files = new ArrayList<>();
+        File uploadDir = new File(UPLOAD_DIRECTORY);
+
+        if (uploadDir.exists() && uploadDir.isDirectory()) {
+            File[] fileList = uploadDir.listFiles();
+            if (fileList != null) {
+                for (File file : fileList) {
+                    if (file.isFile()) {
+                        files.add(file.getName());
+                    }
+                }
+            }
+        }
+
+        return files;
+    }
+
     public static void main(String[] args) {
-        Task121 uploader = new Task121();
-        
-        // Test cases
-        System.out.println("Test 1: " + uploader.uploadFile("test1.txt", "upload/test1.txt"));
-        System.out.println("Test 2: " + uploader.uploadFile("image.jpg", "upload/image.jpg"));
-        System.out.println("Test 3: " + uploader.uploadFile("doc.pdf", "upload/doc.pdf"));
-        System.out.println("Test 4: " + uploader.uploadFile("nonexistent.txt", "upload/test.txt"));
-        System.out.println("Test 5: " + uploader.uploadFile("data.csv", "upload/data.csv"));
+        System.out.println("=== File Upload Program ===\\n");
+
+        // Test Case 1: Upload a file with content
+        System.out.println("Test Case 1: Upload text file");
+        boolean result1 = uploadFileWithContent("test1.txt", "Hello, this is test file 1!");
+        System.out.println("Result: " + result1 + "\\n");
+
+        // Test Case 2: Upload another file with content
+        System.out.println("Test Case 2: Upload document");
+        boolean result2 = uploadFileWithContent("document.txt", "This is a sample document with multiple lines.\\nLine 2\\nLine 3");
+        System.out.println("Result: " + result2 + "\\n");
+
+        // Test Case 3: Upload a file with JSON content
+        System.out.println("Test Case 3: Upload JSON file");
+        boolean result3 = uploadFileWithContent("data.json", "{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}");
+        System.out.println("Result: " + result3 + "\\n");
+
+        // Test Case 4: Upload a file with special characters
+        System.out.println("Test Case 4: Upload file with special characters");
+        boolean result4 = uploadFileWithContent("special.txt", "Special chars: !@#$%^&*()");
+        System.out.println("Result: " + result4 + "\\n");
+
+        // Test Case 5: List all uploaded files
+        System.out.println("Test Case 5: List all uploaded files");
+        List<String> uploadedFiles = listUploadedFiles();
+        System.out.println("Uploaded files:");
+        for (String file : uploadedFiles) {
+            System.out.println("  - " + file);
+        }
     }
 }

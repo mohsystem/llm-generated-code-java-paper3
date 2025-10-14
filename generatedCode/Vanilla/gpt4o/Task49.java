@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 // Simple representation, no actual API or database connection
 import java.util.ArrayList;
 import java.util.List;

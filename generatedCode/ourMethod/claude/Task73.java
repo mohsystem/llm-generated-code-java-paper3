@@ -27,7 +27,7 @@ public class Task73 {
         }
         
         // Check for at least 1 special character
-        if(!password.matches(".*[!@#$%^&*()_+\\\\-=\\\\[\\\\]{};':\\"\\\\\\\\|,.<>\\\\/?].*")) {
+        if(!password.matches(".*[!@#$%^&*()_+\\\\-=\\\\[\\\\]{};':\"\\\\\\\\|,.<>\\\\/?].*")) {
             return false;
         }
         

@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task155 {
     public static void heapSort(int[] arr) {
         int n = arr.length;

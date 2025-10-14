@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.sql.*;
 
 public class Task37 {

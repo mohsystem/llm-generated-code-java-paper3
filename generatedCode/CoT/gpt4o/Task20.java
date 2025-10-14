@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task20 {
 
     public static int findK(int n, int p) {

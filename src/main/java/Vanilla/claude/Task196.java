@@ -1,91 +1,113 @@
 package Vanilla.claude;
 
+import java.util.concurrent.Semaphore;
+import java.util.function.IntConsumer;
+
 class Task196 {
-    static class ZeroEvenOdd {
-        private int n;
-        private int state = 0; // 0: print zero, 1: print odd, 2: print even
-        private int current = 1;
-        
-        public ZeroEvenOdd(int n) {
-            this.n = n;
-        }
-        
-        public synchronized void zero() throws InterruptedException {
-            while (current <= n) {
-                while (state != 0 && current <= n) {
-                    wait();
-                }
-                if (current <= n) {
-                    System.out.print(0);
-                    state = (current % 2 == 0) ? 2 : 1;
-                    notifyAll();
-                }
-            }
-        }
-        
-        public synchronized void even() throws InterruptedException {
-            while (current <= n) {
-                while (state != 2 && current <= n) {
-                    wait();
-                }
-                if (current <= n) {
-                    System.out.print(current);
-                    current++;
-                    state = 0;
-                    notifyAll();
-                }
-            }
-        }
-        
-        public synchronized void odd() throws InterruptedException {
-            while (current <= n) {
-                while (state != 1 && current <= n) {
-                    wait();
-                }
-                if (current <= n) {
-                    System.out.print(current);
-                    current++;
-                    state = 0;
-                    notifyAll();
-                }
+    private int n;
+    private Semaphore zeroSem;
+    private Semaphore oddSem;
+    private Semaphore evenSem;
+
+    public Task196(int n) {
+        this.n = n;
+        this.zeroSem = new Semaphore(1);
+        this.oddSem = new Semaphore(0);
+        this.evenSem = new Semaphore(0);
+    }
+
+    public void zero(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            zeroSem.acquire();
+            printNumber.accept(0);
+            if (i % 2 == 1) {
+                oddSem.release();
+            } else {
+                evenSem.release();
             }
         }
     }
-    
-    public static void main(String[] args) {
-        int[] testCases = {2, 5, 1, 3, 4};
-        
-        for (int n : testCases) {
-            System.out.println("\\nTest case n = " + n);
-            ZeroEvenOdd zeo = new ZeroEvenOdd(n);
-            
-            Thread t1 = new Thread(() -> {
-                try {
-                    zeo.zero();
-                } catch (InterruptedException e) {}
-            });
-            
-            Thread t2 = new Thread(() -> {
-                try {
-                    zeo.even();
-                } catch (InterruptedException e) {}
-            });
-            
-            Thread t3 = new Thread(() -> {
-                try {
-                    zeo.odd();
-                } catch (InterruptedException e) {}
-            });
-            
-            t1.start();
-            t2.start();
-            t3.start();
-            
-            try {
-                t1.join();
-                t2.join();
-                t3.join();
-            } catch (InterruptedException e) {}
+
+    public void even(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 2; i <= n; i += 2) {
+            evenSem.acquire();
+            printNumber.accept(i);
+            zeroSem.release();
         }
+    }
+
+    public void odd(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i += 2) {
+            oddSem.acquire();
+            printNumber.accept(i);
+            zeroSem.release();
+        }
+    }
+
+    public static void main(String[] args) {
+        // Test case 1
+        System.out.print("Test 1 (n=2): ");
+        testCase(2);
+        
+        // Test case 2
+        System.out.print("Test 2 (n=5): ");
+        testCase(5);
+        
+        // Test case 3
+        System.out.print("Test 3 (n=1): ");
+        testCase(1);
+        
+        // Test case 4
+        System.out.print("Test 4 (n=10): ");
+        testCase(10);
+        
+        // Test case 5
+        System.out.print("Test 5 (n=7): ");
+        testCase(7);
+    }
+
+    private static void testCase(int n) {
+        Task196 zeo = new Task196(n);
+        StringBuilder result = new StringBuilder();
+        
+        IntConsumer printNumber = num -> result.append(num);
+        
+        Thread t1 = new Thread(() -> {
+            try {
+                zeo.zero(printNumber);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        
+        Thread t2 = new Thread(() -> {
+            try {
+                zeo.even(printNumber);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        
+        Thread t3 = new Thread(() -> {
+            try {
+                zeo.odd(printNumber);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        
+        t1.start();
+        t2.start();
+        t3.start();
+        
+        try {
+            t1.join();
+            t2.join();
+            t3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println(result.toString());
     }
 }

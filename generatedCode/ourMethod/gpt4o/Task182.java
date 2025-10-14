@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task182 {
     public static String cleanPhoneNumber(String input) {
         input = input.replaceAll("[^0-9]", ""); // Remove all non-numeric characters

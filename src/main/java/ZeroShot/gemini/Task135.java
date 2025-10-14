@@ -1,61 +1,116 @@
 package ZeroShot.gemini;
-import javax.servlet.http.*;
-import java.util.UUID;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Task135 {
 
-    public static String generateCSRFToken() {
-        return UUID.randomUUID().toString();
+    // Simulates a server-side session store (e.g., in-memory, Redis, etc.)
+    // Maps Session ID -> CSRF Token
+    private static final Map<String, String> sessionStore = new HashMap<>();
+    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
+
+    /**
+     * Generates a cryptographically strong random token.
+     * @return A new CSRF token as a Base64 encoded string.
+     */
+    private static String generateToken() {
+        byte[] randomBytes = new byte[32];
+        secureRandom.nextBytes(randomBytes);
+        return base64Encoder.encodeToString(randomBytes);
     }
 
-    public static void storeCSRFToken(HttpServletRequest request, HttpServletResponse response, String token) {
-        HttpSession session = request.getSession();
-        session.setAttribute("csrfToken", token);
-        response.setHeader("CSRF-Token", token); // Optional: For APIs
+    /**
+     * Simulates a user requesting a page with a form.
+     * The server generates a CSRF token, stores it in the user's session,
+     * and sends it to the client to be included in the form.
+     *
+     * @param sessionId The user's session identifier.
+     * @return The generated CSRF token.
+     */
+    public static String generateCsrfToken(String sessionId) {
+        if (sessionId == null || sessionId.isEmpty()) {
+            throw new IllegalArgumentException("Session ID cannot be null or empty.");
+        }
+        String token = generateToken();
+        sessionStore.put(sessionId, token);
+        return token;
     }
-    
-    public static boolean verifyCSRFToken(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
+
+    /**
+     * Simulates a form submission from a user.
+     * The server validates the submitted token against the one stored in the session.
+     *
+     * @param sessionId The user's session identifier.
+     * @param submittedToken The CSRF token received from the submitted form.
+     * @return true if the token is valid, false otherwise.
+     */
+    public static boolean validateCsrfToken(String sessionId, String submittedToken) {
+        if (sessionId == null || submittedToken == null) {
             return false;
         }
-        String storedToken = (String) session.getAttribute("csrfToken");
-        String requestToken = request.getHeader("CSRF-Token"); // For APIs
-        if (requestToken == null) {
-            requestToken = request.getParameter("csrfToken"); // For forms
+
+        String storedToken = sessionStore.get(sessionId);
+        if (storedToken == null) {
+            return false; // No session or token found for this user
         }
 
-        if (storedToken != null && requestToken != null && storedToken.equals(requestToken)) {
-             session.removeAttribute("csrfToken"); //Important: prevent reuse!
-             return true;
-        }
-        return false;
+        // Use a constant-time comparison to prevent timing attacks
+        return Objects.equals(storedToken, submittedToken);
     }
 
+
     public static void main(String[] args) {
-         // Test cases (Illustrative - requires a web server context to run properly)
-        HttpServletRequest mockRequest = null; // Replace with a mock request object
-        HttpServletResponse mockResponse = null; // Replace with a mock response object
+        System.out.println("--- CSRF Protection Simulation ---");
 
-        // Test 1: Generate and store token
-        String token1 = generateCSRFToken();
-        storeCSRFToken(mockRequest, mockResponse, token1);
+        String user1SessionId = "session_abc_123";
+        String user2SessionId = "session_xyz_789";
 
-        // Test 2: Verify valid token
-        // ... (Set up mockRequest with the token1)
-        // boolean valid1 = verifyCSRFToken(mockRequest);
+        // Test Case 1: Valid request
+        System.out.println("\n--- Test Case 1: Valid Request ---");
+        String user1Token = generateCsrfToken(user1SessionId);
+        System.out.println("User 1 generated token: " + user1Token);
+        boolean isValid1 = validateCsrfToken(user1SessionId, user1Token);
+        System.out.println("Form submission with correct token is valid: " + isValid1);
+        assert isValid1;
 
-        // Test 3: Verify invalid token
-        // ... (Set up mockRequest with an incorrect token)
-        // boolean valid2 = verifyCSRFToken(mockRequest);
+        // Test Case 2: Invalid request (wrong token)
+        System.out.println("\n--- Test Case 2: Invalid Request (Wrong Token) ---");
+        String attackerToken = "fake_malicious_token";
+        System.out.println("User 1 submitting with a wrong token: " + attackerToken);
+        boolean isValid2 = validateCsrfToken(user1SessionId, attackerToken);
+        System.out.println("Form submission with wrong token is valid: " + isValid2);
+        assert !isValid2;
 
-        // Test 4: Verify token after verification (should be invalid)
-        // boolean valid3 = verifyCSRFToken(mockRequest); 
+        // Test Case 3: Invalid request (missing token)
+        System.out.println("\n--- Test Case 3: Invalid Request (Missing Token) ---");
+        boolean isValid3 = validateCsrfToken(user1SessionId, null);
+        System.out.println("Form submission with missing token is valid: " + isValid3);
+        assert !isValid3;
 
-        // Test 5: Verify with no session
-        // ... (Set up mockRequest without a session)
-        // boolean valid4 = verifyCSRFToken(mockRequest);
-
-        System.out.println("Test cases completed.  These require a web server context to fully execute.");
+        // Test Case 4: Invalid request (token from a different user's session)
+        System.out.println("\n--- Test Case 4: Invalid Request (Token from another session) ---");
+        String user2Token = generateCsrfToken(user2SessionId);
+        System.out.println("User 2 generated token: " + user2Token);
+        System.out.println("User 1 attempts to submit form with User 2's token.");
+        boolean isValid4 = validateCsrfToken(user1SessionId, user2Token);
+        System.out.println("Submission is valid: " + isValid4);
+        assert !isValid4;
+        
+        // Test Case 5: Valid request after token regeneration (e.g., user logs in again)
+        System.out.println("\n--- Test Case 5: Valid Request after Token Regeneration ---");
+        System.out.println("User 1 old token: " + user1Token);
+        String user1NewToken = generateCsrfToken(user1SessionId); // Token is regenerated
+        System.out.println("User 1 new token: " + user1NewToken);
+        boolean isValid5_old = validateCsrfToken(user1SessionId, user1Token); // Old token is now invalid
+        boolean isValid5_new = validateCsrfToken(user1SessionId, user1NewToken); // New token is valid
+        System.out.println("Submission with old token is valid: " + isValid5_old);
+        System.out.println("Submission with new token is valid: " + isValid5_new);
+        assert !isValid5_old;
+        assert isValid5_new;
     }
 }

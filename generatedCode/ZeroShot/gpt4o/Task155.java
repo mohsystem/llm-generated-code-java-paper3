@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task155 {
     public static void heapSort(int[] arr) {
         int n = arr.length;

@@ -1,58 +1,96 @@
 package CoT.gemini;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Task154 {
-    private static Map<Integer, List<Integer>> graph;
-    private static Set<Integer> visited;
 
-    public static List<Integer> depthFirstSearch(Map<Integer, List<Integer>> graphInput, int startNode) {
-        graph = graphInput;
-        visited = new HashSet<>();
-        List<Integer> result = new ArrayList<>();
-        dfs(startNode, result);
-        return result;
-    }
+    // Graph class representing an adjacency list
+    static class Graph {
+        private final int V; // Number of vertices
+        private final List<List<Integer>> adj; // Adjacency list
 
-    private static void dfs(int node, List<Integer> result) {
-        visited.add(node);
-        result.add(node);
-        if (graph.containsKey(node)) {
-            for (int neighbor : graph.get(node)) {
-                if (!visited.contains(neighbor)) {
-                    dfs(neighbor, result);
+        public Graph(int V) {
+            if (V < 0) {
+                throw new IllegalArgumentException("Number of vertices must be non-negative");
+            }
+            this.V = V;
+            adj = new ArrayList<>(V);
+            for (int i = 0; i < V; i++) {
+                adj.add(new ArrayList<>());
+            }
+        }
+
+        // Function to add an edge to the graph (undirected)
+        public void addEdge(int v, int w) {
+            if (v < 0 || v >= V || w < 0 || w >= V) {
+                System.err.println("Error: Vertex out of bounds.");
+                return;
+            }
+            adj.get(v).add(w);
+            adj.get(w).add(v); // For undirected graph
+        }
+
+        // A recursive helper function for DFS
+        private void dfsUtil(int v, boolean[] visited, List<Integer> result) {
+            visited[v] = true;
+            result.add(v);
+
+            for (int neighbor : adj.get(v)) {
+                if (!visited[neighbor]) {
+                    dfsUtil(neighbor, visited, result);
                 }
             }
+        }
+
+        // The main function that performs DFS traversal
+        public List<Integer> dfs(int startNode) {
+            List<Integer> result = new ArrayList<>();
+            if (startNode < 0 || startNode >= V) {
+                System.err.println("Error: Start node is out of bounds.");
+                return result; // Return empty list for invalid start node
+            }
+            
+            boolean[] visited = new boolean[V];
+            dfsUtil(startNode, visited, result);
+            return result;
         }
     }
 
     public static void main(String[] args) {
-        Map<Integer, List<Integer>> graph1 = new HashMap<>();
-        graph1.put(0, Arrays.asList(1, 2));
-        graph1.put(1, Arrays.asList(2));
-        graph1.put(2, Arrays.asList(0, 3));
-        graph1.put(3, Arrays.asList(3));
-        System.out.println(depthFirstSearch(graph1, 2));
+        int numVertices = 8;
+        Graph g = new Graph(numVertices);
 
-        Map<Integer, List<Integer>> graph2 = new HashMap<>();
-        graph2.put(0, Arrays.asList(1, 2));
-        graph2.put(1, Arrays.asList(0, 3, 4));
-        graph2.put(2, Arrays.asList(0));
-        graph2.put(3, Arrays.asList(1));
-        graph2.put(4, Arrays.asList(1));
+        // Create a sample graph
+        g.addEdge(0, 1);
+        g.addEdge(0, 2);
+        g.addEdge(1, 3);
+        g.addEdge(1, 4);
+        g.addEdge(2, 5);
+        g.addEdge(2, 6);
+        g.addEdge(3, 7);
+        // Node 7 is connected to 3
 
-        System.out.println(depthFirstSearch(graph2, 0));
+        System.out.println("Depth First Traversal (starting from various nodes):");
 
-         Map<Integer, List<Integer>> graph3 = new HashMap<>();
-        System.out.println(depthFirstSearch(graph3, 0));
+        // Test Case 1
+        int startNode1 = 0;
+        System.out.println("Test Case 1 (Start from " + startNode1 + "): " + g.dfs(startNode1));
 
+        // Test Case 2
+        int startNode2 = 3;
+        System.out.println("Test Case 2 (Start from " + startNode2 + "): " + g.dfs(startNode2));
 
-        Map<Integer, List<Integer>> graph4 = new HashMap<>();
-        graph4.put(0, Arrays.asList(1,2,3));
-        System.out.println(depthFirstSearch(graph4, 0));
+        // Test Case 3
+        int startNode3 = 2;
+        System.out.println("Test Case 3 (Start from " + startNode3 + "): " + g.dfs(startNode3));
 
-        Map<Integer, List<Integer>> graph5 = new HashMap<>();
-        graph5.put(0, new ArrayList<>());
-        System.out.println(depthFirstSearch(graph5, 0));
+        // Test Case 4
+        int startNode4 = 6;
+        System.out.println("Test Case 4 (Start from " + startNode4 + "): " + g.dfs(startNode4));
 
+        // Test Case 5
+        int startNode5 = 5;
+        System.out.println("Test Case 5 (Start from " + startNode5 + "): " + g.dfs(startNode5));
     }
 }

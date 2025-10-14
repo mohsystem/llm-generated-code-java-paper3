@@ -1,42 +1,79 @@
 package ourMethod.gemini;
+
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.PriorityQueue;
 
-class Task147 {
-    public int findKthLargest(int[] nums, int k) {
+/**
+ * Task147 class to find the kth largest element in an array.
+ */
+public class Task147 {
+
+    /**
+     * Finds the kth largest element in an array of integers.
+     * This implementation sorts a copy of the array and picks the element at the correct index.
+     *
+     * @param nums The input array of integers.
+     * @param k    The rank of the element to find (1-based index).
+     * @return The kth largest element.
+     * @throws IllegalArgumentException if the input is invalid (e.g., null array, k is out of bounds).
+     */
+    public static int findKthLargest(int[] nums, int k) {
         if (nums == null || nums.length == 0 || k <= 0 || k > nums.length) {
-            throw new IllegalArgumentException("Invalid input");
-        }
-        // Using a min-heap to store the k largest elements seen so far
-        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
-        for (int num : nums) {
-            minHeap.offer(num);
-            if (minHeap.size() > k) {
-                minHeap.poll(); // Remove the smallest element if heap size exceeds k
-            }
+            throw new IllegalArgumentException("Invalid input: array must not be null or empty, and k must be within the bounds [1, array.length].");
         }
 
-        return minHeap.peek();
+        // To find the kth largest, we can sort the array in ascending order and find the element at index (length - k).
+        // A copy is made to avoid modifying the original array passed by the caller.
+        int[] sortedNums = nums.clone();
+        Arrays.sort(sortedNums);
+        
+        return sortedNums[sortedNums.length - k];
     }
 
-
+    /**
+     * The main method with test cases.
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
-        Task147 task147 = new Task147();
-        int[] test1 = {3, 2, 1, 5, 6, 4};
-        System.out.println(task147.findKthLargest(test1, 2)); // Expected 5
+        // Test cases
+        int[][] testArrays = {
+            {3, 2, 1, 5, 6, 4},
+            {3, 2, 3, 1, 2, 4, 5, 5, 6},
+            {1},
+            {99, 99},
+            {-1, -1, -2, -5}
+        };
+        int[] testKs = {2, 4, 1, 1, 3};
+        int[] expectedResults = {5, 4, 1, 99, -2};
 
-        int[] test2 = {3, 2, 3, 1, 2, 4, 5, 5, 6};
-        System.out.println(task147.findKthLargest(test2, 4)); // Expected 4
+        for (int i = 0; i < testArrays.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Input array: " + Arrays.toString(testArrays[i]));
+            System.out.println("k: " + testKs[i]);
+            try {
+                int result = findKthLargest(testArrays[i], testKs[i]);
+                System.out.println("Result: " + result);
+                System.out.println("Expected: " + expectedResults[i]);
+                if (result == expectedResults[i]) {
+                    System.out.println("Status: PASSED");
+                } else {
+                    System.out.println("Status: FAILED");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println("Caught exception: " + e.getMessage());
+                System.out.println("Status: FAILED (exception not expected)");
+            }
+            System.out.println("--------------------");
+        }
 
-        int[] test3 = {1};
-        System.out.println(task147.findKthLargest(test3, 1)); // Expected 1
-
-        int[] test4 = {1, 2};
-        System.out.println(task147.findKthLargest(test4, 1)); // Expected 2
-
-        int[] test5 = {4, 2, 7, 1, 9, 5};
-        System.out.println(task147.findKthLargest(test5, 3)); // Expected 5
-
+        // Additional test case for invalid input
+        System.out.println("Test Case 6: Invalid k (k=4 for array of size 3)");
+        try {
+            findKthLargest(new int[]{1, 2, 3}, 4);
+            System.out.println("Status: FAILED (exception was expected)");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+            System.out.println("Status: PASSED");
+        }
+        System.out.println("--------------------");
     }
 }

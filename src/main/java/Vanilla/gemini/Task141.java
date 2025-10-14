@@ -1,15 +1,32 @@
 package Vanilla.gemini;
-class Task141 {
-    public String reverseString(String str) {
+
+public class Task141 {
+
+    /**
+     * Reverses a given string.
+     * @param str The string to be reversed.
+     * @return The reversed string.
+     */
+    public static String reverseString(String str) {
+        if (str == null) {
+            return null;
+        }
         return new StringBuilder(str).reverse().toString();
     }
 
     public static void main(String[] args) {
-        Task141 task = new Task141();
-        System.out.println(task.reverseString("hello")); // olleh
-        System.out.println(task.reverseString("world")); // dlrow
-        System.out.println(task.reverseString("racecar")); // racecar
-        System.out.println(task.reverseString("madam")); // madam
-        System.out.println(task.reverseString("")); // 
+        String[] testCases = {
+            "hello",
+            "world",
+            "Java",
+            "12345",
+            ""
+        };
+
+        System.out.println("Java Test Cases:");
+        for (String test : testCases) {
+            String reversed = reverseString(test);
+            System.out.println("Original: \"" + test + "\", Reversed: \"" + reversed + "\"");
+        }
     }
 }

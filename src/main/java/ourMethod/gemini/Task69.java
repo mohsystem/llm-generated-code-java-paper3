@@ -1,48 +1,124 @@
 package ourMethod.gemini;
-import java.io.File;
+
 import java.io.IOException;
+import java.nio.file.*;
 
 public class Task69 {
 
-    public static boolean deleteFile(String filePath) {
-        File file = new File(filePath);
-
-        if (!file.exists()) {
+    /**
+     * Deletes a file at the given path after performing security checks.
+     * It will not delete directories or symbolic links.
+     *
+     * @param filePathString The path to the file to be deleted.
+     * @return true if the file was successfully deleted, false otherwise.
+     */
+    public static boolean deleteFile(String filePathString) {
+        if (filePathString == null || filePathString.trim().isEmpty()) {
+            System.err.println("Error: File path cannot be null or empty.");
             return false;
         }
 
-        if (file.isDirectory()) {
-            return false;
+        try {
+            Path path = Paths.get(filePathString);
+
+            // Security Check: Do not follow symbolic links for checks.
+            // This helps mitigate TOCTOU vulnerabilities where a file is replaced by a link.
+            if (Files.isSymbolicLink(path)) {
+                System.err.println("Error: Deleting symbolic links is not allowed for security reasons. Path: " + path);
+                return false;
+            }
+
+            // Check existence after symlink check to avoid race conditions on the type.
+            if (!Files.exists(path)) {
+                System.err.println("Error: File does not exist. Path: " + path);
+                return false;
+            }
+
+            // Security Check: Ensure the path is not a directory.
+            if (Files.isDirectory(path)) {
+                System.err.println("Error: Path is a directory, not a file. Path: " + path);
+                return false;
+            }
+
+            // Security Check: Ensure it is a regular file.
+            if (!Files.isRegularFile(path)) {
+                System.err.println("Error: Path is not a regular file. Path: " + path);
+                return false;
+            }
+
+            Files.delete(path);
+            System.out.println("Successfully deleted file: " + path);
+            return true;
+
+        } catch (InvalidPathException e) {
+            System.err.println("Error: Invalid file path provided. " + e.getMessage());
+        } catch (NoSuchFileException e) {
+            System.err.println("Error: File not found for deletion. It may have been removed by another process. Path: " + e.getFile());
+        } catch (SecurityException e) {
+            System.err.println("Error: Permission denied. Could not delete file. " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("An I/O error occurred: " + e.getMessage());
         }
-
-
-        return file.delete();
+        return false;
     }
 
-    public static void main(String[] args) throws IOException {
-        // Test cases
-        System.out.println("Test case 1: " + deleteFile("test1.txt")); // File exists
-        File test2 = new File("test2.txt");
-        test2.createNewFile();
-        System.out.println("Test case 2: " + deleteFile("test2.txt")); // File created and deleted
-        System.out.println("Test case 3: " + deleteFile("nonexistent.txt")); // File does not exist
-        File test4 = new File("test_dir");
-        test4.mkdir();
-        System.out.println("Test case 4: " + deleteFile("test_dir")); // Path is a directory
-        File test5 = new File("test3.txt");
-        test5.createNewFile();
-        test5.setReadOnly();
-        System.out.println("Test case 5: " + deleteFile("test3.txt")); // File is read-only (may fail on some systems)
+    private static void runTest(String testName, String path) {
+        System.out.println("--- " + testName + " ---");
+        System.out.println("Attempting to delete: " + path);
+        deleteFile(path);
+        System.out.println();
+    }
 
-        // Clean up test directory if it still exists (e.g., if setReadOnly failed)
-        if (test4.exists()) {
-            test4.delete();
+    public static void main(String[] args) {
+        if (args.length == 1) {
+            deleteFile(args[0]);
+        } else {
+            System.out.println("Usage: java Task69 <file_path>");
+            System.out.println("\n--- No file path provided, running built-in test cases ---");
+
+            // Setup for tests
+            Path testFile = Paths.get("test_file_java.txt");
+            Path testDir = Paths.get("test_dir_java");
+            Path testLink = Paths.get("test_link_java.txt");
+            Path nonExistentFile = Paths.get("non_existent_file.txt");
+            
+            try {
+                Files.deleteIfExists(testFile);
+                Files.deleteIfExists(testDir);
+                Files.deleteIfExists(testLink);
+
+                Files.createFile(testFile);
+                Files.createDirectory(testDir);
+                try {
+                    Files.createSymbolicLink(testLink, testFile);
+                } catch (IOException | UnsupportedOperationException e) {
+                    System.err.println("Warning: Could not create symbolic link for test. " + e.getMessage());
+                }
+                
+                // --- 5 Test Cases ---
+                runTest("Test Case 1: Delete existing file", testFile.toString());
+                runTest("Test Case 2: Delete non-existent file", nonExistentFile.toString());
+                runTest("Test Case 3: Delete a directory", testDir.toString());
+                if (Files.exists(testLink, LinkOption.NOFOLLOW_LINKS)) {
+                    runTest("Test Case 4: Delete a symbolic link", testLink.toString());
+                } else {
+                    System.out.println("--- Skipping Test Case 4: Symbolic link was not created ---");
+                }
+                runTest("Test Case 5: Re-delete already deleted file", testFile.toString());
+                
+            } catch (IOException e) {
+                System.err.println("Error during test setup: " + e.getMessage());
+            } finally {
+                // Cleanup
+                try {
+                    Files.deleteIfExists(testDir);
+                    Files.deleteIfExists(testLink);
+                    Files.deleteIfExists(testFile);
+                    System.out.println("--- Test cleanup complete ---");
+                } catch (IOException e) {
+                    System.err.println("Error during cleanup: " + e.getMessage());
+                }
+            }
         }
-
-        if (test5.exists()) {
-            test5.setWritable(true); // Make writable before attempting to delete
-            test5.delete();
-        }
-
     }
 }

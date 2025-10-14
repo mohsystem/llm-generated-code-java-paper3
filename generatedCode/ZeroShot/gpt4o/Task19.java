@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task19 {
     public static String spinWords(String sentence) {
         String[] words = sentence.split(" ");

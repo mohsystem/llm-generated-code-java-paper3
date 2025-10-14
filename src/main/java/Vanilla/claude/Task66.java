@@ -1,55 +1,89 @@
 package Vanilla.claude;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 public class Task66 {
+    
     public static String executeCommand(String command) {
         if (command == null || command.trim().isEmpty()) {
-            return "Invalid command: Command cannot be empty";
+            return "Error: Command cannot be empty";
         }
-
+        
+        // Validate command format - basic security check
+        if (!validateCommand(command)) {
+            return "Error: Invalid or potentially dangerous command";
+        }
+        
+        StringBuilder output = new StringBuilder();
         try {
-            Process process = Runtime.getRuntime().exec(new String[]{"bash", "-c", command});
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("bash", "-c", command);
+            processBuilder.redirectErrorStream(true);
             
-            StringBuilder output = new StringBuilder();
+            Process process = processBuilder.start();
+            
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+            );
+            
             String line;
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\\n");
             }
             
-            while ((line = errorReader.readLine()) != null) {
-                output.append("Error: ").append(line).append("\\n");
-            }
-
             int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                output.append("Command exited with code: ").append(exitCode);
+            if (exitCode != 0 && output.length() == 0) {
+                output.append("Command executed with exit code: ").append(exitCode);
             }
             
-            return output.toString().trim();
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             return "Error executing command: " + e.getMessage();
         }
+        
+        return output.toString().trim();
     }
-
-    public static void main(String[] args) {
-        // Test cases
-        String[] testCommands = {
-            "ls -l",
-            "pwd",
-            "echo 'Hello World'",
-            "date",
-            "whoami"
+    
+    private static boolean validateCommand(String command) {
+        // Basic validation - reject potentially dangerous commands
+        String[] dangerousPatterns = {
+            "rm\\\\s+-rf\\\\s+/",
+            ":\\\\(\\\\)\\\\{.*:\\\\|:&\\\\}",  // fork bomb
+            "dd\\\\s+if=",
+            "mkfs",
+            "format",
+            ">(\\\\s)*/dev/sda"
         };
-
-        for (int i = 0; i < testCommands.length; i++) {
-            System.out.println("Test case " + (i + 1) + ": " + testCommands[i]);
-            System.out.println("Output:");
-            System.out.println(executeCommand(testCommands[i]));
-            System.out.println("------------------------");
+        
+        for (String pattern : dangerousPatterns) {
+            if (Pattern.compile(pattern).matcher(command).find()) {
+                return false;
+            }
         }
+        
+        return true;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("Test Case 1: echo 'Hello World'");
+        System.out.println(executeCommand("echo 'Hello World'"));
+        System.out.println();
+        
+        System.out.println("Test Case 2: ls -la | head -5");
+        System.out.println(executeCommand("ls -la | head -5"));
+        System.out.println();
+        
+        System.out.println("Test Case 3: date");
+        System.out.println(executeCommand("date"));
+        System.out.println();
+        
+        System.out.println("Test Case 4: pwd");
+        System.out.println(executeCommand("pwd"));
+        System.out.println();
+        
+        System.out.println("Test Case 5: echo $((5 + 3))");
+        System.out.println(executeCommand("echo $((5 + 3))"));
+        System.out.println();
     }
 }

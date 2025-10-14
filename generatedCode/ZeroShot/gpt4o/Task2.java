@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task2 {
     public static String createPhoneNumber(int[] numbers) {
         if (numbers == null || numbers.length != 10) {

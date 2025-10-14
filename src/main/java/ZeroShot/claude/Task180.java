@@ -2,98 +2,87 @@ package ZeroShot.claude;
 
 import java.util.*;
 
-class Task180 {
-    static class Node {
-        int value;
-        List<Node> children;
-        
-        Node(int value) {
-            this.value = value;
-            this.children = new ArrayList<>();
-        }
+public class Task180 {
+    private Map<Integer, List<Integer>> adjacencyList;
+    
+    public Task180() {
+        adjacencyList = new HashMap<>();
     }
     
-    public static Node reparentTree(Node root, int newRootValue) {
-        // Build adjacency list
-        Map<Integer, List<Integer>> graph = new HashMap<>();
-        buildGraph(root, -1, graph);
+    public Map<Integer, List<Integer>> reparentTree(Map<Integer, List<Integer>> tree, int newRoot) {
+        if (tree == null || tree.isEmpty()) {
+            return new HashMap<>();
+        }
         
-        // Create new tree with BFS
-        Map<Integer, Node> nodes = new HashMap<>();
-        Queue<Integer> queue = new LinkedList<>();
+        if (!tree.containsKey(newRoot)) {
+            return new HashMap<>();
+        }
+        
+        Map<Integer, List<Integer>> result = new HashMap<>();
         Set<Integer> visited = new HashSet<>();
         
-        // Create new root
-        Node newRoot = new Node(newRootValue);
-        nodes.put(newRootValue, newRoot);
-        queue.offer(newRootValue);
-        visited.add(newRootValue);
+        buildReparentedTree(tree, newRoot, -1, visited, result);
         
-        while (!queue.isEmpty()) {
-            int current = queue.poll();
-            Node currentNode = nodes.get(current);
-            
-            for (int neighbor : graph.get(current)) {
-                if (!visited.contains(neighbor)) {
-                    Node newNode = new Node(neighbor);
-                    currentNode.children.add(newNode);
-                    nodes.put(neighbor, newNode);
-                    queue.offer(neighbor);
-                    visited.add(neighbor);
-                }
+        return result;
+    }
+    
+    private void buildReparentedTree(Map<Integer, List<Integer>> tree, int current, int parent, 
+                                     Set<Integer> visited, Map<Integer, List<Integer>> result) {
+        visited.add(current);
+        result.putIfAbsent(current, new ArrayList<>());
+        
+        if (!tree.containsKey(current)) {
+            return;
+        }
+        
+        for (int neighbor : tree.get(current)) {
+            if (!visited.contains(neighbor)) {
+                result.get(current).add(neighbor);
+                buildReparentedTree(tree, neighbor, current, visited, result);
             }
         }
         
-        return newRoot;
-    }
-    
-    private static void buildGraph(Node node, int parent, Map<Integer, List<Integer>> graph) {
-        if (!graph.containsKey(node.value)) {
-            graph.put(node.value, new ArrayList<>());
-        }
-        
         if (parent != -1) {
-            graph.get(node.value).add(parent);
-            graph.get(parent).add(node.value);
-        }
-        
-        for (Node child : node.children) {
-            buildGraph(child, node.value, graph);
-        }
-    }
-    
-    private static void printTree(Node node, String prefix, boolean isLast) {
-        System.out.print(prefix);
-        System.out.print(isLast ? "└── " : "├── ");
-        System.out.println(node.value);
-        
-        for (int i = 0; i < node.children.size(); i++) {
-            printTree(node.children.get(i),
-                     prefix + (isLast ? "    " : "│   "),
-                     i == node.children.size() - 1);
+            result.get(current).add(parent);
         }
     }
     
     public static void main(String[] args) {
-        // Test case 1: Simple tree
-        Node root1 = new Node(0);
-        root1.children.add(new Node(1));
-        root1.children.add(new Node(2));
-        Node newRoot1 = reparentTree(root1, 2);
-        System.out.println("Test case 1:");
-        printTree(newRoot1, "", true);
+        Task180 solution = new Task180();
         
-        // Test case 2: Larger tree
-        Node root2 = new Node(0);
-        root2.children.add(new Node(1));
-        root2.children.add(new Node(2));
-        root2.children.add(new Node(3));
-        root2.children.get(0).children.add(new Node(4));
-        root2.children.get(0).children.add(new Node(5));
-        Node newRoot2 = reparentTree(root2, 4);
-        System.out.println("\\nTest case 2:");
-        printTree(newRoot2, "", true);
+        // Test case 1: Simple tree from example
+        Map<Integer, List<Integer>> tree1 = new HashMap<>();
+        tree1.put(0, Arrays.asList(1, 2, 3));
+        tree1.put(1, Arrays.asList(4, 5));
+        tree1.put(2, Arrays.asList(6, 7));
+        tree1.put(3, Arrays.asList(8, 9));
+        System.out.println("Test 1 - Reparent from 6:");
+        System.out.println(solution.reparentTree(tree1, 6));
         
-        // Add more test cases similarly
+        // Test case 2: Single node
+        Map<Integer, List<Integer>> tree2 = new HashMap<>();
+        tree2.put(0, new ArrayList<>());
+        System.out.println("\\nTest 2 - Single node:");
+        System.out.println(solution.reparentTree(tree2, 0));
+        
+        // Test case 3: Linear tree
+        Map<Integer, List<Integer>> tree3 = new HashMap<>();
+        tree3.put(0, Arrays.asList(1));
+        tree3.put(1, Arrays.asList(2));
+        tree3.put(2, Arrays.asList(3));
+        System.out.println("\\nTest 3 - Linear tree, reparent from 2:");
+        System.out.println(solution.reparentTree(tree3, 2));
+        
+        // Test case 4: Reparent at root (no change)
+        Map<Integer, List<Integer>> tree4 = new HashMap<>();
+        tree4.put(0, Arrays.asList(1, 2));
+        tree4.put(1, Arrays.asList(3));
+        System.out.println("\\nTest 4 - Reparent at root:");
+        System.out.println(solution.reparentTree(tree4, 0));
+        
+        // Test case 5: Empty tree
+        Map<Integer, List<Integer>> tree5 = new HashMap<>();
+        System.out.println("\\nTest 5 - Empty tree:");
+        System.out.println(solution.reparentTree(tree5, 0));
     }
 }

@@ -10,7 +10,7 @@ public class Task120 {
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
-            .replace("\\"", "&quot;")
+            .replace("\"", "&quot;")
             .replace("'", "&#x27;")
             .replace("/", "&#x2F;");
             
@@ -21,7 +21,7 @@ public class Task120 {
         // Test cases
         System.out.println(displayUserInput("Hello World"));
         System.out.println(displayUserInput("<script>alert('XSS')</script>"));
-        System.out.println(displayUserInput("Text with & < > \\" ' / symbols"));
+        System.out.println(displayUserInput("Text with & < > \" ' / symbols"));
         System.out.println(displayUserInput(null));
         System.out.println(displayUserInput("Regular text 123"));
     }

@@ -1,44 +1,88 @@
 package ourMethod.gemini;
-import java.util.*;
 
-class Task174 {
-    public String shortestPalindrome(String s) {
-        int n = s.length();
-        String reversed_s = new StringBuilder(s).reverse().toString();
-        for (int i = 0; i < n; i++) {
-            if (s.substring(0, n - i).equals(reversed_s.substring(i))) {
-                return reversed_s.substring(0, i) + s;
+import java.nio.charset.StandardCharsets;
+
+public class Task174 {
+
+    /**
+     * Computes the Longest Proper Prefix Suffix (LPS) array for KMP algorithm.
+     * The LPS array stores for each position i, the length of the longest proper prefix of pattern[0...i]
+     * which is also a suffix of pattern[0...i].
+     *
+     * @param pattern The string for which to compute the LPS array.
+     * @return The LPS array.
+     */
+    private int[] computeLPSArray(String pattern) {
+        int n = pattern.length();
+        int[] lps = new int[n];
+        int length = 0;
+        int i = 1;
+
+        while (i < n) {
+            if (pattern.charAt(i) == pattern.charAt(length)) {
+                length++;
+                lps[i] = length;
+                i++;
+            } else {
+                if (length != 0) {
+                    length = lps[length - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
             }
         }
-        return "";
+        return lps;
+    }
+
+    /**
+     * Finds the shortest palindrome by adding characters to the front of the string.
+     *
+     * @param s The input string.
+     * @return The shortest palindrome.
+     */
+    public String shortestPalindrome(String s) {
+        if (s == null || s.length() <= 1) {
+            return s;
+        }
+
+        String reversed_s = new StringBuilder(s).reverse().toString();
+        String temp = s + "#" + reversed_s;
+        
+        int[] lps = computeLPSArray(temp);
+        int lpsLength = lps[temp.length() - 1];
+
+        String suffix = s.substring(lpsLength);
+        String prefix = new StringBuilder(suffix).reverse().toString();
+
+        return prefix + s;
     }
 
     public static void main(String[] args) {
-        Task174 solution = new Task174();
+        Task174 solver = new Task174();
+        String[] testCases = {
+            "aacecaaa",
+            "abcd",
+            "aba",
+            "",
+            "a"
+        };
+        String[] expectedResults = {
+            "aaacecaaa",
+            "dcbabcd",
+            "aba",
+            "",
+            "a"
+        };
 
-        String testCase1 = "aacecaaa";
-        String expected1 = "aaacecaaa";
-        String result1 = solution.shortestPalindrome(testCase1);
-        System.out.println("Test Case 1: " + (result1.equals(expected1) ? "Passed" : "Failed"));
-
-        String testCase2 = "abcd";
-        String expected2 = "dcbabcd";
-        String result2 = solution.shortestPalindrome(testCase2);
-        System.out.println("Test Case 2: " + (result2.equals(expected2) ? "Passed" : "Failed"));
-
-        String testCase3 = "racecar";
-        String expected3 = "racecar";
-        String result3 = solution.shortestPalindrome(testCase3);
-        System.out.println("Test Case 3: " + (result3.equals(expected3) ? "Passed" : "Failed"));
-
-        String testCase4 = "";
-        String expected4 = "";
-        String result4 = solution.shortestPalindrome(testCase4);
-        System.out.println("Test Case 4: " + (result4.equals(expected4) ? "Passed" : "Failed"));
-
-        String testCase5 = "a";
-        String expected5 = "a";
-        String result5 = solution.shortestPalindrome(testCase5);
-        System.out.println("Test Case 5: " + (result5.equals(expected5) ? "Passed" : "Failed"));
+        for (int i = 0; i < testCases.length; i++) {
+            String s = testCases[i];
+            String result = solver.shortestPalindrome(s);
+            System.out.println("Input: \"" + s + "\"");
+            System.out.println("Output: \"" + result + "\"");
+            System.out.println("Expected: \"" + expectedResults[i] + "\"");
+            System.out.println("Test " + (i + 1) + " " + (result.equals(expectedResults[i]) ? "Passed" : "Failed"));
+            System.out.println();
+        }
     }
 }

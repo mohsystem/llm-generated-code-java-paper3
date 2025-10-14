@@ -1,63 +1,128 @@
 package Vanilla.claude;
 
+import java.util.*;
 import java.security.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
 import java.util.Base64;
 
 public class Task134 {
-    private static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(2048);
-        return keyGen.generateKeyPair();
+    private Map<String, String> keyStore;
+    private SecureRandom secureRandom;
+    
+    public Task134() {
+        this.keyStore = new HashMap<>();
+        this.secureRandom = new SecureRandom();
     }
     
-    private static String encodeKey(Key key) {
-        return Base64.getEncoder().encodeToString(key.getEncoded());
-    }
-    
-    private static boolean verifyKeyPair(KeyPair keyPair) {
+    public String generateKey(String keyId, int keySize) {
         try {
-            String testMessage = "Test Message";
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            
-            // Sign with private key
-            signature.initSign(keyPair.getPrivate());
-            signature.update(testMessage.getBytes());
-            byte[] signedData = signature.sign();
-            
-            // Verify with public key
-            signature.initVerify(keyPair.getPublic());
-            signature.update(testMessage.getBytes());
-            return signature.verify(signedData);
-            
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(keySize, secureRandom);
+            SecretKey secretKey = keyGen.generateKey();
+            String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+            keyStore.put(keyId, encodedKey);
+            return encodedKey;
         } catch (Exception e) {
-            return false;
+            return "Error: " + e.getMessage();
         }
     }
-
+    
+    public String getKey(String keyId) {
+        return keyStore.getOrDefault(keyId, "Key not found");
+    }
+    
+    public boolean deleteKey(String keyId) {
+        if (keyStore.containsKey(keyId)) {
+            keyStore.remove(keyId);
+            return true;
+        }
+        return false;
+    }
+    
+    public List<String> listKeys() {
+        return new ArrayList<>(keyStore.keySet());
+    }
+    
+    public String rotateKey(String keyId, int keySize) {
+        if (keyStore.containsKey(keyId)) {
+            return generateKey(keyId, keySize);
+        }
+        return "Key not found";
+    }
+    
+    public String encryptData(String keyId, String data) {
+        try {
+            String encodedKey = keyStore.get(keyId);
+            if (encodedKey == null) {
+                return "Key not found";
+            }
+            
+            byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+            SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] encryptedData = cipher.doFinal(data.getBytes());
+            return Base64.getEncoder().encodeToString(encryptedData);
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+    
+    public String decryptData(String keyId, String encryptedData) {
+        try {
+            String encodedKey = keyStore.get(keyId);
+            if (encodedKey == null) {
+                return "Key not found";
+            }
+            
+            byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+            SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            byte[] decryptedData = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
+            return new String(decryptedData);
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+    
     public static void main(String[] args) {
-        try {
-            // Test Case 1: Generate and verify key pair
-            KeyPair keyPair1 = generateKeyPair();
-            System.out.println("Test 1 - Key pair generated and verified: " + verifyKeyPair(keyPair1));
-            
-            // Test Case 2: Encode public key
-            String encodedPublic = encodeKey(keyPair1.getPublic());
-            System.out.println("Test 2 - Encoded public key length: " + encodedPublic.length());
-            
-            // Test Case 3: Encode private key
-            String encodedPrivate = encodeKey(keyPair1.getPrivate());
-            System.out.println("Test 3 - Encoded private key length: " + encodedPrivate.length());
-            
-            // Test Case 4: Generate different key pairs
-            KeyPair keyPair2 = generateKeyPair();
-            System.out.println("Test 4 - Different key pairs are unique: " + 
-                             !encodedPublic.equals(encodeKey(keyPair2.getPublic())));
-            
-            // Test Case 5: Verify another key pair
-            System.out.println("Test 5 - Second key pair verified: " + verifyKeyPair(keyPair2));
-            
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        Task134 keyManager = new Task134();
+        
+        System.out.println("Test Case 1: Generate and retrieve keys");
+        String key1 = keyManager.generateKey("key1", 128);
+        System.out.println("Generated key1: " + key1);
+        System.out.println("Retrieved key1: " + keyManager.getKey("key1"));
+        System.out.println();
+        
+        System.out.println("Test Case 2: List all keys");
+        keyManager.generateKey("key2", 256);
+        keyManager.generateKey("key3", 128);
+        System.out.println("All keys: " + keyManager.listKeys());
+        System.out.println();
+        
+        System.out.println("Test Case 3: Encrypt and decrypt data");
+        String originalData = "Hello, World!";
+        String encrypted = keyManager.encryptData("key1", originalData);
+        System.out.println("Encrypted: " + encrypted);
+        String decrypted = keyManager.decryptData("key1", encrypted);
+        System.out.println("Decrypted: " + decrypted);
+        System.out.println();
+        
+        System.out.println("Test Case 4: Rotate key");
+        String oldKey = keyManager.getKey("key2");
+        System.out.println("Old key2: " + oldKey);
+        String newKey = keyManager.rotateKey("key2", 256);
+        System.out.println("New key2: " + newKey);
+        System.out.println("Keys are different: " + (!oldKey.equals(newKey)));
+        System.out.println();
+        
+        System.out.println("Test Case 5: Delete key");
+        System.out.println("Delete key3: " + keyManager.deleteKey("key3"));
+        System.out.println("Remaining keys: " + keyManager.listKeys());
+        System.out.println("Try to get deleted key: " + keyManager.getKey("key3"));
     }
 }

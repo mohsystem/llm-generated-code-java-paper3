@@ -2,29 +2,47 @@ package CoT.claude;
 
 public class Task31 {
     public static String makeComplement(String dna) {
-        if(dna == null || dna.isEmpty()) {
-            return "";
+        if (dna == null) {
+            return null;
         }
         
-        StringBuilder result = new StringBuilder();
-        for(char c : dna.toCharArray()) {
-            switch(c) {
-                case 'A': result.append('T'); break;
-                case 'T': result.append('A'); break;
-                case 'C': result.append('G'); break;
-                case 'G': result.append('C'); break;
-                default: result.append(c);
+        StringBuilder complement = new StringBuilder();
+        for (int i = 0; i < dna.length(); i++) {
+            char nucleotide = dna.charAt(i);
+            switch (nucleotide) {
+                case 'A':
+                    complement.append('T');
+                    break;
+                case 'T':
+                    complement.append('A');
+                    break;
+                case 'C':
+                    complement.append('G');
+                    break;
+                case 'G':
+                    complement.append('C');
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid DNA nucleotide: " + nucleotide);
             }
         }
-        return result.toString();
+        return complement.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(makeComplement("ATTGC")); // Should print: TAACG
-        System.out.println(makeComplement("GTAT")); // Should print: CATA
-        System.out.println(makeComplement("AAAA")); // Should print: TTTT
-        System.out.println(makeComplement("GCGC")); // Should print: CGCG
-        System.out.println(makeComplement("TATA")); // Should print: ATAT
+        // Test case 1
+        System.out.println("Input: ATTGC, Output: " + makeComplement("ATTGC"));
+        
+        // Test case 2
+        System.out.println("Input: GTAT, Output: " + makeComplement("GTAT"));
+        
+        // Test case 3
+        System.out.println("Input: AAAA, Output: " + makeComplement("AAAA"));
+        
+        // Test case 4
+        System.out.println("Input: CGCG, Output: " + makeComplement("CGCG"));
+        
+        // Test case 5
+        System.out.println("Input: ATCGATCG, Output: " + makeComplement("ATCGATCG"));
     }
 }

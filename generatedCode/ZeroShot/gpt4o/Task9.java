@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task9 {
     public static String oddOrEven(int[] numbers) {
         int sum = 0;

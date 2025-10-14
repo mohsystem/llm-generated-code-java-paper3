@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task19 {
     public static String spinWords(String sentence) {
         String[] words = sentence.split(" ");

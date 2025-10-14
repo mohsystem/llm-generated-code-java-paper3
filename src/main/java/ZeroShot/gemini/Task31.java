@@ -1,9 +1,21 @@
 package ZeroShot.gemini;
-class Task31 {
-    public String makeComplement(String dna) {
+
+public class Task31 {
+
+    /**
+     * Finds the complementary strand of a DNA sequence.
+     * 'A' is complement of 'T', 'C' is complement of 'G'.
+     *
+     * @param dna A string representing one side of the DNA.
+     * @return The complementary DNA strand.
+     */
+    public static String dnaStrand(String dna) {
+        if (dna == null) {
+            return ""; // Or throw an exception, depending on contract.
+        }
         StringBuilder complement = new StringBuilder();
-        for (char base : dna.toCharArray()) {
-            switch (base) {
+        for (char c : dna.toCharArray()) {
+            switch (c) {
                 case 'A':
                     complement.append('T');
                     break;
@@ -16,18 +28,22 @@ class Task31 {
                 case 'G':
                     complement.append('C');
                     break;
+                default:
+                    // As per prompt, input is always valid. A more robust solution
+                    // might handle or log invalid characters.
+                    complement.append(c);
+                    break;
             }
         }
         return complement.toString();
     }
 
     public static void main(String[] args) {
-        Task31 task31 = new Task31();
-        System.out.println(task31.makeComplement("ATTGC"));
-        System.out.println(task31.makeComplement("GTAT"));
-        System.out.println(task31.makeComplement("AAAA"));
-        System.out.println(task31.makeComplement("TTTT"));
-        System.out.println(task31.makeComplement("CGCG"));
-
+        String[] testCases = {"ATTGC", "GTAT", "AAAA", "CGCG", "TAACG"};
+        
+        for (String testCase : testCases) {
+            String result = dnaStrand(testCase);
+            System.out.println("\"" + testCase + "\" --> \"" + result + "\"");
+        }
     }
 }

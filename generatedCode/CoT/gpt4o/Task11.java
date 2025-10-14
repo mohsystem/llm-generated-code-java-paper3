@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task11 {
     public static int nb_year(int p0, double percent, int aug, int p) {
         int years = 0;

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;

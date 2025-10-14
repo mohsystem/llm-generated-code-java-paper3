@@ -59,7 +59,7 @@ public class Task119 {
             System.out.println("Test 1: " + parseCSV("test1.csv"));
 
             // Test case 2: CSV with quoted values
-            String csvContent2 = "\\"name,with,comma\\",value1,value2\\ndata1,data2,data3";
+            String csvContent2 = "\"name,with,comma\",value1,value2\\ndata1,data2,data3";
             Files.write(Paths.get("test2.csv"), csvContent2.getBytes());
             System.out.println("Test 2: " + parseCSV("test2.csv"));
 

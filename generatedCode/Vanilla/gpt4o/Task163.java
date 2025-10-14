@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task163 {
     public static int longestRun(int[] arr) {
         if (arr.length == 0) return 0;

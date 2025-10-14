@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task166 {
     public static int[] posNegSort(int[] arr) {
         int[] positives = java.util.Arrays.stream(arr).filter(x -> x > 0).sorted().toArray();

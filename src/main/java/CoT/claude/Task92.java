@@ -1,75 +1,101 @@
 package CoT.claude;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Task92 {
     private static int currentCounter = 0;
-    private static final int maxCounter = 10;
-    private static final Object lock = new Object();
+    private static int maxCounter = 10;
+    private static final Lock lock = new ReentrantLock();
 
-    static class CounterThread extends Thread {
-        private final String threadName;
-        
-        public CounterThread(String name) {
-            this.threadName = name;
-        }
-
-        @Override
-        public void run() {
-            while (true) {
-                synchronized (lock) {
-                    if (currentCounter >= maxCounter) {
-                        break;
-                    }
+    public static void accessSharedResource(String threadName) {
+        if (currentCounter <= maxCounter) {
+            lock.lock();
+            try {
+                // Double-check after acquiring lock
+                if (currentCounter <= maxCounter) {
                     currentCounter++;
-                    System.out.println("Thread " + threadName + " accessing counter: " + currentCounter);
+                    System.out.println(threadName + " is accessing currentCounter: " + currentCounter);
                 }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            } finally {
+                lock.unlock();
             }
         }
     }
 
     public static void main(String[] args) {
-        // Test case 1: Create 3 threads
-        Thread t1 = new CounterThread("T1");
-        Thread t2 = new CounterThread("T2");
-        Thread t3 = new CounterThread("T3");
-        t1.start();
-        t2.start();
-        t3.start();
-
-        // Test case 2: Wait for threads to complete
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        // Reset counter for next test
+        // Test Case 1: Multiple threads with counter limit 10
         currentCounter = 0;
-
-        // Test case 3: Create 5 threads
-        Thread[] threads = new Thread[5];
-        for(int i = 0; i < 5; i++) {
-            threads[i] = new CounterThread("Thread-" + i);
-            threads[i].start();
+        maxCounter = 10;
+        System.out.println("Test Case 1: maxCounter = 10");
+        Thread[] threads1 = new Thread[5];
+        for (int i = 0; i < 5; i++) {
+            final String name = "Thread-" + (i + 1);
+            threads1[i] = new Thread(() -> {
+                for (int j = 0; j < 3; j++) {
+                    accessSharedResource(name);
+                }
+            });
+            threads1[i].start();
+        }
+        for (Thread t : threads1) {
+            try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); }
         }
 
-        // Test case 4: Wait for all 5 threads
-        for(Thread t : threads) {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        // Test Case 2: Counter limit 5
+        currentCounter = 0;
+        maxCounter = 5;
+        System.out.println("\\nTest Case 2: maxCounter = 5");
+        Thread[] threads2 = new Thread[3];
+        for (int i = 0; i < 3; i++) {
+            final String name = "Thread-" + (i + 1);
+            threads2[i] = new Thread(() -> {
+                for (int j = 0; j < 2; j++) {
+                    accessSharedResource(name);
+                }
+            });
+            threads2[i].start();
+        }
+        for (Thread t : threads2) {
+            try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); }
+        }
+
+        // Test Case 3: Counter limit 0
+        currentCounter = 0;
+        maxCounter = 0;
+        System.out.println("\\nTest Case 3: maxCounter = 0");
+        Thread t3 = new Thread(() -> accessSharedResource("Thread-1"));
+        t3.start();
+        try { t3.join(); } catch (InterruptedException e) { e.printStackTrace(); }
+
+        // Test Case 4: Counter limit 20
+        currentCounter = 0;
+        maxCounter = 20;
+        System.out.println("\\nTest Case 4: maxCounter = 20");
+        Thread[] threads4 = new Thread[10];
+        for (int i = 0; i < 10; i++) {
+            final String name = "Thread-" + (i + 1);
+            threads4[i] = new Thread(() -> {
+                for (int j = 0; j < 2; j++) {
+                    accessSharedResource(name);
+                }
+            });
+            threads4[i].start();
+        }
+        for (Thread t : threads4) {
+            try { t.join(); } catch (InterruptedException e) { e.printStackTrace(); }
+        }
+
+        // Test Case 5: Single thread with counter limit 3
+        currentCounter = 0;
+        maxCounter = 3;
+        System.out.println("\\nTest Case 5: Single thread, maxCounter = 3");
+        Thread t5 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                accessSharedResource("Thread-Single");
             }
-        }
-
-        // Test case 5: Final counter value check
-        System.out.println("Final counter value: " + currentCounter);
+        });
+        t5.start();
+        try { t5.join(); } catch (InterruptedException e) { e.printStackTrace(); }
     }
 }

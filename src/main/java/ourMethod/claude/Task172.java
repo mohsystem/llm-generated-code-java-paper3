@@ -1,43 +1,62 @@
 package ourMethod.claude;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Task172 {
-    public static int countRepeatedSubstrings(String text) {
-        if (text == null || text.length() < 2) {
+    public static int distinctEchoSubstrings(String text) {
+        if (text == null || text.length() == 0) {
             return 0;
         }
         
-        java.util.HashSet<String> result = new java.util.HashSet<>();
+        // Validate input: only lowercase English letters
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c < 'a' || c > 'z') {
+                throw new IllegalArgumentException("Input must contain only lowercase English letters");
+            }
+        }
+        
+        Set<String> distinctSubstrings = new HashSet<>();
         int n = text.length();
         
-        // Check all possible substrings of even length
-        for (int i = 0; i < n; i++) {
-            for (int len = 2; i + len <= n && len % 2 == 0; len += 2) {
-                String substr = text.substring(i, i + len);
-                String firstHalf = substr.substring(0, len/2);
-                String secondHalf = substr.substring(len/2);
+        // Iterate through all possible substring lengths (must be even)
+        for (int len = 2; len <= n; len += 2) {
+            int halfLen = len / 2;
+            
+            // Iterate through all starting positions
+            for (int i = 0; i <= n - len; i++) {
+                String firstHalf = text.substring(i, i + halfLen);
+                String secondHalf = text.substring(i + halfLen, i + len);
+                
                 if (firstHalf.equals(secondHalf)) {
-                    result.add(substr);
+                    distinctSubstrings.add(text.substring(i, i + len));
                 }
             }
         }
         
-        return result.size();
+        return distinctSubstrings.size();
     }
     
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "abcabcabc",
-            "leetcodeleetcode",
-            "aa",
-            "aabaabaa",
-            "abcd"
-        };
+        // Test case 1
+        String test1 = "abcabcabc";
+        System.out.println("Input: \"" + test1 + "\" Output: " + distinctEchoSubstrings(test1));
         
-        for (String test : tests) {
-            System.out.println("Input: " + test);
-            System.out.println("Output: " + countRepeatedSubstrings(test));
-            System.out.println();
-        }
+        // Test case 2
+        String test2 = "leetcodeleetcode";
+        System.out.println("Input: \"" + test2 + "\" Output: " + distinctEchoSubstrings(test2));
+        
+        // Test case 3
+        String test3 = "aaaa";
+        System.out.println("Input: \"" + test3 + "\" Output: " + distinctEchoSubstrings(test3));
+        
+        // Test case 4
+        String test4 = "a";
+        System.out.println("Input: \"" + test4 + "\" Output: " + distinctEchoSubstrings(test4));
+        
+        // Test case 5
+        String test5 = "abab";
+        System.out.println("Input: \"" + test5 + "\" Output: " + distinctEchoSubstrings(test5));
     }
 }

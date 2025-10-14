@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task144 {
     public static int[] mergeSortedArrays(int[] arr1, int[] arr2) {
         int[] mergedArray = new int[arr1.length + arr2.length];

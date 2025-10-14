@@ -1,31 +1,44 @@
 package ourMethod.gemini;
-import java.util.Scanner;
 
 public class Task142 {
-    public static int gcd(int a, int b) {
-        if (b == 0) {
-            return a;
+
+    /**
+     * Calculates the greatest common divisor (GCD) of two numbers using the iterative Euclidean algorithm.
+     * This method handles positive, negative, and zero inputs. The result is always non-negative.
+     *
+     * @param a The first number.
+     * @param b The second number.
+     * @return The greatest common divisor of a and b.
+     */
+    public static long gcd(long a, long b) {
+        // The GCD is conventionally a non-negative number.
+        // gcd(a, b) = gcd(|a|, |b|).
+        a = Math.abs(a);
+        b = Math.abs(b);
+
+        while (b != 0) {
+            long temp = b;
+            b = a % b;
+            a = temp;
         }
-        return gcd(b, a % b);
+        return a;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter two numbers:");
-        int num1 = scanner.nextInt();
-        int num2 = scanner.nextInt();
+        // 5 Test Cases
+        long[][] testCases = {
+            {54, 24},      // Standard case
+            {101, 103},    // Coprime numbers
+            {0, 5},        // One number is zero
+            {12, 0},        // The other number is zero
+            {-48, -18}     // Negative numbers
+        };
 
-        int result = gcd(num1, num2);
-        System.out.println("GCD of " + num1 + " and " + num2 + " is: " + result);
-
-
-
-        System.out.println("Test case 1: GCD(48, 18) = " + gcd(48, 18)); // Expected: 6
-        System.out.println("Test case 2: GCD(12, 18) = " + gcd(12, 18)); // Expected: 6
-        System.out.println("Test case 3: GCD(7, 13) = " + gcd(7, 13));   // Expected: 1
-        System.out.println("Test case 4: GCD(100, 0) = " + gcd(100, 0));  // Expected: 100
-        System.out.println("Test case 5: GCD(0, 50) = " + gcd(0, 50));  // Expected: 50
-
+        for (long[] testCase : testCases) {
+            long num1 = testCase[0];
+            long num2 = testCase[1];
+            long result = gcd(num1, num2);
+            System.out.println("GCD of " + num1 + " and " + num2 + " is: " + result);
+        }
     }
-
 }

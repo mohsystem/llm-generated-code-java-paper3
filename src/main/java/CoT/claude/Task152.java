@@ -1,109 +1,124 @@
 package CoT.claude;
 
-public class Task152 {
-    private static class HashNode {
+import java.util.LinkedList;
+
+class Task152 {
+    private static final int TABLE_SIZE = 10;
+    private LinkedList<Entry>[] table;
+    
+    static class Entry {
         String key;
         int value;
-        HashNode next;
         
-        HashNode(String key, int value) {
+        Entry(String key, int value) {
             this.key = key;
             this.value = value;
-            this.next = null;
         }
     }
     
-    private HashNode[] table;
-    private int size;
-    private int capacity;
-    
+    @SuppressWarnings("unchecked")
     public Task152() {
-        capacity = 10;
-        size = 0;
-        table = new HashNode[capacity];
+        table = new LinkedList[TABLE_SIZE];
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            table[i] = new LinkedList<>();
+        }
     }
     
     private int hash(String key) {
-        int hashCode = key.hashCode();
-        return Math.abs(hashCode % capacity);
+        if (key == null) return 0;
+        int hash = 0;
+        for (int i = 0; i < key.length(); i++) {
+            hash = (hash * 31 + key.charAt(i)) % TABLE_SIZE;
+        }
+        return Math.abs(hash);
     }
     
     public void insert(String key, int value) {
-        if(key == null) return;
-        
-        int index = hash(key);
-        HashNode node = table[index];
-        
-        while(node != null) {
-            if(node.key.equals(key)) {
-                node.value = value;
-                return;
-            }
-            node = node.next;
+        if (key == null) {
+            System.out.println("Error: Key cannot be null");
+            return;
         }
         
-        HashNode newNode = new HashNode(key, value);
-        newNode.next = table[index];
-        table[index] = newNode;
-        size++;
+        int index = hash(key);
+        LinkedList<Entry> bucket = table[index];
+        
+        // Update if key exists
+        for (Entry entry : bucket) {
+            if (entry.key.equals(key)) {
+                entry.value = value;
+                return;
+            }
+        }
+        
+        // Insert new entry
+        bucket.add(new Entry(key, value));
     }
     
     public Integer search(String key) {
-        if(key == null) return null;
+        if (key == null) {
+            System.out.println("Error: Key cannot be null");
+            return null;
+        }
         
         int index = hash(key);
-        HashNode node = table[index];
+        LinkedList<Entry> bucket = table[index];
         
-        while(node != null) {
-            if(node.key.equals(key)) {
-                return node.value;
+        for (Entry entry : bucket) {
+            if (entry.key.equals(key)) {
+                return entry.value;
             }
-            node = node.next;
         }
+        
         return null;
     }
     
     public boolean delete(String key) {
-        if(key == null) return false;
+        if (key == null) {
+            System.out.println("Error: Key cannot be null");
+            return false;
+        }
         
         int index = hash(key);
-        HashNode node = table[index];
-        HashNode prev = null;
+        LinkedList<Entry> bucket = table[index];
         
-        while(node != null) {
-            if(node.key.equals(key)) {
-                if(prev == null) {
-                    table[index] = node.next;
-                } else {
-                    prev.next = node.next;
-                }
-                size--;
+        for (int i = 0; i < bucket.size(); i++) {
+            if (bucket.get(i).key.equals(key)) {
+                bucket.remove(i);
                 return true;
             }
-            prev = node;
-            node = node.next;
         }
+        
         return false;
     }
     
     public static void main(String[] args) {
         Task152 hashTable = new Task152();
         
-        // Test case 1: Insert and search
-        hashTable.insert("one", 1);
-        System.out.println("Test 1: " + (hashTable.search("one") == 1));
+        // Test Case 1: Insert and search
+        System.out.println("Test 1: Insert and Search");
+        hashTable.insert("apple", 100);
+        hashTable.insert("banana", 200);
+        System.out.println("Search 'apple': " + hashTable.search("apple"));
+        System.out.println("Search 'banana': " + hashTable.search("banana"));
         
-        // Test case 2: Update existing key
-        hashTable.insert("one", 10);
-        System.out.println("Test 2: " + (hashTable.search("one") == 10));
+        // Test Case 2: Update existing key
+        System.out.println("\\nTest 2: Update Existing Key");
+        hashTable.insert("apple", 150);
+        System.out.println("Search 'apple' after update: " + hashTable.search("apple"));
         
-        // Test case 3: Delete existing key
-        System.out.println("Test 3: " + hashTable.delete("one"));
+        // Test Case 3: Delete operation
+        System.out.println("\\nTest 3: Delete Operation");
+        System.out.println("Delete 'banana': " + hashTable.delete("banana"));
+        System.out.println("Search 'banana' after delete: " + hashTable.search("banana"));
         
-        // Test case 4: Search non-existing key
-        System.out.println("Test 4: " + (hashTable.search("two") == null));
+        // Test Case 4: Search non-existent key
+        System.out.println("\\nTest 4: Search Non-existent Key");
+        System.out.println("Search 'orange': " + hashTable.search("orange"));
         
-        // Test case 5: Delete non-existing key
-        System.out.println("Test 5: " + (!hashTable.delete("two")));
+        // Test Case 5: Null key handling
+        System.out.println("\\nTest 5: Null Key Handling");
+        hashTable.insert(null, 300);
+        System.out.println("Search null: " + hashTable.search(null));
+        System.out.println("Delete null: " + hashTable.delete(null));
     }
 }

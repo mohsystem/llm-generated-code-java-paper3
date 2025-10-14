@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task115 {
     static class BitFieldStruct {
         int a : 1;

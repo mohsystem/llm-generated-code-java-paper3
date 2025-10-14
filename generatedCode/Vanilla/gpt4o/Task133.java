@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task133 {
     public static String resetPassword(String username, String oldPassword, String newPassword) {
         // This is a mock function; in a real scenario, it would interact with a database

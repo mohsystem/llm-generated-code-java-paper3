@@ -1,49 +1,85 @@
 package CoT.claude;
 
+import java.util.Scanner;
+import java.util.InputMismatchException;
+
 public class Task159 {
-    private int[] buffer;
-    private int size;
+    private static final int BUFFER_SIZE = 100;
     
-    public Task159(int size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("Buffer size must be positive");
+    public static int readFromBuffer(int[] buffer, int index) {
+        if (buffer == null) {
+            throw new IllegalArgumentException("Buffer cannot be null");
         }
-        this.size = size;
-        this.buffer = new int[size];
-        // Initialize buffer with some data
-        for(int i = 0; i < size; i++) {
-            buffer[i] = i + 1;
-        }
-    }
-    
-    public int readFromBuffer(int index) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bounds");
+        if (index < 0 || index >= buffer.length) {
+            throw new IndexOutOfBoundsException("Index out of bounds: " + index);
         }
         return buffer[index];
     }
     
+    public static int[] allocateBuffer(int size) {
+        if (size <= 0 || size > 1000000) {
+            throw new IllegalArgumentException("Invalid buffer size");
+        }
+        return new int[size];
+    }
+    
+    public static void initializeBuffer(int[] buffer) {
+        for (int i = 0; i < buffer.length; i++) {
+            buffer[i] = i * 10;
+        }
+    }
+    
     public static void main(String[] args) {
+        System.out.println("=== Secure Memory Buffer Access Test Cases ===\\n");
+        
+        // Test Case 1: Normal valid access
         try {
-            Task159 task = new Task159(10);
-            
-            // Test case 1: Valid index
-            System.out.println("Test 1: " + task.readFromBuffer(5));
-            
-            // Test case 2: Another valid index
-            System.out.println("Test 2: " + task.readFromBuffer(0));
-            
-            // Test case 3: Valid boundary index
-            System.out.println("Test 3: " + task.readFromBuffer(9));
-            
-            // Test case 4: Invalid negative index
-            System.out.println("Test 4: " + task.readFromBuffer(-1));
-            
-            // Test case 5: Invalid out of bounds index
-            System.out.println("Test 5: " + task.readFromBuffer(10));
-            
+            int[] buffer1 = allocateBuffer(BUFFER_SIZE);
+            initializeBuffer(buffer1);
+            int result = readFromBuffer(buffer1, 50);
+            System.out.println("Test 1 - Valid access at index 50: " + result);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Test 1 - Error: " + e.getMessage());
+        }
+        
+        // Test Case 2: Access at boundary (first element)
+        try {
+            int[] buffer2 = allocateBuffer(BUFFER_SIZE);
+            initializeBuffer(buffer2);
+            int result = readFromBuffer(buffer2, 0);
+            System.out.println("Test 2 - Valid access at index 0: " + result);
+        } catch (Exception e) {
+            System.out.println("Test 2 - Error: " + e.getMessage());
+        }
+        
+        // Test Case 3: Access at boundary (last element)
+        try {
+            int[] buffer3 = allocateBuffer(BUFFER_SIZE);
+            initializeBuffer(buffer3);
+            int result = readFromBuffer(buffer3, BUFFER_SIZE - 1);
+            System.out.println("Test 3 - Valid access at index " + (BUFFER_SIZE - 1) + ": " + result);
+        } catch (Exception e) {
+            System.out.println("Test 3 - Error: " + e.getMessage());
+        }
+        
+        // Test Case 4: Invalid access (negative index)
+        try {
+            int[] buffer4 = allocateBuffer(BUFFER_SIZE);
+            initializeBuffer(buffer4);
+            int result = readFromBuffer(buffer4, -5);
+            System.out.println("Test 4 - Access at index -5: " + result);
+        } catch (Exception e) {
+            System.out.println("Test 4 - Error (Expected): " + e.getMessage());
+        }
+        
+        // Test Case 5: Invalid access (out of bounds)
+        try {
+            int[] buffer5 = allocateBuffer(BUFFER_SIZE);
+            initializeBuffer(buffer5);
+            int result = readFromBuffer(buffer5, 150);
+            System.out.println("Test 5 - Access at index 150: " + result);
+        } catch (Exception e) {
+            System.out.println("Test 5 - Error (Expected): " + e.getMessage());
         }
     }
 }

@@ -1,10 +1,16 @@
 package ZeroShot.claude;
 
 public class Task31 {
-    public static String makeComplement(String dna) {
+    public static String getDNAComplement(String dna) {
+        if (dna == null || dna.isEmpty()) {
+            return "";
+        }
+        
         StringBuilder complement = new StringBuilder();
-        for(char c : dna.toCharArray()) {
-            switch(c) {
+        
+        for (int i = 0; i < dna.length(); i++) {
+            char nucleotide = dna.charAt(i);
+            switch (nucleotide) {
                 case 'A':
                     complement.append('T');
                     break;
@@ -17,17 +23,38 @@ public class Task31 {
                 case 'G':
                     complement.append('C');
                     break;
+                default:
+                    throw new IllegalArgumentException("Invalid DNA nucleotide: " + nucleotide);
             }
         }
+        
         return complement.toString();
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(makeComplement("ATTGC")); // Should print: TAACG
-        System.out.println(makeComplement("GTAT")); // Should print: CATA
-        System.out.println(makeComplement("AAAA")); // Should print: TTTT
-        System.out.println(makeComplement("GCGC")); // Should print: CGCG
-        System.out.println(makeComplement("ATCG")); // Should print: TAGC
+        // Test case 1
+        System.out.println("Input: ATTGC");
+        System.out.println("Output: " + getDNAComplement("ATTGC"));
+        System.out.println("Expected: TAACG\\n");
+        
+        // Test case 2
+        System.out.println("Input: GTAT");
+        System.out.println("Output: " + getDNAComplement("GTAT"));
+        System.out.println("Expected: CATA\\n");
+        
+        // Test case 3
+        System.out.println("Input: AAAA");
+        System.out.println("Output: " + getDNAComplement("AAAA"));
+        System.out.println("Expected: TTTT\\n");
+        
+        // Test case 4
+        System.out.println("Input: CGCG");
+        System.out.println("Output: " + getDNAComplement("CGCG"));
+        System.out.println("Expected: GCGC\\n");
+        
+        // Test case 5
+        System.out.println("Input: ATCGATCG");
+        System.out.println("Output: " + getDNAComplement("ATCGATCG"));
+        System.out.println("Expected: TAGCTAGC\\n");
     }
 }

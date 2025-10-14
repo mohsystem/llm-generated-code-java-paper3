@@ -1,2 +1,0 @@
-package CoT.gpt4o;
-// Java code is not provided because web scraping typically requires external libraries like JSoup, which cannot be included in a single file without external dependencies. Additionally, database operations require JDBC setup and configuration.

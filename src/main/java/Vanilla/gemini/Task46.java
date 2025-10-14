@@ -1,40 +1,82 @@
 package Vanilla.gemini;
+
 import java.util.HashMap;
 import java.util.Map;
 
-class Task46 {
-    private Map<String, User> users = new HashMap<>();
+class UserInfo {
+    private String name;
+    private String email;
+    private String password;
 
-    static class User {
-        String name;
-        String email;
-        String password;
-
-        User(String name, String email, String password) {
-            this.name = name;
-            this.email = email;
-            this.password = password;
-        }
+    public UserInfo(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
-    
-    public void registerUser(String name, String email, String password) {
-        if (users.containsKey(email)) {
-            System.out.println("User with this email already exists.");
-            return;
-        }
-        User newUser = new User(name, email, password);
-        users.put(email, newUser);
-        System.out.println("User registered successfully.");
 
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public String toString() {
+        return "UserInfo{name='" + name + "', email='" + email + "'}";
+    }
+}
+
+public class Task46 {
+
+    // Simulating a database table with a Map (email is the unique key)
+    private static Map<String, UserInfo> userDatabase = new HashMap<>();
+
+    /**
+     * Registers a new user in the database.
+     * @param name The user's name.
+     * @param email The user's email (must be unique).
+     * @param password The user's password.
+     * @return true if registration is successful, false if the email already exists.
+     */
+    public static boolean registerUser(String name, String email, String password) {
+        if (userDatabase.containsKey(email)) {
+            System.out.println("Registration failed: Email '" + email + "' already exists.");
+            return false;
+        }
+        UserInfo newUser = new UserInfo(name, email, password);
+        userDatabase.put(email, newUser);
+        System.out.println("Registration successful for: " + newUser);
+        return true;
     }
 
     public static void main(String[] args) {
-        Task46 registrationSystem = new Task46();
-        registrationSystem.registerUser("John Doe", "john.doe@example.com", "password123");
-        registrationSystem.registerUser("Jane Doe", "jane.doe@example.com", "password456");
-        registrationSystem.registerUser("Peter Pan", "peter.pan@example.com", "password789");
-        registrationSystem.registerUser("John Doe", "john.doe@example.com", "new_password");
-        registrationSystem.registerUser("Alice Wonderland", "alice@example.com", "wonderland123");
+        System.out.println("--- UserInfo Registration System ---");
 
+        // Test Case 1: Successful registration
+        System.out.println("\nTest Case 1:");
+        registerUser("Alice", "alice@example.com", "password123");
+
+        // Test Case 2: Successful registration
+        System.out.println("\nTest Case 2:");
+        registerUser("Bob", "bob@example.com", "securepass");
+
+        // Test Case 3: Failed registration (duplicate email)
+        System.out.println("\nTest Case 3:");
+        registerUser("Alice Smith", "alice@example.com", "anotherpass");
+
+        // Test Case 4: Successful registration
+        System.out.println("\nTest Case 4:");
+        registerUser("Charlie", "charlie@example.com", "charlie!@#");
+        
+        // Test Case 5: Successful registration
+        System.out.println("\nTest Case 5:");
+        registerUser("Diana", "diana@example.com", "diana_pass");
+
+        System.out.println("\n--- Current Database State ---");
+        for (Map.Entry<String, UserInfo> entry : userDatabase.entrySet()) {
+            System.out.println("Email: " + entry.getKey() + ", UserInfo: " + entry.getValue());
+        }
     }
 }

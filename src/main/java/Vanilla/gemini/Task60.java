@@ -1,29 +1,30 @@
 package Vanilla.gemini;
+
 public class Task60 {
 
     public static String expandedForm(int num) {
-        String result = "";
-        String numStr = String.valueOf(num);
-        int numLen = numStr.length();
-
-        for (int i = 0; i < numLen; i++) {
-            int digit = Character.getNumericValue(numStr.charAt(i));
-            if (digit > 0) {
-                if (!result.isEmpty()) {
-                    result += " + ";
+        String s = String.valueOf(num);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char digit = s.charAt(i);
+            if (digit != '0') {
+                if (result.length() > 0) {
+                    result.append(" + ");
                 }
-                result += digit * Math.pow(10, numLen - i - 1);
+                result.append(digit);
+                for (int j = 0; j < s.length() - 1 - i; j++) {
+                    result.append('0');
+                }
             }
         }
-        return result;
+        return result.toString();
     }
 
     public static void main(String[] args) {
-        System.out.println(expandedForm(12)); // "10 + 2"
-        System.out.println(expandedForm(42)); // "40 + 2"
-        System.out.println(expandedForm(70304)); // "70000 + 300 + 4"
-        System.out.println(expandedForm(800)); // "800"
-        System.out.println(expandedForm(10000000)); // "10000000"
-
+        System.out.println("12 -> " + expandedForm(12));
+        System.out.println("42 -> " + expandedForm(42));
+        System.out.println("70304 -> " + expandedForm(70304));
+        System.out.println("999 -> " + expandedForm(999));
+        System.out.println("800000 -> " + expandedForm(800000));
     }
 }

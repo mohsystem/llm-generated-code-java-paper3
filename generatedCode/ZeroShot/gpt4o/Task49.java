@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 // Java code for a simple API endpoint using a local list as a mock database
 
 import java.util.ArrayList;

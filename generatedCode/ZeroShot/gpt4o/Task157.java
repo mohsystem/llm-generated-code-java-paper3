@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task157 {
     public static void main(String[] args) {
         for (int i = 0; i < 5; i++) {

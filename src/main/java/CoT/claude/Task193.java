@@ -6,37 +6,28 @@ public class Task193 {
             return false;
         }
         
-        if (nums.length % 2 == 0) {
-            return true;
-        }
-        
         int xor = 0;
         for (int num : nums) {
             xor ^= num;
         }
         
-        return xor == 0;
+        return xor == 0 || nums.length % 2 == 0;
     }
     
     public static void main(String[] args) {
         // Test case 1
-        int[] nums1 = {1, 1, 2};
-        System.out.println("Test case 1: " + xorGame(nums1));  // false
+        System.out.println(xorGame(new int[]{1, 1, 2})); // false
         
         // Test case 2
-        int[] nums2 = {0, 1};
-        System.out.println("Test case 2: " + xorGame(nums2));  // true
+        System.out.println(xorGame(new int[]{0, 1})); // true
         
         // Test case 3
-        int[] nums3 = {1, 2, 3};
-        System.out.println("Test case 3: " + xorGame(nums3));  // true
+        System.out.println(xorGame(new int[]{1, 2, 3})); // true
         
         // Test case 4
-        int[] nums4 = {1, 2, 3, 4};
-        System.out.println("Test case 4: " + xorGame(nums4));  // true
+        System.out.println(xorGame(new int[]{1})); // false
         
         // Test case 5
-        int[] nums5 = {1, 1, 1};
-        System.out.println("Test case 5: " + xorGame(nums5));  // false
+        System.out.println(xorGame(new int[]{2, 2, 2, 2})); // true
     }
 }

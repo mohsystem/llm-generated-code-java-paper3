@@ -1,25 +1,31 @@
 package ZeroShot.gemini;
-class Task16 {
-    public boolean solution(String str, String ending) {
+
+public class Task16 {
+
+    /**
+     * Checks if the first string ends with the second string.
+     * This implementation is secure as it uses the built-in String.endsWith method,
+     * which handles all edge cases such as different lengths and empty strings.
+     * A null check is added to prevent NullPointerException.
+     *
+     * @param str The main string.
+     * @param ending The string to check for at the end of str.
+     * @return true if str ends with ending, false otherwise.
+     */
+    public static boolean solution(String str, String ending) {
+        // Handle null inputs to prevent NullPointerException
         if (str == null || ending == null) {
             return false;
         }
-        int strLen = str.length();
-        int endingLen = ending.length();
-        if (endingLen > strLen) {
-            return false;
-        }
-        return str.substring(strLen - endingLen).equals(ending);
+        return str.endsWith(ending);
     }
 
     public static void main(String[] args) {
-        Task16 task16 = new Task16();
-        System.out.println(task16.solution("abc", "bc")); // true
-        System.out.println(task16.solution("abc", "d"));  // false
-        System.out.println(task16.solution("abcde", "cde")); // true
-        System.out.println(task16.solution("abc", "abc")); // true
-        System.out.println(task16.solution("abc", "")); // true
-
-
+        // Test cases
+        System.out.println("('abc', 'bc') -> " + solution("abc", "bc")); // true
+        System.out.println("('abc', 'd') -> " + solution("abc", "d")); // false
+        System.out.println("('sushi', 'shi') -> " + solution("sushi", "shi")); // true
+        System.out.println("('samurai', 'ra') -> " + solution("samurai", "ra")); // false
+        System.out.println("('abc', '') -> " + solution("abc", "")); // true
     }
 }

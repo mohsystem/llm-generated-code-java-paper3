@@ -1,27 +1,44 @@
 package ourMethod.claude;
 
 public class Task193 {
-    public boolean xorGame(int[] nums) {
-        if (nums.length % 2 == 0) {
-            return true;
+    public static boolean xorGame(int[] nums) {
+        if (nums == null) {
+            throw new IllegalArgumentException("Input array cannot be null");
+        }
+        if (nums.length < 1 || nums.length > 1000) {
+            throw new IllegalArgumentException("Array length must be between 1 and 1000");
         }
         
-        int xor = 0;
+        int xorSum = 0;
         for (int num : nums) {
-            xor ^= num;
+            if (num < 0 || num >= 65536) {
+                throw new IllegalArgumentException("Array elements must be between 0 and 65535");
+            }
+            xorSum ^= num;
         }
         
-        return xor == 0;
+        return xorSum == 0 || nums.length % 2 == 0;
     }
-
+    
     public static void main(String[] args) {
-        Task193 solution = new Task193();
+        // Test case 1
+        int[] test1 = {1, 1, 2};
+        System.out.println("Test 1: " + xorGame(test1)); // Expected: false
         
-        // Test cases
-        System.out.println(solution.xorGame(new int[]{1,1,2}));      // false
-        System.out.println(solution.xorGame(new int[]{0,1}));        // true
-        System.out.println(solution.xorGame(new int[]{1,2,3}));      // true
-        System.out.println(solution.xorGame(new int[]{1,2,3,4}));    // true
-        System.out.println(solution.xorGame(new int[]{1,1,1}));      // false
+        // Test case 2
+        int[] test2 = {0, 1};
+        System.out.println("Test 2: " + xorGame(test2)); // Expected: true
+        
+        // Test case 3
+        int[] test3 = {1, 2, 3};
+        System.out.println("Test 3: " + xorGame(test3)); // Expected: true
+        
+        // Test case 4
+        int[] test4 = {1};
+        System.out.println("Test 4: " + xorGame(test4)); // Expected: false
+        
+        // Test case 5
+        int[] test5 = {2, 2, 2, 2};
+        System.out.println("Test 5: " + xorGame(test5)); // Expected: true
     }
 }

@@ -25,7 +25,7 @@ public class Task98 {
         
         for (String test : tests) {
             Integer result = convertToInteger(test);
-            System.out.println("Input: \\"" + test + "\\" -> Output: " + result);
+            System.out.println("Input: \"" + test + "\" -> Output: " + result);
         }
     }
 }

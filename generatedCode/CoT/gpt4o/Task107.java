@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

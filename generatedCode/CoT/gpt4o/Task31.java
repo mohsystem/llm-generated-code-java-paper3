@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task31 {
     public static String getComplementaryDNA(String dna) {
         StringBuilder complementary = new StringBuilder();

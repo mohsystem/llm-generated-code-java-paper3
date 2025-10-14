@@ -1,57 +1,88 @@
 package ourMethod.claude;
 
 import java.sql.*;
-import java.util.Scanner;
+import java.util.Properties;
+import java.io.InputStream;
+import java.io.IOException;
 
 public class Task37 {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/userdb";
-    private static final String DB_USER = "dbuser";
-    private static final String DB_PASSWORD = "dbpassword";
+    private static final int MAX_USERNAME_LENGTH = 50;
+    private static final String USERNAME_PATTERN = "^[a-zA-Z0-9_-]+$";
     
-    public static void getUserInfo(String username) {
-        if (username == null || username.trim().isEmpty()) {
-            System.out.println("Username cannot be empty");
-            return;
+    public static String getUserInfo(String username) {
+        if (username == null || username.isEmpty()) {
+            return "Error: Username cannot be null or empty";
         }
         
-        // Use try-with-resources to ensure proper resource cleanup
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Use PreparedStatement to prevent SQL injection
-            String query = "SELECT id, username, email FROM users WHERE username = ?";
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, username);
-                
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        // Safely handle and display results
-                        System.out.println("User found:");
-                        System.out.println("ID: " + rs.getInt("id"));
-                        System.out.println("Username: " + rs.getString("username"));
-                        System.out.println("Email: " + rs.getString("email"));
-                    } else {
-                        System.out.println("User not found");
-                    }
+        if (username.length() > MAX_USERNAME_LENGTH) {
+            return "Error: Username exceeds maximum length";
+        }
+        
+        if (!username.matches(USERNAME_PATTERN)) {
+            return "Error: Username contains invalid characters";
+        }
+        
+        Properties props = new Properties();
+        try (InputStream input = Task37.class.getClassLoader().getResourceAsStream("db.properties")) {
+            if (input == null) {
+                return "Error: Database configuration file not found";
+            }
+            props.load(input);
+        } catch (IOException e) {
+            return "Error: Failed to load database configuration";
+        }
+        
+        String url = props.getProperty("db.url");
+        String dbUser = props.getProperty("db.user");
+        String dbPassword = props.getProperty("db.password");
+        
+        if (url == null || dbUser == null || dbPassword == null) {
+            return "Error: Missing database configuration";
+        }
+        
+        String query = "SELECT id, username, email, created_at FROM users WHERE username = ?";
+        
+        try (Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, username);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    String user = rs.getString("username");
+                    String email = rs.getString("email");
+                    String createdAt = rs.getString("created_at");
+                    
+                    return String.format("User found - ID: %d, Username: %s, Email: %s, Created: %s",
+                            id, user, email, createdAt);
+                } else {
+                    return "User not found";
                 }
             }
         } catch (SQLException e) {
-            // Log the error securely, avoid exposing sensitive details
-            System.out.println("Error occurred while accessing database");
+            return "Error: Database operation failed";
         }
     }
-
+    
     public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Enter username to search: ");
-            String username = scanner.nextLine();
-            getUserInfo(username);
-        }
+        System.out.println("Test Case 1 - Valid username:");
+        System.out.println(getUserInfo("john_doe"));
+        System.out.println();
         
-        // Test cases
-        System.out.println("\\nTest Cases:");
-        getUserInfo("validUser");
-        getUserInfo(""); // Empty username
-        getUserInfo(null); // Null username
-        getUserInfo("user'; DROP TABLE users; --"); // SQL injection attempt
-        getUserInfo("normalUser123");
+        System.out.println("Test Case 2 - Valid username with numbers:");
+        System.out.println(getUserInfo("user123"));
+        System.out.println();
+        
+        System.out.println("Test Case 3 - Invalid username with special chars:");
+        System.out.println(getUserInfo("user'; DROP TABLE users--"));
+        System.out.println();
+        
+        System.out.println("Test Case 4 - Null username:");
+        System.out.println(getUserInfo(null));
+        System.out.println();
+        
+        System.out.println("Test Case 5 - Empty username:");
+        System.out.println(getUserInfo(""));
     }
 }

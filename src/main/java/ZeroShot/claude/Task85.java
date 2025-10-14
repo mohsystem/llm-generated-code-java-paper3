@@ -3,33 +3,36 @@ package ZeroShot.claude;
 import java.security.SecureRandom;
 
 public class Task85 {
+    private static final String ASCII_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final SecureRandom secureRandom = new SecureRandom();
+    
     public static String generateRandomString(int length) {
-        if (length <= 0) {
-            throw new IllegalArgumentException("Length must be positive");
+        if (length < 0) {
+            throw new IllegalArgumentException("Length must be non-negative");
         }
         
-        SecureRandom secureRandom = new SecureRandom();
-        StringBuilder sb = new StringBuilder(length);
-        String ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        
+        StringBuilder result = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            int randomIndex = secureRandom.nextInt(ALPHA.length());
-            sb.append(ALPHA.charAt(randomIndex));
+            int randomIndex = secureRandom.nextInt(ASCII_LETTERS.length());
+            result.append(ASCII_LETTERS.charAt(randomIndex));
         }
-        
-        return sb.toString();
+        return result.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        try {
-            System.out.println(generateRandomString(5));  // e.g. "KjHmN"
-            System.out.println(generateRandomString(10)); // e.g. "pQrStUvWxY"
-            System.out.println(generateRandomString(15)); // e.g. "aBcDeFgHiJkLmNo"
-            System.out.println(generateRandomString(20)); // e.g. "MnOpQrStUvWxYzAbCdEf"
-            System.out.println(generateRandomString(1));  // e.g. "X"
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        // Test case 1: Generate string of length 10
+        System.out.println("Test 1 (length 10): " + generateRandomString(10));
+        
+        // Test case 2: Generate string of length 5
+        System.out.println("Test 2 (length 5): " + generateRandomString(5));
+        
+        // Test case 3: Generate string of length 20
+        System.out.println("Test 3 (length 20): " + generateRandomString(20));
+        
+        // Test case 4: Generate string of length 0
+        System.out.println("Test 4 (length 0): '" + generateRandomString(0) + "'");
+        
+        // Test case 5: Generate string of length 15
+        System.out.println("Test 5 (length 15): " + generateRandomString(15));
     }
 }

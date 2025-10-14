@@ -1,61 +1,72 @@
 package ourMethod.gemini;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Task36 {
 
-    public static String readFile(String filePath) {
-        StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    /**
+     * Reads a file specified by the file path and prints its contents to the console.
+     * Uses try-with-resources for automatic resource management and catches IOExceptions.
+     *
+     * @param filePath The path to the file to be read.
+     */
+    public static void readFileAndPrint(String filePath) {
+        // Rule #7: The file path is treated as untrusted input.
+        // We avoid TOCTOU vulnerabilities by directly trying to open the file
+        // and handling the exception rather than checking for existence first.
+        Path path = Paths.get(filePath);
+
+        // Rule #8: Use try-with-resources to ensure the reader is closed automatically.
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             String line;
+            // Rule #1: Reading line by line avoids large buffer allocations and potential overflows.
             while ((line = reader.readLine()) != null) {
-                content.append(line).append(System.lineSeparator());
+                System.out.println(line);
             }
         } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
-            return null; // Or throw an exception if you prefer
+            // Handle exceptions like file not found, permission denied, etc.
+            System.err.println("Error reading file '" + filePath + "': " + e.getMessage());
         }
-        return content.toString();
+    }
+
+    private static void createTestFile(String fileName, String content) {
+        Path path = Paths.get(fileName);
+        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+            writer.write(content);
+        } catch (IOException e) {
+            System.err.println("Failed to create test file: " + e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Setup test files
+        createTestFile("test1.txt", "Hello, World!");
+        createTestFile("test2.txt", "This is line 1.\nThis is line 2.");
+        createTestFile("test3.txt", "");
+        createTestFile("test4.txt", "UTF-8 characters: áéíóú ñ €");
 
-        System.out.println("Test case 1:");
-        String fileContent1 = readFile("test1.txt");
-        if (fileContent1 != null) {
-            System.out.println(fileContent1);
-        }
+        System.out.println("--- Test Case 1: File with a single line ---");
+        readFileAndPrint("test1.txt");
+        System.out.println("\n--- Test Case 2: File with multiple lines ---");
+        readFileAndPrint("test2.txt");
+        System.out.println("\n--- Test Case 3: Empty file ---");
+        readFileAndPrint("test3.txt");
+        System.out.println("\n--- Test Case 4: File with UTF-8 characters ---");
+        readFileAndPrint("test4.txt");
+        System.out.println("\n--- Test Case 5: Non-existent file ---");
+        readFileAndPrint("nonexistent.txt");
 
-        System.out.println("Test case 2:");
-        String fileContent2 = readFile("test2.txt");
-        if (fileContent2 != null) {
-            System.out.println(fileContent2);
-        }
-
-
-        System.out.println("Test case 3 - File not found:");
-        String fileContent3 = readFile("nonexistent_file.txt");
-        if (fileContent3 != null) {
-            System.out.println(fileContent3);
-        }
-
-
-        System.out.println("Test case 4 - Empty file:");
-        String fileContent4 = readFile("empty.txt"); // Create an empty file for this test
-        if (fileContent4 != null) {
-            System.out.println(fileContent4);
-        }
-
-
-        System.out.println("Test case 5:");
-        String fileContent5 = readFile("test3.txt"); // Create a test3.txt with some content
-        if (fileContent5 != null) {
-            System.out.println(fileContent5);
-        }
-
-        scanner.close();
+        // Cleanup
+        new File("test1.txt").delete();
+        new File("test2.txt").delete();
+        new File("test3.txt").delete();
+        new File("test4.txt").delete();
     }
 }

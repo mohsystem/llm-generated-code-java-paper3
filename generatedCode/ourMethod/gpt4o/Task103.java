@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task103 {
 
     public static boolean isPasswordStrong(String password) {

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task1 {
     public static int numberOfPeopleOnBus(int[][] busStops) {
         int peopleOnBus = 0;

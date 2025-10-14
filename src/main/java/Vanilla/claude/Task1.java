@@ -1,26 +1,36 @@
 package Vanilla.claude;
 
 public class Task1 {
-    public static int countPassengers(int[][] stops) {
-        int passengers = 0;
-        for(int[] stop : stops) {
-            passengers += stop[0] - stop[1];
+    public static int countPassengers(int[][] busStops) {
+        int peopleOnBus = 0;
+        
+        for (int i = 0; i < busStops.length; i++) {
+            peopleOnBus += busStops[i][0]; // people getting on
+            peopleOnBus -= busStops[i][1]; // people getting off
         }
-        return passengers;
+        
+        return peopleOnBus;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        int[][] test1 = {{10,0}, {3,5}, {5,8}};
-        int[][] test2 = {{3,0}, {4,2}, {5,5}};
-        int[][] test3 = {{20,0}, {10,5}, {5,15}};
-        int[][] test4 = {{5,0}, {7,3}, {2,5}};
-        int[][] test5 = {{15,0}, {10,5}, {5,8}, {3,12}};
+        // Test case 1
+        int[][] test1 = {{10, 0}, {3, 5}, {5, 8}};
+        System.out.println("Test 1: " + countPassengers(test1)); // Expected: 5
         
-        System.out.println(countPassengers(test1)); // Expected: 5
-        System.out.println(countPassengers(test2)); // Expected: 5
-        System.out.println(countPassengers(test3)); // Expected: 15
-        System.out.println(countPassengers(test4)); // Expected: 6
-        System.out.println(countPassengers(test5)); // Expected: 8
+        // Test case 2
+        int[][] test2 = {{3, 0}, {9, 1}, {4, 10}, {12, 2}, {6, 1}, {7, 10}};
+        System.out.println("Test 2: " + countPassengers(test2)); // Expected: 17
+        
+        // Test case 3
+        int[][] test3 = {{3, 0}, {9, 1}, {4, 8}, {12, 2}, {6, 1}, {7, 8}};
+        System.out.println("Test 3: " + countPassengers(test3)); // Expected: 21
+        
+        // Test case 4
+        int[][] test4 = {{0, 0}};
+        System.out.println("Test 4: " + countPassengers(test4)); // Expected: 0
+        
+        // Test case 5
+        int[][] test5 = {{5, 0}, {2, 3}, {4, 1}};
+        System.out.println("Test 5: " + countPassengers(test5)); // Expected: 7
     }
 }

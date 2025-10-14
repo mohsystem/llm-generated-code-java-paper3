@@ -1,124 +1,215 @@
 package ourMethod.claude;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.math.BigDecimal;
+import java.util.Map;
 
 public class Task181 {
-    static class BankAccount {
+    private static class BankAccount {
         private final String accountId;
-        private double balance;
-        private boolean isActive;
-        private final ReentrantLock lock;
+        private BigDecimal balance;
+        private boolean closed;
+        private final ReentrantReadWriteLock lock;
 
-        public BankAccount(String accountId, double initialBalance) {
+        public BankAccount(String accountId, BigDecimal initialBalance) {
             if (accountId == null || accountId.trim().isEmpty()) {
                 throw new IllegalArgumentException("Account ID cannot be null or empty");
             }
-            if (initialBalance < 0) {
-                throw new IllegalArgumentException("Initial balance cannot be negative");
+            if (initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Initial balance cannot be null or negative");
             }
             this.accountId = accountId;
             this.balance = initialBalance;
-            this.isActive = true;
-            this.lock = new ReentrantLock();
+            this.closed = false;
+            this.lock = new ReentrantReadWriteLock(true);
         }
 
-        public boolean deposit(double amount) {
-            if (!isActive) {
+        public boolean deposit(BigDecimal amount) {
+            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
                 return false;
             }
-            if (amount <= 0) {
-                return false;
-            }
-            
-            lock.lock();
+            lock.writeLock().lock();
             try {
-                if (!isActive) {
+                if (closed) {
                     return false;
                 }
-                balance += amount;
+                balance = balance.add(amount);
                 return true;
             } finally {
-                lock.unlock();
+                lock.writeLock().unlock();
             }
         }
 
-        public boolean withdraw(double amount) {
-            if (!isActive) {
+        public boolean withdraw(BigDecimal amount) {
+            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
                 return false;
             }
-            if (amount <= 0) {
-                return false;
-            }
-            
-            lock.lock();
+            lock.writeLock().lock();
             try {
-                if (!isActive || balance < amount) {
+                if (closed) {
                     return false;
                 }
-                balance -= amount;
+                if (balance.compareTo(amount) < 0) {
+                    return false;
+                }
+                balance = balance.subtract(amount);
                 return true;
             } finally {
-                lock.unlock();
+                lock.writeLock().unlock();
+            }
+        }
+
+        public BigDecimal getBalance() {
+            lock.readLock().lock();
+            try {
+                if (closed) {
+                    return null;
+                }
+                return balance;
+            } finally {
+                lock.readLock().unlock();
             }
         }
 
         public boolean close() {
-            lock.lock();
+            lock.writeLock().lock();
             try {
-                if (!isActive) {
+                if (closed) {
                     return false;
                 }
-                isActive = false;
+                closed = true;
                 return true;
             } finally {
-                lock.unlock();
+                lock.writeLock().unlock();
             }
         }
 
-        public double getBalance() {
-            lock.lock();
+        public boolean isClosed() {
+            lock.readLock().lock();
             try {
-                if (!isActive) {
-                    throw new IllegalStateException("Account is closed");
-                }
-                return balance;
+                return closed;
             } finally {
-                lock.unlock();
+                lock.readLock().unlock();
             }
+        }
+
+        public String getAccountId() {
+            return accountId;
         }
     }
 
-    private static final ConcurrentHashMap<String, BankAccount> accounts = new ConcurrentHashMap<>();
+    private static class BankingSystem {
+        private final ConcurrentHashMap<String, BankAccount> accounts;
 
-    public static boolean openAccount(String accountId, double initialBalance) {
-        if (accountId == null || initialBalance < 0) {
-            return false;
+        public BankingSystem() {
+            this.accounts = new ConcurrentHashMap<>();
         }
-        return accounts.putIfAbsent(accountId, new BankAccount(accountId, initialBalance)) == null;
+
+        public boolean openAccount(String accountId, BigDecimal initialBalance) {
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return false;
+            }
+            if (initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) < 0) {
+                return false;
+            }
+            try {
+                BankAccount newAccount = new BankAccount(accountId, initialBalance);
+                return accounts.putIfAbsent(accountId, newAccount) == null;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+
+        public boolean closeAccount(String accountId) {
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return false;
+            }
+            BankAccount account = accounts.get(accountId);
+            if (account == null) {
+                return false;
+            }
+            return account.close();
+        }
+
+        public boolean deposit(String accountId, BigDecimal amount) {
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return false;
+            }
+            BankAccount account = accounts.get(accountId);
+            if (account == null) {
+                return false;
+            }
+            return account.deposit(amount);
+        }
+
+        public boolean withdraw(String accountId, BigDecimal amount) {
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return false;
+            }
+            BankAccount account = accounts.get(accountId);
+            if (account == null) {
+                return false;
+            }
+            return account.withdraw(amount);
+        }
+
+        public BigDecimal getBalance(String accountId) {
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return null;
+            }
+            BankAccount account = accounts.get(accountId);
+            if (account == null) {
+                return null;
+            }
+            return account.getBalance();
+        }
     }
 
     public static void main(String[] args) {
-        // Test case 1: Open account
-        System.out.println("Test 1: " + openAccount("ACC1", 1000.0));  // true
+        BankingSystem bank = new BankingSystem();
 
-        // Test case 2: Deposit
-        BankAccount acc1 = accounts.get("ACC1");
-        System.out.println("Test 2: " + acc1.deposit(500.0));  // true
-        System.out.println("Balance: " + acc1.getBalance());   // 1500.0
+        System.out.println("Test 1: Open account and check balance");
+        boolean opened = bank.openAccount("ACC001", new BigDecimal("1000.00"));
+        BigDecimal balance = bank.getBalance("ACC001");
+        System.out.println("Account opened: " + opened + ", Balance: " + balance);
 
-        // Test case 3: Withdraw
-        System.out.println("Test 3: " + acc1.withdraw(200.0)); // true
-        System.out.println("Balance: " + acc1.getBalance());   // 1300.0
+        System.out.println("\\nTest 2: Deposit money");
+        boolean deposited = bank.deposit("ACC001", new BigDecimal("500.00"));
+        balance = bank.getBalance("ACC001");
+        System.out.println("Deposit successful: " + deposited + ", New balance: " + balance);
 
-        // Test case 4: Close account
-        System.out.println("Test 4: " + acc1.close());        // true
+        System.out.println("\\nTest 3: Withdraw money");
+        boolean withdrawn = bank.withdraw("ACC001", new BigDecimal("300.00"));
+        balance = bank.getBalance("ACC001");
+        System.out.println("Withdrawal successful: " + withdrawn + ", New balance: " + balance);
 
-        // Test case 5: Operation on closed account
+        System.out.println("\\nTest 4: Close account and try to deposit");
+        boolean closed = bank.closeAccount("ACC001");
+        boolean depositAfterClose = bank.deposit("ACC001", new BigDecimal("100.00"));
+        System.out.println("Account closed: " + closed + ", Deposit after close: " + depositAfterClose);
+
+        System.out.println("\\nTest 5: Concurrent operations");
+        bank.openAccount("ACC002", new BigDecimal("2000.00"));
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                bank.deposit("ACC002", new BigDecimal("10.00"));
+            }
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                bank.withdraw("ACC002", new BigDecimal("5.00"));
+            }
+        });
+        t1.start();
+        t2.start();
         try {
-            System.out.println("Test 5: " + acc1.deposit(100.0)); // false
-        } catch (Exception e) {
-            System.out.println("Expected error: " + e.getMessage());
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+        balance = bank.getBalance("ACC002");
+        System.out.println("Final balance after concurrent operations: " + balance);
     }
 }

@@ -1,75 +1,125 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-public class Task138 {
+class PermissionManager {
+    private final Map<String, Set<String>> rolesToPermissions;
+    private final Map<String, Set<String>> usersToRoles;
 
-    private Map<String, List<String>> userPermissions;
-
-    public Task138() {
-        userPermissions = new HashMap<>();
+    public PermissionManager() {
+        this.rolesToPermissions = new HashMap<>();
+        this.usersToRoles = new HashMap<>();
     }
 
-    public void addUser(String username) {
-        if (!userPermissions.containsKey(username)) {
-            userPermissions.put(username, new ArrayList<>());
+    public boolean addUser(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            System.err.println("Error: Username cannot be null or empty.");
+            return false;
         }
+        if (usersToRoles.containsKey(username)) {
+            System.err.println("Error: User '" + username + "' already exists.");
+            return false;
+        }
+        usersToRoles.put(username, new HashSet<>());
+        return true;
     }
 
-    public void addPermission(String username, String permission) {
-        if (userPermissions.containsKey(username)) {
-            userPermissions.get(username).add(permission);
+    public boolean addRole(String roleName, Set<String> permissions) {
+        if (roleName == null || roleName.trim().isEmpty()) {
+            System.err.println("Error: Role name cannot be null or empty.");
+            return false;
         }
+        if (permissions == null || permissions.isEmpty()) {
+            System.err.println("Error: Permissions set cannot be null or empty.");
+            return false;
+        }
+        // Defensive copy of the permissions set
+        rolesToPermissions.put(roleName, new HashSet<>(permissions));
+        return true;
     }
 
-
-    public void removePermission(String username, String permission) {
-        if (userPermissions.containsKey(username)) {
-            userPermissions.get(username).remove(permission);
+    public boolean assignRoleToUser(String username, String roleName) {
+        if (username == null || !usersToRoles.containsKey(username)) {
+            System.err.println("Error: User '" + (username == null ? "NULL" : username) + "' not found.");
+            return false;
         }
+        if (roleName == null || !rolesToPermissions.containsKey(roleName)) {
+            System.err.println("Error: Role '" + (roleName == null ? "NULL" : roleName) + "' not found.");
+            return false;
+        }
+        usersToRoles.get(username).add(roleName);
+        return true;
     }
 
-    public boolean hasPermission(String username, String permission) {
-        if (userPermissions.containsKey(username)) {
-            return userPermissions.get(username).contains(permission);
+    public boolean checkPermission(String username, String permission) {
+        if (username == null || !usersToRoles.containsKey(username)) {
+            // Fail closed: if user doesn't exist, they have no permissions.
+            return false;
         }
+        if (permission == null || permission.trim().isEmpty()) {
+            return false;
+        }
+
+        Set<String> userRoles = usersToRoles.get(username);
+        if (userRoles == null) {
+            return false;
+        }
+
+        for (String roleName : userRoles) {
+            Set<String> permissions = rolesToPermissions.get(roleName);
+            if (permissions != null && permissions.contains(permission)) {
+                return true;
+            }
+        }
+
         return false;
     }
+}
 
-    public List<String> getUserPermissions(String username) {
-         return userPermissions.getOrDefault(username, new ArrayList<>());
-    }
-
-
-
+public class Task138 {
     public static void main(String[] args) {
-        Task138 permissionManager = new Task138();
+        PermissionManager pm = new PermissionManager();
 
-        // Test cases
-        permissionManager.addUser("john");
-        permissionManager.addPermission("john", "read");
-        permissionManager.addPermission("john", "write");
-        System.out.println("john has read permission: " + permissionManager.hasPermission("john", "read")); // Expected: true
-        System.out.println("john has execute permission: " + permissionManager.hasPermission("john", "execute")); // Expected: false
-        permissionManager.removePermission("john", "write");
-        System.out.println("john has write permission: " + permissionManager.hasPermission("john", "write")); // Expected: false
+        System.out.println("--- Test Case 1: Basic Setup and Permission Check ---");
+        pm.addRole("admin", new HashSet<>(Set.of("read", "write", "delete")));
+        pm.addRole("editor", new HashSet<>(Set.of("read", "write")));
+        pm.addRole("viewer", new HashSet<>(Set.of("read")));
+        pm.addUser("alice");
+        pm.addUser("bob");
+        pm.assignRoleToUser("alice", "admin");
+        pm.assignRoleToUser("bob", "editor");
 
-        permissionManager.addUser("jane");
-        permissionManager.addPermission("jane", "read");
-        System.out.println("jane's permissions: " + permissionManager.getUserPermissions("jane")); // Expected: [read]
+        System.out.println("Does alice have 'delete' permission? " + pm.checkPermission("alice", "delete")); // Expected: true
+        System.out.println("Does bob have 'delete' permission? " + pm.checkPermission("bob", "delete"));   // Expected: false
+        System.out.println("Does bob have 'write' permission? " + pm.checkPermission("bob", "write"));   // Expected: true
+        System.out.println();
 
+        System.out.println("--- Test Case 2: User with multiple roles ---");
+        pm.addUser("charlie");
+        pm.assignRoleToUser("charlie", "viewer");
+        pm.assignRoleToUser("charlie", "editor"); // Promote charlie
+        System.out.println("Does charlie have 'write' permission? " + pm.checkPermission("charlie", "write")); // Expected: true
+        System.out.println("Does charlie have 'read' permission? " + pm.checkPermission("charlie", "read")); // Expected: true
+        System.out.println();
 
-        permissionManager.addUser("peter");
-        System.out.println("peter's permissions: " + permissionManager.getUserPermissions("peter")); // Expected: []
-        System.out.println("unknown user has admin permission: " + permissionManager.hasPermission("unknown", "admin")); // Expected: false
+        System.out.println("--- Test Case 3: Non-existent user, role, or permission ---");
+        System.out.println("Does non_existent_user have 'read' permission? " + pm.checkPermission("non_existent_user", "read")); // Expected: false
+        System.out.println("Does alice have 'execute' permission? " + pm.checkPermission("alice", "execute")); // Expected: false
+        System.out.println("Assigning non-existent role: " + pm.assignRoleToUser("alice", "super_admin")); // Expected: false (with error)
+        System.out.println();
 
-
-        permissionManager.addPermission("john", "execute");
-        permissionManager.addPermission("jane", "write");
-        System.out.println("john's permissions: " + permissionManager.getUserPermissions("john")); // Expected: [read, execute]
-        System.out.println("jane's permissions: " + permissionManager.getUserPermissions("jane")); // Expected: [read, write]
-
+        System.out.println("--- Test Case 4: User with no roles ---");
+        pm.addUser("dave");
+        System.out.println("Does dave have 'read' permission? " + pm.checkPermission("dave", "read")); // Expected: false
+        System.out.println();
+        
+        System.out.println("--- Test Case 5: Invalid inputs ---");
+        System.out.println("Adding user with null name: " + pm.addUser(null)); // Expected: false (with error)
+        System.out.println("Adding user with empty name: " + pm.addUser("  ")); // Expected: false (with error)
+        System.out.println("Checking null permission for alice: " + pm.checkPermission("alice", null)); // Expected: false
+        System.out.println();
     }
 }

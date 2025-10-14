@@ -1,78 +1,68 @@
 package CoT.gemini;
-import java.io.IOException;
-import java.io.PrintWriter;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-public class Task120 extends HttpServlet {
+import java.util.stream.Collectors;
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            String userInput = request.getParameter("userInput");
-            if (userInput != null) {
-                // Encode user input to prevent XSS
-                String encodedUserInput = escapeHtml(userInput);
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>User Input Display</title>");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<p>You entered: " + encodedUserInput + "</p>");
-                out.println("</body>");
-                out.println("</html>");
-            } else {
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>User Input Display</title>");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<form method=\"post\">");
-                out.println("Enter text: <input type=\"text\" name=\"userInput\"><br>");
-                out.println("<input type=\"submit\" value=\"Submit\">");
-                out.println("</form>");
-                out.println("</body>");
-                out.println("</html>");
+public class Task120 {
 
-            }
+    /**
+     * Escapes special HTML characters in a string to prevent XSS.
+     *
+     * @param input The raw string to be escaped.
+     * @return The HTML-escaped string.
+     */
+    public static String escapeHtml(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
         }
+        return input.chars()
+            .mapToObj(c -> {
+                switch (c) {
+                    case '&': return "&amp;";
+                    case '<': return "&lt;";
+                    case '>': return "&gt;";
+                    case '"': return "&quot;";
+                    case '\'': return "&#39;"; // or &apos;
+                    default: return String.valueOf((char) c);
+                }
+            })
+            .collect(Collectors.joining());
     }
 
-
-    private String escapeHtml(String input) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : input.toCharArray()) {
-            switch (c) {
-                case '<':
-                    sb.append("&lt;");
-                    break;
-                case '>':
-                    sb.append("&gt;");
-                    break;
-                case '&':
-                    sb.append("&amp;");
-                    break;
-                case '"':
-                    sb.append("&quot;");
-                    break;
-                case '\'':
-                    sb.append("&#x27;");
-                    break;
-                case '/':
-                    sb.append("&#x2F;");
-                    break;
-                default:
-                    sb.append(c);
-            }
-        }
-        return sb.toString();
-
+    /**
+     * Generates a simple HTML page string displaying user-supplied input securely.
+     *
+     * @param userInput The user-supplied string.
+     * @return A string containing the full HTML page.
+     */
+    public static String generateWebPage(String userInput) {
+        String escapedInput = escapeHtml(userInput);
+        return "<!DOCTYPE html>\n" +
+               "<html>\n" +
+               "<head>\n" +
+               "  <title>User Input</title>\n" +
+               "</head>\n" +
+               "<body>\n" +
+               "  <h1>User Comment:</h1>\n" +
+               "  <p>" + escapedInput + "</p>\n" +
+               "</body>\n" +
+               "</html>";
     }
 
+    public static void main(String[] args) {
+        String[] testCases = {
+            "Hello, World!",
+            "1 < 5",
+            "This is a 'quote' & an \"ampersand\"",
+            "<script>alert('XSS Attack!')</script>",
+            ""
+        };
+
+        System.out.println("--- Java Test Cases ---");
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("\n--- Test Case " + (i + 1) + " ---");
+            System.out.println("Input: " + testCases[i]);
+            String webPage = generateWebPage(testCases[i]);
+            System.out.println("Generated HTML:\n" + webPage);
+        }
+    }
 }

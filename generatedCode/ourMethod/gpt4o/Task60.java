@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task60 {
     public static String expandedForm(int num) {
         StringBuilder result = new StringBuilder();

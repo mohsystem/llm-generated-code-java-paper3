@@ -1,105 +1,141 @@
 package CoT.gemini;
-import java.math.BigDecimal;
-import java.util.concurrent.locks.ReentrantLock;
 
-class Task181 {
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-    private static class Account {
-        private final int accountNumber;
-        private BigDecimal balance;
-        private boolean isOpen;
-        private final ReentrantLock lock = new ReentrantLock();
+class BankAccount {
+    private final AtomicLong balance;
+    private volatile boolean isOpen;
+    private final Object lock = new Object();
 
-        public Account(int accountNumber) {
-            this.accountNumber = accountNumber;
-            this.balance = BigDecimal.ZERO;
-            this.isOpen = true;
+    public BankAccount(long initialBalance) {
+        if (initialBalance < 0) {
+            throw new IllegalArgumentException("Initial balance cannot be negative.");
         }
-
-        public synchronized boolean isOpen() {
-            return isOpen;
-        }
-
-        public synchronized void close() {
-            this.isOpen = false;
-        }
-
-        public synchronized BigDecimal getBalance() {
-            if (!isOpen) {
-                throw new IllegalStateException("Account is closed.");
-            }
-            return balance;
-        }
-
-
-        public synchronized void deposit(BigDecimal amount) {
-            if (!isOpen) {
-                throw new IllegalStateException("Account is closed.");
-            }
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Deposit amount must be positive.");
-            }
-            lock.lock();
-            try {
-                balance = balance.add(amount);
-            } finally {
-                lock.unlock();
-            }
-
-        }
-
-        public synchronized void withdraw(BigDecimal amount) {
-            if (!isOpen) {
-                throw new IllegalStateException("Account is closed.");
-            }
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Withdrawal amount must be positive.");
-            }
-            if (balance.compareTo(amount) < 0) {
-                throw new IllegalArgumentException("Insufficient funds.");
-            }
-
-            lock.lock();
-            try {
-                balance = balance.subtract(amount);
-            } finally {
-                lock.unlock();
-            }
-        }
-
+        this.balance = new AtomicLong(initialBalance);
+        this.isOpen = true;
     }
 
-    public static void main(String[] args) {
-        Account account1 = new Account(12345);
+    public long getBalance() throws IllegalStateException {
+        if (!isOpen) {
+            throw new IllegalStateException("Account is closed.");
+        }
+        return balance.get();
+    }
 
-        // Test cases
-        account1.deposit(new BigDecimal("100.00"));
-        System.out.println("Balance after deposit: " + account1.getBalance()); // Expected: 100.00
+    public void deposit(long amount) throws IllegalStateException {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Deposit amount must be positive.");
+        }
+        synchronized (lock) {
+            if (!isOpen) {
+                throw new IllegalStateException("Account is closed.");
+            }
+            balance.addAndGet(amount);
+        }
+    }
 
-        account1.withdraw(new BigDecimal("50.00"));
-        System.out.println("Balance after withdrawal: " + account1.getBalance()); // Expected: 50.00
+    public void withdraw(long amount) throws IllegalStateException {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be positive.");
+        }
+        synchronized (lock) {
+            if (!isOpen) {
+                throw new IllegalStateException("Account is closed.");
+            }
+            if (balance.get() < amount) {
+                throw new IllegalStateException("Insufficient funds.");
+            }
+            balance.addAndGet(-amount);
+        }
+    }
 
-        account1.close();
+    public void closeAccount() {
+        // No need to synchronize setting a volatile boolean if it's a one-way switch
+        this.isOpen = false;
+    }
+}
 
-
+public class Task181 {
+    public static void main(String[] args) throws InterruptedException {
+        // Test Case 1: Basic Operations
+        System.out.println("--- Test Case 1: Basic Operations ---");
+        BankAccount account1 = new BankAccount(1000);
         try {
-            account1.deposit(new BigDecimal("25.00"));
+            System.out.println("Initial Balance: " + account1.getBalance());
+            account1.deposit(500);
+            System.out.println("Balance after deposit: " + account1.getBalance());
+            account1.withdraw(200);
+            System.out.println("Balance after withdrawal: " + account1.getBalance());
         } catch (IllegalStateException e) {
-            System.out.println("Deposit to closed account failed as expected: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
-
-        Account account2 = new Account(67890);
-        account2.deposit(new BigDecimal("500.00"));
-        System.out.println("Balance of account2: " + account2.getBalance());
-
+        // Test Case 2: Insufficient Funds
+        System.out.println("\n--- Test Case 2: Insufficient Funds ---");
         try {
-            account2.withdraw(new BigDecimal("600.00"));
-        } catch (IllegalArgumentException e) {
-            System.out.println("Withdrawal exceeding balance failed as expected: " + e.getMessage());
+            System.out.println("Current Balance: " + account1.getBalance());
+            System.out.println("Attempting to withdraw 2000...");
+            account1.withdraw(2000);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected error: " + e.getMessage());
         }
 
-        account2.withdraw(new BigDecimal("200.00"));
-        System.out.println("Balance after withdrawal: " + account2.getBalance());
+        // Test Case 3: Operations on a closed account
+        System.out.println("\n--- Test Case 3: Operations on Closed Account ---");
+        account1.closeAccount();
+        System.out.println("Account closed.");
+        try {
+            account1.deposit(100);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected error on deposit: " + e.getMessage());
+        }
+        try {
+            account1.withdraw(50);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected error on withdraw: " + e.getMessage());
+        }
+        try {
+            account1.getBalance();
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected error on getBalance: " + e.getMessage());
+        }
+
+        // Test Case 4: Concurrent Transactions
+        System.out.println("\n--- Test Case 4: Concurrent Transactions ---");
+        BankAccount account2 = new BankAccount(10000);
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        for (int i = 0; i < 1000; i++) {
+            service.submit(() -> {
+                try {
+                    account2.deposit(10);
+                } catch (IllegalStateException e) {
+                    System.out.println(e.getMessage());
+                }
+            });
+            service.submit(() -> {
+                try {
+                    account2.withdraw(5);
+                } catch (IllegalStateException e) {
+                    System.out.println(e.getMessage());
+                }
+            });
+        }
+        service.shutdown();
+        service.awaitTermination(5, TimeUnit.SECONDS);
+        System.out.println("Initial concurrent balance: 10000");
+        System.out.println("After 1000 deposits of 10 and 1000 withdrawals of 5...");
+        // Expected: 10000 + (1000 * 10) - (1000 * 5) = 15000
+        System.out.println("Final concurrent balance: " + account2.getBalance());
+
+        // Test Case 5: Opening with negative balance
+        System.out.println("\n--- Test Case 5: Opening with Negative Balance ---");
+        try {
+            new BankAccount(-100);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught expected error: " + e.getMessage());
+        }
     }
 }

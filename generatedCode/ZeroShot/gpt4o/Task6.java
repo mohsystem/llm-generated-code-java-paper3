@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task6 {
 
     public static double findUniq(double[] arr) {

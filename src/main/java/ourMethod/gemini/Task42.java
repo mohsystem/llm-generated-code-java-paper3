@@ -1,83 +1,146 @@
 package ourMethod.gemini;
-import java.security.MessageDigest;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.security.MessageDigest;
 
 public class Task42 {
 
-    private static final Map<String, String> users = new HashMap<>();
-    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final int SALT_LENGTH_BYTES = 16;
+    private static final int HASH_LENGTH_BYTES = 32; // 256 bits
+    private static final int ITERATIONS = 210000;
+    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
 
-    public static boolean registerUser(String username, String password) {
-        if (users.containsKey(username)) {
-            return false; // Username already exists
+    private final Map<String, UserCredentials> userStore = new HashMap<>();
+    private final SecureRandom secureRandom = new SecureRandom();
+
+    private static class UserCredentials {
+        private final byte[] salt;
+        private final byte[] hashedPassword;
+
+        UserCredentials(byte[] salt, byte[] hashedPassword) {
+            this.salt = salt;
+            this.hashedPassword = hashedPassword;
         }
-
-        String salt = generateSalt();
-        String hashedPassword = hashPassword(password, salt);
-        users.put(username, salt + ":" + hashedPassword);
-        return true;
     }
 
-    public static boolean authenticateUser(String username, String password) {
-        if (!users.containsKey(username)) {
-            return false; // Username not found
-        }
-
-        String storedCredentials = users.get(username);
-        String[] parts = storedCredentials.split(":");
-        String salt = parts[0];
-        String hashedPassword = parts[1];
-
-        String submittedHashedPassword = hashPassword(password, salt);
-        return submittedHashedPassword.equals(hashedPassword);
+    /**
+     * Hashes a password using PBKDF2 with a given salt.
+     *
+     * @param password The password to hash.
+     * @param salt     The salt to use.
+     * @return The hashed password.
+     * @throws NoSuchAlgorithmException if the hashing algorithm is not available.
+     * @throws InvalidKeySpecException  if the key spec is invalid.
+     */
+    private byte[] hashPassword(char[] password, byte[] salt)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, HASH_LENGTH_BYTES * 8);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance(HASH_ALGORITHM);
+        return factory.generateSecret(spec).getEncoded();
     }
 
+    /**
+     * Registers a new user with a username and password.
+     *
+     * @param username The username.
+     * @param password The password.
+     * @return true if registration is successful, false if the user already exists.
+     */
+    public boolean register(String username, String password) {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            System.err.println("Username and password cannot be empty.");
+            return false;
+        }
+        if (userStore.containsKey(username)) {
+            System.err.println("User '" + username + "' already exists.");
+            return false;
+        }
 
-    private static String generateSalt() {
-        byte[] salt = new byte[16];
+        byte[] salt = new byte[SALT_LENGTH_BYTES];
         secureRandom.nextBytes(salt);
-        return bytesToHex(salt);
-    }
-
-    private static String hashPassword(String password, String salt) {
+        char[] passwordChars = password.toCharArray();
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt.getBytes());
-            md.update(password.getBytes());
-            byte[] hashedPassword = md.digest();
-            return bytesToHex(hashedPassword);
-        } catch (NoSuchAlgorithmException e) {
-            // Handle exception appropriately in a real application
-            e.printStackTrace();
-            return null;
+            byte[] hashedPassword = hashPassword(passwordChars, salt);
+            userStore.put(username, new UserCredentials(salt, hashedPassword));
+            return true;
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            System.err.println("Error during password hashing: " + e.getMessage());
+            return false;
+        } finally {
+            // Securely clear the password from memory
+            Arrays.fill(passwordChars, '\0');
         }
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+    /**
+     * Authenticates a user with a username and password.
+     *
+     * @param username The username.
+     * @param password The password.
+     * @return true if authentication is successful, false otherwise.
+     */
+    public boolean login(String username, String password) {
+        if (username == null || password == null || !userStore.containsKey(username)) {
+            return false;
         }
-        return sb.toString();
+
+        UserCredentials credentials = userStore.get(username);
+        char[] passwordChars = password.toCharArray();
+        try {
+            byte[] computedHash = hashPassword(passwordChars, credentials.salt);
+            // Use constant-time comparison to prevent timing attacks
+            return MessageDigest.isEqual(computedHash, credentials.hashedPassword);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            System.err.println("Error during password verification: " + e.getMessage());
+            return false;
+        } finally {
+            // Securely clear the password from memory
+            Arrays.fill(passwordChars, '\0');
+        }
     }
-
-
 
     public static void main(String[] args) {
-        // Test cases
-        registerUser("user1", "password123");
-        registerUser("user2", "P@$$wOrd");
-        registerUser("bob", "bobspassword");
+        Task42 auth = new Task42();
 
+        // Test Case 1: Register a new user
+        System.out.println("Test 1: Register 'alice'");
+        boolean registered = auth.register("alice", "Password123!");
+        System.out.println("Registration successful: " + registered);
+        System.out.println("--------------------");
 
-        System.out.println(authenticateUser("user1", "password123")); // Expected: true
-        System.out.println(authenticateUser("user1", "wrongpassword")); // Expected: false
-        System.out.println(authenticateUser("user2", "P@$$wOrd")); // Expected: true
-        System.out.println(authenticateUser("nonexistentuser", "password")); // Expected: false
-        System.out.println(authenticateUser("bob", "bobspassword")); // Expected: true
+        // Test Case 2: Successful login
+        System.out.println("Test 2: Successful login for 'alice'");
+        boolean loginSuccess = auth.login("alice", "Password123!");
+        System.out.println("Login successful: " + loginSuccess);
+        System.out.println("--------------------");
 
+        // Test Case 3: Failed login with wrong password
+        System.out.println("Test 3: Failed login for 'alice' (wrong password)");
+        boolean loginFailPassword = auth.login("alice", "WrongPassword");
+        System.out.println("Login successful: " + loginFailPassword);
+        System.out.println("--------------------");
+
+        // Test Case 4: Failed login with non-existent user
+        System.out.println("Test 4: Failed login for non-existent user 'bob'");
+        boolean loginFailUser = auth.login("bob", "SomePassword");
+        System.out.println("Login successful: " + loginFailUser);
+        System.out.println("--------------------");
+        
+        // Test Case 5: Register a second user and login successfully
+        System.out.println("Test 5: Register 'bob' and log in");
+        boolean registeredBob = auth.register("bob", "anotherSecureP@ssw0rd");
+        System.out.println("Registration of 'bob' successful: " + registeredBob);
+        boolean loginBobSuccess = auth.login("bob", "anotherSecureP@ssw0rd");
+        System.out.println("Login for 'bob' successful: " + loginBobSuccess);
+        System.out.println("--------------------");
     }
 }

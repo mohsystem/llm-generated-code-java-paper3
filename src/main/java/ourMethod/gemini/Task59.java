@@ -1,28 +1,61 @@
 package ourMethod.gemini;
-import java.lang.StringBuilder;
 
-class Task59 {
-    public String accum(String s) {
-        StringBuilder result = new StringBuilder();
+import java.nio.charset.StandardCharsets;
+
+public class Task59 {
+
+    /**
+     * Transforms a string based on character position.
+     * Example: accum("abcd") -> "A-Bb-Ccc-Dddd"
+     *
+     * @param s The input string, containing only letters from a..z and A..Z.
+     * @return The transformed string.
+     */
+    public static String accum(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder resultBuilder = new StringBuilder();
+        // Using getBytes to iterate over characters is not ideal,
+        // but it's one way to process without complex char-to-byte logic.
+        // A simple for loop with charAt is more idiomatic and safer.
         for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            result.append(Character.toUpperCase(c));
-            for (int j = 0; j < i; j++) {
-                result.append(Character.toLowerCase(c));
+            if (i > 0) {
+                resultBuilder.append('-');
             }
-            if (i < s.length() - 1) {
-                result.append("-");
+            char currentChar = s.charAt(i);
+            resultBuilder.append(Character.toUpperCase(currentChar));
+            for (int j = 0; j < i; j++) {
+                resultBuilder.append(Character.toLowerCase(currentChar));
             }
         }
-        return result.toString();
+        return resultBuilder.toString();
     }
 
     public static void main(String[] args) {
-        Task59 task59 = new Task59();
-        System.out.println(task59.accum("abcd")); // Expected: "A-Bb-Ccc-Dddd"
-        System.out.println(task59.accum("RqaEzty")); // Expected: "R-Qq-Aaa-Eeee-Zzzzz-Tttttt-Yyyyyyy"
-        System.out.println(task59.accum("cwAt")); // Expected: "C-Ww-Aaa-Tttt"
-        System.out.println(task59.accum("xyz")); // Expected: X-Yy-Zzz
-        System.out.println(task59.accum("NyffsGeyylB")); // Expected: N-Yy-Fff-Ffff-Sssss-Gggggg-Eeeeeee-Yyyyyyyy-Yyyyyyyyy-Llllllllll-Bbbbbbbbbbb
+        String[] testCases = {
+            "abcd",
+            "RqaEzty",
+            "cwAt",
+            "ZpglnRxqenU",
+            ""
+        };
+        String[] expectedResults = {
+            "A-Bb-Ccc-Dddd",
+            "R-Qq-Aaa-Eeee-Zzzzz-Tttttt-Yyyyyyy",
+            "C-Ww-Aaa-Tttt",
+            "Z-Pp-Ggg-Llll-Nnnnn-Rrrrrr-Xxxxxxx-Qqqqqqqq-Eeeeeeeee-Nnnnnnnnnn-Uuuuuuuuuuu",
+            ""
+        };
+
+        for (int i = 0; i < testCases.length; i++) {
+            String result = accum(testCases[i]);
+            System.out.println("Test case " + (i + 1) + ": accum(\"" + testCases[i] + "\")");
+            System.out.println("Expected: " + expectedResults[i]);
+            System.out.println("Actual  : " + result);
+            System.out.println("Result: " + (expectedResults[i].equals(result) ? "PASS" : "FAIL"));
+            System.out.println();
+        }
     }
 }

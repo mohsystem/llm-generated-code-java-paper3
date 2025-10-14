@@ -1,70 +1,146 @@
 package ourMethod.gemini;
-import java.security.*;
-import java.security.spec.*;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
-import javax.crypto.*;
-import javax.crypto.spec.*;
 
 public class Task134 {
 
-    public static KeyPair generateKeyPair(String algorithm, int keySize) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
-        keyGen.initialize(keySize);
-        return keyGen.generateKeyPair();
+    private static final String ENCRYPTION_ALGORITHM = "AES/GCM/NoPadding";
+    private static final String KEY_DERIVATION_FUNCTION = "PBKDF2WithHmacSHA256";
+    private static final int AES_KEY_SIZE_BITS = 256;
+    private static final int GCM_IV_LENGTH_BYTES = 12;
+    private static final int GCM_TAG_LENGTH_BITS = 128;
+    private static final int SALT_LENGTH_BYTES = 16;
+    private static final int PBKDF2_ITERATIONS = 600000;
+
+    public static SecretKey deriveKey(String passphrase, byte[] salt)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        char[] passphraseChars = passphrase.toCharArray();
+        KeySpec spec = new PBEKeySpec(passphraseChars, salt, PBKDF2_ITERATIONS, AES_KEY_SIZE_BITS);
+        Arrays.fill(passphraseChars, '\0'); // Clear passphrase from memory
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_DERIVATION_FUNCTION);
+            SecretKey tmp = factory.generateSecret(spec);
+            return new SecretKeySpec(tmp.getEncoded(), "AES");
+        } finally {
+//            spec.clearPassword();
+        }
     }
 
+    public static byte[] encrypt(String plaintext, String passphrase) {
+        try {
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] salt = new byte[SALT_LENGTH_BYTES];
+            secureRandom.nextBytes(salt);
 
-    public static String encrypt(String algorithm, String plainText, Key key) throws NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+            SecretKey key = deriveKey(passphrase, salt);
 
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] cipherText = cipher.doFinal(plainText.getBytes());
-        return Base64.getEncoder().encodeToString(cipherText);
+            byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+            secureRandom.nextBytes(iv);
+
+            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv);
+            cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
+
+            byte[] plainTextBytes = plaintext.getBytes(StandardCharsets.UTF_8);
+            byte[] cipherText = cipher.doFinal(plainTextBytes);
+
+            ByteBuffer byteBuffer = ByteBuffer.allocate(salt.length + iv.length + cipherText.length);
+            byteBuffer.put(salt);
+            byteBuffer.put(iv);
+            byteBuffer.put(cipherText);
+
+            return byteBuffer.array();
+        } catch (Exception e) {
+            // In a real application, log this securely without sensitive data.
+            throw new RuntimeException("Encryption failed", e);
+        }
     }
 
-    public static String decrypt(String algorithm, String cipherText, Key key) throws NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText));
-        return new String(plainText);
+    public static String decrypt(byte[] encryptedData, String passphrase) {
+        try {
+            if (encryptedData.length < SALT_LENGTH_BYTES + GCM_IV_LENGTH_BYTES + (GCM_TAG_LENGTH_BITS / 8)) {
+                return null;
+            }
+            ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedData);
+
+            byte[] salt = new byte[SALT_LENGTH_BYTES];
+            byteBuffer.get(salt);
+
+            byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+            byteBuffer.get(iv);
+
+            byte[] cipherText = new byte[byteBuffer.remaining()];
+            byteBuffer.get(cipherText);
+
+            SecretKey key = deriveKey(passphrase, salt);
+
+            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv);
+            cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec);
+
+            byte[] decryptedTextBytes = cipher.doFinal(cipherText);
+            return new String(decryptedTextBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            // Decryption failed: wrong key, tampered data, etc.
+            // Return null to indicate failure without leaking details.
+            return null;
+        }
     }
 
+    public static void main(String[] args) {
+        System.out.println("--- Cryptographic Key Management Demo ---");
 
-    public static void main(String[] args) throws Exception {
+        String passphrase = "a_very-s3cur3-p@ssphr@se!";
+        String[] testCases = {
+                "Hello, World!",
+                "This is a secret message.",
+                "Another test case with some special characters: !@#$%^&*()",
+                "Short",
+                "" // Empty string
+        };
 
-        // Test cases
-        KeyPair rsaKeyPair = generateKeyPair("RSA", 2048);
+        for (int i = 0; i < testCases.length; i++) {
+            String originalPlaintext = testCases[i];
+            System.out.println("\n--- Test Case " + (i + 1) + " ---");
+            System.out.println("Original:  " + originalPlaintext);
 
-        String plainText1 = "Test Case 1";
-        String cipherText1 = encrypt("RSA", plainText1, rsaKeyPair.getPublic());
-        String decryptedText1 = decrypt("RSA", cipherText1, rsaKeyPair.getPrivate());
-        System.out.println("Test 1 - Original: " + plainText1 + ", Decrypted: " + decryptedText1);
+            byte[] encryptedData = encrypt(originalPlaintext, passphrase);
+            System.out.println("Encrypted (Base64): " + Base64.getEncoder().encodeToString(encryptedData));
 
+            String decryptedPlaintext = decrypt(encryptedData, passphrase);
+            System.out.println("Decrypted: " + decryptedPlaintext);
+            System.out.println("Result: " + (originalPlaintext.equals(decryptedPlaintext) ? "SUCCESS" : "FAILURE"));
+        }
 
-        KeyPair aesKeyPair = generateKeyPair("AES", 128);
-        String plainText2 = "Test Case 2";
-        String cipherText2 = encrypt("AES", plainText2, aesKeyPair.getPublic());
-        String decryptedText2 = decrypt("AES", cipherText2, aesKeyPair.getPrivate());
-        System.out.println("Test 2 - Original: " + plainText2 + ", Decrypted: " + decryptedText2);
+        System.out.println("\n--- Failure Test Cases ---");
+        String originalText = "Test for failure cases.";
+        byte[] encrypted = encrypt(originalText, passphrase);
 
+        // Test 1: Wrong Passphrase
+        System.out.println("\n1. Decrypting with wrong passphrase...");
+        String decryptedWrongPass = decrypt(encrypted, "wrong-passphrase");
+        System.out.println("Decrypted: " + decryptedWrongPass);
+        System.out.println("Result: " + (decryptedWrongPass == null ? "SUCCESS (Decryption failed as expected)" : "FAILURE"));
 
-        String plainText3 = "Test Case 3 - Longer Text";
-        String cipherText3 = encrypt("RSA", plainText3, rsaKeyPair.getPublic());
-        String decryptedText3 = decrypt("RSA", cipherText3, rsaKeyPair.getPrivate());
-        System.out.println("Test 3 - Original: " + plainText3 + ", Decrypted: " + decryptedText3);
-
-        String plainText4 = "Test Case 4 - Special Characters: !@#$%^&*()_+=-`~[]\';,./{}|:\"<>?";
-        String cipherText4 = encrypt("RSA", plainText4, rsaKeyPair.getPublic());
-        String decryptedText4 = decrypt("RSA", cipherText4, rsaKeyPair.getPrivate());
-        System.out.println("Test 4 - Original: " + plainText4 + ", Decrypted: " + decryptedText4);
-
-
-        String plainText5 = "Test Case 5 - Unicode characters:  你好世界";
-        String cipherText5 = encrypt("RSA", plainText5, rsaKeyPair.getPublic());
-        String decryptedText5 = decrypt("RSA", cipherText5, rsaKeyPair.getPrivate());
-        System.out.println("Test 5 - Original: " + plainText5 + ", Decrypted: " + decryptedText5);
-
+        // Test 2: Tampered Ciphertext
+        System.out.println("\n2. Decrypting with tampered ciphertext...");
+        byte[] tamperedEncrypted = Arrays.copyOf(encrypted, encrypted.length);
+        tamperedEncrypted[tamperedEncrypted.length - 1] ^= 0x01; // Flip a bit in the tag
+        String decryptedTampered = decrypt(tamperedEncrypted, passphrase);
+        System.out.println("Decrypted: " + decryptedTampered);
+        System.out.println("Result: " + (decryptedTampered == null ? "SUCCESS (Decryption failed as expected)" : "FAILURE"));
     }
 }

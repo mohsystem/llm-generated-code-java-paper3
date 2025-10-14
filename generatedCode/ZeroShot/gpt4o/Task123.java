@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task123 {
     private static class SessionManager {
         private HashMap<String, Long> sessions = new HashMap<>();

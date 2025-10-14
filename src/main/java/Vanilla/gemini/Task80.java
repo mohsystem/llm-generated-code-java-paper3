@@ -1,53 +1,85 @@
 package Vanilla.gemini;
+
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Task80 {
 
-    public static Socket createSSLSocketIPv6(String host, int port) throws IOException {
-        SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket sslSocket = (SSLSocket) sslsocketfactory.createSocket();
+    /**
+     * Creates an SSL client socket using IPv6 and TCP.
+     *
+     * @param host The hostname to connect to.
+     * @param port The port to connect to.
+     * @return The established SSLSocket, or null if an IPv6 address could not be found or connection failed.
+     */
+    public static SSLSocket createIPv6SslClientSocket(String host, int port) {
+        try {
+            InetAddress[] addresses = InetAddress.getAllByName(host);
+            Inet6Address ipv6Address = null;
 
-        InetAddress[] addresses = InetAddress.getAllByName(host);
-        for (InetAddress address : addresses) {
-            if (address instanceof Inet6Address) {
-                InetSocketAddress sockaddr = new InetSocketAddress(address, port);
-                sslSocket.connect(sockaddr);
-                return sslSocket;
+            for (InetAddress addr : addresses) {
+                if (addr instanceof Inet6Address) {
+                    ipv6Address = (Inet6Address) addr;
+                    break;
+                }
             }
-        }
 
-        throw new IOException("No IPv6 address found for host " + host);
+            if (ipv6Address == null) {
+                System.err.println("No IPv6 address found for host: " + host);
+                return null;
+            }
 
-    }
-
-    public static void main(String[] args) throws IOException {
-        // Replace with your test host and port. These examples are unlikely to work.
-        testConnection("google.com", 443); // Standard HTTPS port
-        testConnection("ipv6.google.com", 443); // Google's IPv6 address for testing
-        testConnection("www.facebook.com", 443); // Another common HTTPS site
-
-        // These two tests demonstrate error handling when using specific IPv6 literal and unavailable port
-        try {
-            testConnection("[::1]", 443); // Localhost IPv6 - might work if you have an HTTPS server running locally
+            SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            SSLSocket sslSocket = (SSLSocket) factory.createSocket(ipv6Address, port);
+            
+            // Start the handshake to confirm the connection
+            sslSocket.startHandshake();
+            
+            return sslSocket;
+        } catch (UnknownHostException e) {
+            System.err.println("Host not found: " + e.getMessage());
+            return null;
         } catch (IOException e) {
-            System.err.println("Test case failed: " + e.getMessage());
-        }
-        try {
-            testConnection("google.com", 8080); // Unlikely port for HTTPS
-        } catch (IOException e) {
-            System.err.println("Test case failed: " + e.getMessage());
+            System.err.println("I/O error during connection: " + e.getMessage());
+            return null;
         }
     }
 
-    private static void testConnection(String host, int port) throws IOException {
-        try (Socket socket = createSSLSocketIPv6(host, port)) {
-            System.out.println("Successfully connected to " + host + ":" + port + " using IPv6.");
+    public static void main(String[] args) {
+        String[] hosts = {"google.com", "facebook.com", "ipv6.google.com", "wikipedia.org", "example.com"};
+        int port = 443;
+
+        for (String host : hosts) {
+            System.out.println("--- Testing connection to " + host + ":" + port + " ---");
+            SSLSocket sslSocket = null;
+            try {
+                sslSocket = createIPv6SslClientSocket(host, port);
+                if (sslSocket != null && sslSocket.isConnected()) {
+                    System.out.println("Successfully connected to " + host + " over IPv6.");
+                    System.out.println("Remote Address: " + sslSocket.getInetAddress());
+                    System.out.println("Cipher Suite: " + sslSocket.getSession().getCipherSuite());
+                } else {
+                    System.out.println("Failed to connect to " + host + " over IPv6.");
+                }
+            } catch (Exception e) {
+                System.err.println("An exception occurred for host " + host + ": " + e.getMessage());
+                 e.printStackTrace();
+            } finally {
+                if (sslSocket != null) {
+                    try {
+                        sslSocket.close();
+                        System.out.println("Socket closed.");
+                    } catch (IOException e) {
+                        System.err.println("Error closing socket for host " + host + ": " + e.getMessage());
+                    }
+                }
+            }
+            System.out.println();
         }
     }
 }

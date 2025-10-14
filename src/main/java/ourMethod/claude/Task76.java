@@ -1,81 +1,121 @@
 package ourMethod.claude;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import javax.net.ssl.HttpsURLConnection;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Task76 {
-    public static String getPageTitle(String urlStr) throws Exception {
-        if (urlStr == null || !urlStr.toLowerCase().startsWith("https://")) {
-            throw new IllegalArgumentException("Invalid URL: URL must start with https://");
+    private static final int MAX_CONTENT_LENGTH = 10485760; // 10MB
+    private static final int TIMEOUT_MS = 10000;
+    private static final Pattern TITLE_PATTERN = Pattern.compile("<title[^>]*>([^<]*)</title>", Pattern.CASE_INSENSITIVE);
+
+    public static String extractTitle(String urlString) {
+        if (urlString == null || urlString.trim().isEmpty()) {
+            throw new IllegalArgumentException("URL cannot be null or empty");
         }
 
-        URL url = new URL(urlStr);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        urlString = urlString.trim();
         
-        conn.setRequestMethod("GET");
-        conn.setConnectTimeout(5000);
-        conn.setReadTimeout(5000);
-        
+        if (!urlString.toLowerCase().startsWith("https://")) {
+            throw new IllegalArgumentException("Only HTTPS URLs are allowed");
+        }
+
+        if (urlString.length() > 2048) {
+            throw new IllegalArgumentException("URL exceeds maximum allowed length");
+        }
+
+        HttpsURLConnection connection = null;
         try {
-            int responseCode = conn.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new Exception("HTTP request failed with response code: " + responseCode);
-            }
+            URL url = new URL(urlString);
             
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            if (!"https".equalsIgnoreCase(url.getProtocol())) {
+                throw new IllegalArgumentException("Only HTTPS protocol is allowed");
+            }
+
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            sslContext.init(null, null, new SecureRandom());
+
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setSSLSocketFactory(sslContext.getSocketFactory());
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(TIMEOUT_MS);
+            connection.setReadTimeout(TIMEOUT_MS);
+            connection.setInstanceFollowRedirects(false);
+            connection.setRequestProperty("User-Agent", "TitleExtractor/1.0");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                throw new RuntimeException("HTTP request failed with code: " + responseCode);
+            }
+
+            String contentType = connection.getContentType();
+            if (contentType != null && !contentType.toLowerCase().contains("text/html")) {
+                throw new RuntimeException("Response is not HTML content");
+            }
+
             StringBuilder content = new StringBuilder();
-            String line;
-            
-            while ((line = reader.readLine()) != null) {
-                content.append(line);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                int totalRead = 0;
+                while ((line = reader.readLine()) != null) {
+                    totalRead += line.length();
+                    if (totalRead > MAX_CONTENT_LENGTH) {
+                        throw new RuntimeException("Content exceeds maximum allowed size");
+                    }
+                    content.append(line).append("\\n");
+                }
             }
-            reader.close();
-            
-            Pattern pattern = Pattern.compile("<title>(.*?)</title>");
-            Matcher matcher = pattern.matcher(content.toString());
-            
+
+            Matcher matcher = TITLE_PATTERN.matcher(content.toString());
             if (matcher.find()) {
-                return matcher.group(1).trim();
-            } else {
-                return "No title found";
+                String title = matcher.group(1).trim();
+                return title.isEmpty() ? "No title found" : title;
             }
+
+            return "No title found";
+
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to extract title: " + e.getMessage());
         } finally {
-            conn.disconnect();
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
     public static void main(String[] args) {
-        try {
-            if (args.length != 1) {
-                System.out.println("Usage: java Task76 <https_url>");
-                return;
+        if (args.length == 0) {
+            System.err.println("Usage: java Task76 <https-url>");
+            System.exit(1);
+        }
+
+        String[] testUrls = {
+            args[0],
+            "https://www.example.com",
+            "https://www.wikipedia.org",
+            "https://www.github.com",
+            "https://www.google.com"
+        };
+
+        for (String url : testUrls) {
+            try {
+                String title = extractTitle(url);
+                System.out.println("URL: " + url);
+                System.out.println("Title: " + title);
+                System.out.println();
+            } catch (Exception e) {
+                System.err.println("Error for URL " + url + ": " + e.getMessage());
+                System.err.println();
             }
-            
-            String url = args[0];
-            String title = getPageTitle(url);
-            System.out.println("Page title: " + title);
-            
-            // Test cases
-            String[] testUrls = {
-                "https://www.example.com",
-                "https://www.google.com",
-                "https://www.github.com", 
-                "https://www.oracle.com",
-                "https://www.microsoft.com"
-            };
-            
-            for(String testUrl : testUrls) {
-                System.out.println("\\nTesting URL: " + testUrl);
-                System.out.println("Title: " + getPageTitle(testUrl));
-            }
-            
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
         }
     }
 }

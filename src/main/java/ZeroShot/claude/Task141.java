@@ -1,29 +1,27 @@
 package ZeroShot.claude;
 
 public class Task141 {
-    public static String reverseString(String str) {
-        if (str == null) return null;
-        StringBuilder reversed = new StringBuilder();
-        for (int i = str.length() - 1; i >= 0; i--) {
-            reversed.append(str.charAt(i));
+    public static String reverseString(String input) {
+        if (input == null) {
+            return null;
         }
-        return reversed.toString();
+        return new StringBuilder(input).reverse().toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "Hello World",
-            "Programming",
-            "12345",
-            "",
-            "a"
-        };
+        // Test case 1: Normal string
+        System.out.println("Test 1: " + reverseString("hello"));
         
-        for (String test : tests) {
-            System.out.println("Original: " + test);
-            System.out.println("Reversed: " + reverseString(test));
-            System.out.println();
-        }
+        // Test case 2: String with spaces
+        System.out.println("Test 2: " + reverseString("hello world"));
+        
+        // Test case 3: Empty string
+        System.out.println("Test 3: " + reverseString(""));
+        
+        // Test case 4: Single character
+        System.out.println("Test 4: " + reverseString("a"));
+        
+        // Test case 5: String with special characters
+        System.out.println("Test 5: " + reverseString("Hello123!@#"));
     }
 }

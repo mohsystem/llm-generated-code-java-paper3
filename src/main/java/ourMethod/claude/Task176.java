@@ -8,65 +8,75 @@ class Task176 {
     
     public Task176() {
         prefixProducts = new ArrayList<>();
-        prefixProducts.add(1); // sentinel value
+        prefixProducts.add(1);
     }
     
     public void add(int num) {
-        if (num == 0) {
-            prefixProducts = new ArrayList<>();
-            prefixProducts.add(1);
-            return;
+        if (num < 0 || num > 100) {
+            throw new IllegalArgumentException("Number must be between 0 and 100");
         }
         
-        prefixProducts.add(prefixProducts.get(prefixProducts.size() - 1) * num);
+        if (num == 0) {
+            prefixProducts.clear();
+            prefixProducts.add(1);
+        } else {
+            int lastProduct = prefixProducts.get(prefixProducts.size() - 1);
+            prefixProducts.add(lastProduct * num);
+        }
     }
     
     public int getProduct(int k) {
+        if (k < 1 || k > 40000) {
+            throw new IllegalArgumentException("k must be between 1 and 40000");
+        }
+        
         int n = prefixProducts.size();
-        if (k >= n) return 0;
-        return prefixProducts.get(n-1) / prefixProducts.get(n-k-1);
+        if (k >= n) {
+            return 0;
+        }
+        
+        return prefixProducts.get(n - 1) / prefixProducts.get(n - 1 - k);
     }
-
+    
     public static void main(String[] args) {
-        // Test case 1
-        Task176 t1 = new Task176();
-        t1.add(3);
-        t1.add(0);
-        t1.add(2);
-        t1.add(5);
-        t1.add(4);
-        System.out.println(t1.getProduct(2)); // Expected: 20
-
-        // Test case 2  
-        Task176 t2 = new Task176();
-        t2.add(2);
-        t2.add(3);
-        t2.add(4);
-        System.out.println(t2.getProduct(3)); // Expected: 24
-
-        // Test case 3
-        Task176 t3 = new Task176();
-        t3.add(1);
-        t3.add(2);
-        t3.add(3);
-        t3.add(0);
-        System.out.println(t3.getProduct(2)); // Expected: 0
-
-        // Test case 4
-        Task176 t4 = new Task176();
-        t4.add(5);
-        t4.add(2);
-        t4.add(4);
-        t4.add(8);
-        System.out.println(t4.getProduct(2)); // Expected: 32
-
-        // Test case 5
-        Task176 t5 = new Task176();
-        t5.add(3);
-        t5.add(6);
-        t5.add(0);
-        t5.add(2);
-        t5.add(4);
-        System.out.println(t5.getProduct(3)); // Expected: 0
+        // Test case 1: Example from problem
+        Task176 test1 = new Task176();
+        test1.add(3);
+        test1.add(0);
+        test1.add(2);
+        test1.add(5);
+        test1.add(4);
+        System.out.println(test1.getProduct(2)); // 20
+        System.out.println(test1.getProduct(3)); // 40
+        System.out.println(test1.getProduct(4)); // 0
+        test1.add(8);
+        System.out.println(test1.getProduct(2)); // 32
+        
+        // Test case 2: All non-zero
+        Task176 test2 = new Task176();
+        test2.add(2);
+        test2.add(3);
+        test2.add(4);
+        System.out.println(test2.getProduct(2)); // 12
+        
+        // Test case 3: Multiple zeros
+        Task176 test3 = new Task176();
+        test3.add(1);
+        test3.add(0);
+        test3.add(0);
+        test3.add(5);
+        System.out.println(test3.getProduct(1)); // 5
+        
+        // Test case 4: Single element
+        Task176 test4 = new Task176();
+        test4.add(7);
+        System.out.println(test4.getProduct(1)); // 7
+        
+        // Test case 5: Large numbers
+        Task176 test5 = new Task176();
+        test5.add(100);
+        test5.add(100);
+        test5.add(1);
+        System.out.println(test5.getProduct(3)); // 10000
     }
 }

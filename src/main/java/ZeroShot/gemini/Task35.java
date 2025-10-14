@@ -1,31 +1,45 @@
 package ZeroShot.gemini;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class Task35 {
-    public static int peopleOnBus(List<List<Integer>> stops) {
-        int people = 0;
-        for (List<Integer> stop : stops) {
-            people += stop.get(0) - stop.get(1);
+public class Task35 {
+
+    /**
+     * Calculates the number of people still on the bus after the last bus stop.
+     *
+     * @param stops A list of integer arrays. Each array represents a bus stop
+     *              with two elements: [people_getting_on, people_getting_off].
+     * @return The number of people remaining on the bus.
+     */
+    public static int countPassengers(List<int[]> stops) {
+        int peopleOnBus = 0;
+        if (stops == null) {
+            return 0;
         }
-        return people;
+        for (int[] stop : stops) {
+            // Assuming input is always valid with pairs of [on, off]
+            peopleOnBus += stop[0];
+            peopleOnBus -= stop[1];
+        }
+        return peopleOnBus;
     }
 
     public static void main(String[] args) {
-        List<List<Integer>> test1 = Arrays.asList(Arrays.asList(10, 0), Arrays.asList(3, 5), Arrays.asList(5, 8));
-        System.out.println(peopleOnBus(test1)); // Output: 5
+        // Test Case 1
+        System.out.println(countPassengers(new ArrayList<>(Arrays.asList(new int[]{10, 0}, new int[]{3, 5}, new int[]{5, 8}))));
 
-        List<List<Integer>> test2 = Arrays.asList(Arrays.asList(3, 0), Arrays.asList(9, 1), Arrays.asList(4, 10), Arrays.asList(12, 2), Arrays.asList(6, 1), Arrays.asList(7, 10));
-        System.out.println(peopleOnBus(test2)); // Output: 17
+        // Test Case 2
+        System.out.println(countPassengers(new ArrayList<>(Arrays.asList(new int[]{3, 0}, new int[]{9, 1}, new int[]{4, 10}, new int[]{12, 2}, new int[]{6, 1}, new int[]{7, 10}))));
 
-        List<List<Integer>> test3 = Arrays.asList(Arrays.asList(3, 0), Arrays.asList(9, 1), Arrays.asList(4, 8), Arrays.asList(12, 2), Arrays.asList(6, 1), Arrays.asList(7, 8));
-        System.out.println(peopleOnBus(test3)); // Output: 21
+        // Test Case 3: Single stop with no change
+        System.out.println(countPassengers(new ArrayList<>(Arrays.asList(new int[]{0, 0}))));
 
-        List<List<Integer>> test4 = new ArrayList<>();
-        System.out.println(peopleOnBus(test4)); // Output: 0
-
-        List<List<Integer>> test5 = Arrays.asList(Arrays.asList(5, 0), Arrays.asList(0, 2), Arrays.asList(3, 1));
-        System.out.println(peopleOnBus(test5)); // Output: 6
+        // Test Case 4: Ends with zero passengers
+        System.out.println(countPassengers(new ArrayList<>(Arrays.asList(new int[]{100, 0}, new int[]{0, 50}, new int[]{25, 0}, new int[]{0, 75}))));
+        
+        // Test Case 5: Net change is zero at most stops
+        System.out.println(countPassengers(new ArrayList<>(Arrays.asList(new int[]{5, 0}, new int[]{5, 5}, new int[]{5, 5}, new int[]{5, 5}, new int[]{5, 5}))));
     }
 }

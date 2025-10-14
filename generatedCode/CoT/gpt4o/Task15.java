@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task15 {
     public static String[] buildTower(int floors) {
         String[] tower = new String[floors];

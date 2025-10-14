@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 class Task2 {
     public static String createPhoneNumber(int[] numbers) {
         return String.format("(%d%d%d) %d%d%d-%d%d%d%d", 

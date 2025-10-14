@@ -1,30 +1,58 @@
 package ZeroShot.gemini;
-import java.util.Arrays;
 
-class Task146 {
-    public int findMissingNumber(int[] arr) {
+public class Task146 {
+
+    /**
+     * Finds the missing number in an array containing n-1 unique integers from 1 to n.
+     * This method is secure against integer overflow for the sum calculation by using a 'long' type.
+     *
+     * @param arr The input array of unique integers. The array is expected to contain
+     *            unique numbers from 1 to n (inclusive) with one number missing.
+     * @return The missing integer.
+     * @throws IllegalArgumentException if the input array is null.
+     */
+    public static int findMissingNumber(int[] arr) {
+        // Input validation for robustness. A null array is an invalid argument.
+        if (arr == null) {
+            throw new IllegalArgumentException("Input array cannot be null.");
+        }
+        
+        // The complete list should contain 'n' numbers.
+        // The array has n-1 numbers, so n = arr.length + 1.
         int n = arr.length + 1;
-        int expectedSum = n * (n + 1) / 2;
-        int actualSum = 0;
+        
+        // Use 'long' for the expected sum to prevent potential integer overflow if 'n' is large.
+        // The formula for the sum of the first n integers is n * (n + 1) / 2.
+        long expectedSum = (long)n * (n + 1) / 2;
+        
+        long actualSum = 0;
         for (int num : arr) {
             actualSum += num;
         }
-        return expectedSum - actualSum;
+        
+        // The difference between the expected sum and the actual sum is the missing number.
+        return (int)(expectedSum - actualSum);
     }
 
     public static void main(String[] args) {
-        Task146 task = new Task146();
-        int[] test1 = {1, 2, 4, 5, 6};
-        int[] test2 = {1, 2, 3, 4, 6, 7, 8};
-        int[] test3 = {2, 3, 4, 5};
-        int[] test4 = {1, 3, 4, 5, 6};
-        int[] test5 = {1};
+        // Test Case 1: A standard case with a missing number in the middle.
+        int[] arr1 = {1, 2, 4, 5};
+        System.out.println("Test Case 1: Array = {1, 2, 4, 5}, Missing number: " + findMissingNumber(arr1));
 
-        System.out.println(task.findMissingNumber(test1)); // Output: 3
-        System.out.println(task.findMissingNumber(test2)); // Output: 5
-        System.out.println(task.findMissingNumber(test3)); // Output: 1
-        System.out.println(task.findMissingNumber(test4)); // Output: 2
-        System.out.println(task.findMissingNumber(test5)); // Output: 2
+        // Test Case 2: An unordered array.
+        int[] arr2 = {5, 2, 1, 4};
+        System.out.println("Test Case 2: Array = {5, 2, 1, 4}, Missing number: " + findMissingNumber(arr2));
 
+        // Test Case 3: A small array where the last number is missing.
+        int[] arr3 = {1};
+        System.out.println("Test Case 3: Array = {1}, Missing number: " + findMissingNumber(arr3));
+        
+        // Test Case 4: An empty array. Here n=1, so the missing number is 1.
+        int[] arr4 = {};
+        System.out.println("Test Case 4: Array = {}, Missing number: " + findMissingNumber(arr4));
+
+        // Test Case 5: A larger array.
+        int[] arr5 = {1, 2, 3, 4, 5, 6, 7, 9, 10};
+        System.out.println("Test Case 5: Array = {1..10 missing 8}, Missing number: " + findMissingNumber(arr5));
     }
 }

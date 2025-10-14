@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 // MongoDB interaction requires MongoDB driver and a running MongoDB instance. 
 // Due to security constraints, we cannot directly implement MongoDB interaction here. 
 // Below is a template code for MongoDB CRUD operations in Java:

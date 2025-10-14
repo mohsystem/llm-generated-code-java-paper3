@@ -2,41 +2,50 @@ package Vanilla.claude;
 
 public class Task182 {
     public static String cleanPhoneNumber(String phoneNumber) {
-        String cleaned = phoneNumber.replaceAll("[^0-9]", "");
-        
-        if (cleaned.length() > 11 || cleaned.length() < 10)
+        if (phoneNumber == null) {
             return null;
-            
-        if (cleaned.length() == 11) {
-            if (cleaned.charAt(0) != '1')
-                return null;
-            cleaned = cleaned.substring(1);
         }
         
-        if (cleaned.length() != 10)
+        // Remove all non-digit characters
+        String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
+        
+        // Check if it starts with country code 1 and has 11 digits
+        if (digitsOnly.length() == 11 && digitsOnly.startsWith("1")) {
+            digitsOnly = digitsOnly.substring(1);
+        }
+        
+        // Validate the length is 10 digits
+        if (digitsOnly.length() != 10) {
             return null;
-            
-        if (cleaned.charAt(0) < '2')
+        }
+        
+        // Validate area code (first digit must be 2-9)
+        if (digitsOnly.charAt(0) < '2' || digitsOnly.charAt(0) > '9') {
             return null;
-            
-        if (cleaned.charAt(3) < '2') 
+        }
+        
+        // Validate exchange code (fourth digit must be 2-9)
+        if (digitsOnly.charAt(3) < '2' || digitsOnly.charAt(3) > '9') {
             return null;
-            
-        return cleaned;
+        }
+        
+        return digitsOnly;
     }
     
     public static void main(String[] args) {
-        String[] tests = {
-            "+1 (613)-995-0253",
-            "613-995-0253",
-            "1 613 995 0253",
-            "613.995.0253",
-            "123-456-7890"
-        };
+        // Test case 1
+        System.out.println("Test 1: " + cleanPhoneNumber("+1 (613)-995-0253"));
         
-        for (String test : tests) {
-            System.out.println("Input: " + test);
-            System.out.println("Output: " + cleanPhoneNumber(test));
-        }
+        // Test case 2
+        System.out.println("Test 2: " + cleanPhoneNumber("613-995-0253"));
+        
+        // Test case 3
+        System.out.println("Test 3: " + cleanPhoneNumber("1 613 995 0253"));
+        
+        // Test case 4
+        System.out.println("Test 4: " + cleanPhoneNumber("613.995.0253"));
+        
+        // Test case 5
+        System.out.println("Test 5: " + cleanPhoneNumber("(234) 567-8901"));
     }
 }

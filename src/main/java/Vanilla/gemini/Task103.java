@@ -1,32 +1,45 @@
 package Vanilla.gemini;
-class Task103 {
-    public boolean isStrongPassword(String password) {
-        if (password.length() < 8) {
+
+public class Task103 {
+
+    public static boolean checkPasswordStrength(String password) {
+        if (password == null || password.length() < 8) {
             return false;
         }
-        boolean hasUppercase = false;
-        boolean hasLowercase = false;
+
+        boolean hasUpper = false;
+        boolean hasLower = false;
         boolean hasDigit = false;
+
         for (char c : password.toCharArray()) {
             if (Character.isUpperCase(c)) {
-                hasUppercase = true;
+                hasUpper = true;
             } else if (Character.isLowerCase(c)) {
-                hasLowercase = true;
+                hasLower = true;
             } else if (Character.isDigit(c)) {
                 hasDigit = true;
             }
+
+            if (hasUpper && hasLower && hasDigit) {
+                return true;
+            }
         }
-        return hasUppercase && hasLowercase && hasDigit;
+
+        return false;
     }
 
     public static void main(String[] args) {
-        Task103 task = new Task103();
-        System.out.println(task.isStrongPassword("Hello123")); // true
-        System.out.println(task.isStrongPassword("hello")); // false
-        System.out.println(task.isStrongPassword("HELLO123")); // false
-        System.out.println(task.isStrongPassword("helloWORLD")); // false
-        System.out.println(task.isStrongPassword("H3ll0")); // false
+        String[] testPasswords = {
+            "StrongPassword123",
+            "weak",
+            "NoDigitsHere",
+            "nouppercase123",
+            "NOLOWERCASE123"
+        };
 
-
+        for (String password : testPasswords) {
+            boolean isStrong = checkPasswordStrength(password);
+            System.out.println("Password: \"" + password + "\" -> " + (isStrong ? "Strong" : "Weak"));
+        }
     }
 }

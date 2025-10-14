@@ -16,7 +16,7 @@ public class Task121 {
         }
 
 
-        if (fileName == null || fileName.isEmpty() || fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+        if (fileName == null || fileName.isEmpty() || fileName.contains("..") || fileName.contains("/") || fileName.contains("\")) {
            throw new IllegalArgumentException("Invalid file name.");
         }
 

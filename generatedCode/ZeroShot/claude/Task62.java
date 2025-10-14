@@ -60,7 +60,7 @@ class Task62 {
         }
         
         // String
-        if (json.startsWith("\\"")) {
+        if (json.startsWith("\"")) {
             return new JsonElement("string", json.substring(1, json.length() - 1));
         }
         
@@ -110,11 +110,11 @@ class Task62 {
     public static void main(String[] args) {
         // Test cases
         String[] tests = {
-            "{\\"name\\":\\"John\\", \\"age\\":30}",
+            "{\"name\":\"John\", \"age\":30}",
             "[1,2,3,4,5]",
-            "{\\"arr\\":[1,2,{\\"x\\":10}], \\"val\\":null}",
-            "\\"simple string\\"",
-            "{\\"nested\\":{\\"array\\":[1,2,3],\\"bool\\":true}}"
+            "{\"arr\":[1,2,{\"x\":10}], \"val\":null}",
+            "\"simple string\"",
+            "{\"nested\":{\"array\":[1,2,3],\"bool\":true}}"
         };
         
         for (String test : tests) {

@@ -1,86 +1,84 @@
 package Vanilla.gemini;
-import java.util.ArrayList;
-import java.util.List;
 
-class Task148 {
-    private List<Integer> stack;
+public class Task148 {
 
-    public Task148() {
-        stack = new ArrayList<>();
-    }
+    static class Stack {
+        private int arr[];
+        private int top;
+        private int capacity;
 
-    public void push(int value) {
-        stack.add(value);
-    }
-
-    public int pop() {
-        if (isEmpty()) {
-            throw new RuntimeException("Stack is empty");
+        // Constructor to initialize stack
+        Stack(int size) {
+            arr = new int[size];
+            capacity = size;
+            top = -1;
         }
-        return stack.remove(stack.size() - 1);
-    }
 
-    public int peek() {
-        if (isEmpty()) {
-            throw new RuntimeException("Stack is empty");
+        // Utility function to add an element x to the stack
+        public void push(int x) {
+            if (isFull()) {
+                System.out.println("Stack Overflow");
+                return;
+            }
+            System.out.println("Pushing " + x);
+            arr[++top] = x;
         }
-        return stack.get(stack.size() - 1);
-    }
 
-    public boolean isEmpty() {
-        return stack.isEmpty();
+        // Utility function to pop a top element from the stack
+        public int pop() {
+            if (isEmpty()) {
+                System.out.println("Stack Underflow");
+                return Integer.MIN_VALUE;
+            }
+            int item = arr[top--];
+            System.out.println("Popping " + item);
+            return item;
+        }
+
+        // Utility function to return top element in a stack
+        public int peek() {
+            if (isEmpty()) {
+                System.out.println("Stack is empty");
+                return Integer.MIN_VALUE;
+            }
+            return arr[top];
+        }
+
+        // Utility function to check if the stack is full
+        public Boolean isFull() {
+            return top == capacity - 1;
+        }
+
+        // Utility function to check if the stack is empty
+        public Boolean isEmpty() {
+            return top == -1;
+        }
     }
 
     public static void main(String[] args) {
-        Task148 stack = new Task148();
+        System.out.println("--- Java Stack Test ---");
+        Stack stack = new Stack(3);
+
+        // Test Case 1: Push elements
         stack.push(10);
         stack.push(20);
         stack.push(30);
-        System.out.println(stack.peek()); // Output: 30
-        System.out.println(stack.pop()); // Output: 30
-        System.out.println(stack.pop()); // Output: 20
-        System.out.println(stack.isEmpty()); // Output: false
+
+        // Test Case 2: Peek at the top element
+        System.out.println("Top element is: " + stack.peek());
+
+        // Test Case 3: Pop an element
         stack.pop();
-        System.out.println(stack.isEmpty()); // Output: true
+        System.out.println("Top element after pop is: " + stack.peek());
 
+        // Test Case 4: Push to a full stack (Overflow)
+        stack.push(40); // This should be fine
+        stack.push(50); // This should cause an overflow
 
-        Task148 stack2 = new Task148();
-        System.out.println(stack2.isEmpty()); //true
-        stack2.push(1);
-        System.out.println(stack2.peek()); // 1
-        stack2.push(2);
-        System.out.println(stack2.peek()); // 2
-        stack2.push(3);
-        System.out.println(stack2.peek()); // 3
-        System.out.println(stack2.pop()); // 3
-        System.out.println(stack2.pop()); // 2
-        System.out.println(stack2.pop()); // 1
-        System.out.println(stack2.isEmpty()); //true
-
-        Task148 stack3 = new Task148();
-        try {
-             stack3.pop();
-        } catch (RuntimeException e) {
-             System.out.println(e.getMessage()); // Stack is empty
-        }
-
-        Task148 stack4 = new Task148();
-        stack4.push(5);
-        System.out.println(stack4.peek()); // 5
-        stack4.push(6);
-        System.out.println(stack4.peek()); // 6
-        stack4.pop();
-        System.out.println(stack4.peek()); // 5
-
-        Task148 stack5 = new Task148();
-        stack5.push(100);
-        stack5.push(200);
-        stack5.pop();
-        stack5.push(300);
-        System.out.println(stack5.peek()); //300
-        System.out.println(stack5.pop()); //300
-        System.out.println(stack5.pop()); //100
-
-
+        // Test Case 5: Pop all elements and check for underflow
+        stack.pop();
+        stack.pop();
+        stack.pop();
+        stack.pop(); // This should cause an underflow
     }
 }

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task13 {
 
     public static boolean isValidWalk(String[] walk) {

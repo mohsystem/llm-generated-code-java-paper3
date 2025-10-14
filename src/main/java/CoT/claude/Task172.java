@@ -1,32 +1,59 @@
 package CoT.claude;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Task172 {
-    public static int distinctSubstrings(String text) {
-        int n = text.length();
-        java.util.HashSet<String> result = new java.util.HashSet<>();
+    public static int distinctEchoSubstrings(String text) {
+        // Input validation
+        if (text == null || text.isEmpty() || text.length() > 2000) {
+            return 0;
+        }
         
-        // Check all possible substrings
-        for(int len = 2; len <= n; len += 2) {
-            for(int i = 0; i + len <= n; i++) {
-                String substr = text.substring(i, i + len);
-                if(len % 2 == 0) {
-                    String firstHalf = substr.substring(0, len/2);
-                    String secondHalf = substr.substring(len/2);
-                    if(firstHalf.equals(secondHalf)) {
-                        result.add(substr);
-                    }
+        // Validate that text contains only lowercase English letters
+        for (char c : text.toCharArray()) {
+            if (c < 'a' || c > 'z') {
+                return 0;
+            }
+        }
+        
+        Set<String> distinctSubstrings = new HashSet<>();
+        int n = text.length();
+        
+        // Iterate through all possible substring lengths (must be even)
+        for (int len = 2; len <= n; len += 2) {
+            int halfLen = len / 2;
+            
+            // Iterate through all possible starting positions
+            for (int i = 0; i <= n - len; i++) {
+                // Extract the two halves
+                String firstHalf = text.substring(i, i + halfLen);
+                String secondHalf = text.substring(i + halfLen, i + len);
+                
+                // Check if both halves are equal
+                if (firstHalf.equals(secondHalf)) {
+                    distinctSubstrings.add(firstHalf + secondHalf);
                 }
             }
         }
-        return result.size();
+        
+        return distinctSubstrings.size();
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(distinctSubstrings("abcabcabc")); // Expected: 3
-        System.out.println(distinctSubstrings("leetcodeleetcode")); // Expected: 2
-        System.out.println(distinctSubstrings("aa")); // Expected: 1
-        System.out.println(distinctSubstrings("aaa")); // Expected: 1
-        System.out.println(distinctSubstrings("aabaabaa")); // Expected: 2
+        // Test case 1
+        System.out.println("Test 1: " + distinctEchoSubstrings("abcabcabc")); // Expected: 3
+        
+        // Test case 2
+        System.out.println("Test 2: " + distinctEchoSubstrings("leetcodeleetcode")); // Expected: 2
+        
+        // Test case 3
+        System.out.println("Test 3: " + distinctEchoSubstrings("aa")); // Expected: 1
+        
+        // Test case 4
+        System.out.println("Test 4: " + distinctEchoSubstrings("a")); // Expected: 0
+        
+        // Test case 5
+        System.out.println("Test 5: " + distinctEchoSubstrings("aaaa")); // Expected: 2
     }
 }

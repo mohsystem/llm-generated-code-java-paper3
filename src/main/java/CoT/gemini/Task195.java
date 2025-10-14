@@ -1,64 +1,95 @@
 package CoT.gemini;
-import java.util.Collections;
+
 import java.util.PriorityQueue;
+import java.util.Collections;
 
 class MedianFinder {
-    private PriorityQueue<Integer> small;
-    private PriorityQueue<Integer> large;
+    private PriorityQueue<Integer> smallHalf; // max-heap
+    private PriorityQueue<Integer> largeHalf; // min-heap
 
+    /** initialize your data structure here. */
     public MedianFinder() {
-        small = new PriorityQueue<>(Collections.reverseOrder());
-        large = new PriorityQueue<>();
+        smallHalf = new PriorityQueue<>(Collections.reverseOrder());
+        largeHalf = new PriorityQueue<>();
     }
-
+    
     public void addNum(int num) {
-        if (small.size() >= large.size()) {
-            small.offer(num);
-            large.offer(small.poll());
-        } else {
-            large.offer(num);
-            small.offer(large.poll());
+        // Add to max-heap (smallHalf)
+        smallHalf.offer(num);
+        
+        // Move the largest element from smallHalf to largeHalf
+        // to maintain the invariant that smallHalf elements are <= largeHalf elements.
+        largeHalf.offer(smallHalf.poll());
+        
+        // Balance the sizes. We want smallHalf to be equal or one larger than largeHalf.
+        if (largeHalf.size() > smallHalf.size()) {
+            smallHalf.offer(largeHalf.poll());
         }
     }
-
+    
     public double findMedian() {
-        if (small.size() > large.size()) {
-            return small.peek();
-        } else if (large.size() > small.size()) {
-            return large.peek();
+        // If total number of elements is odd, the median is the top of the larger heap (smallHalf)
+        if (smallHalf.size() > largeHalf.size()) {
+            return (double) smallHalf.peek();
         } else {
-            return (small.peek() + large.peek()) / 2.0;
+            // If total number is even, median is the average of the two tops
+            return (smallHalf.peek() + largeHalf.peek()) / 2.0;
         }
     }
+}
 
+public class Task195 {
     public static void main(String[] args) {
-        MedianFinder medianFinder1 = new MedianFinder();
-        medianFinder1.addNum(1);
-        medianFinder1.addNum(2);
-        System.out.println(medianFinder1.findMedian()); // 1.5
-        medianFinder1.addNum(3);
-        System.out.println(medianFinder1.findMedian()); // 2.0
+        // Test Case 1: Example from prompt
+        System.out.println("Test Case 1:");
+        MedianFinder mf1 = new MedianFinder();
+        mf1.addNum(1);
+        mf1.addNum(2);
+        System.out.println("Median: " + mf1.findMedian()); // Output: 1.5
+        mf1.addNum(3);
+        System.out.println("Median: " + mf1.findMedian()); // Output: 2.0
+        System.out.println();
 
-        MedianFinder medianFinder2 = new MedianFinder();
-        medianFinder2.addNum(-1);
-        System.out.println(medianFinder2.findMedian()); // -1.0
-        medianFinder2.addNum(-2);
-        System.out.println(medianFinder2.findMedian()); // -1.5
-        medianFinder2.addNum(-3);
-        System.out.println(medianFinder2.findMedian()); // -2.0
+        // Test Case 2: Negative numbers
+        System.out.println("Test Case 2:");
+        MedianFinder mf2 = new MedianFinder();
+        mf2.addNum(-1);
+        mf2.addNum(-2);
+        System.out.println("Median: " + mf2.findMedian()); // Output: -1.5
+        mf2.addNum(-3);
+        System.out.println("Median: " + mf2.findMedian()); // Output: -2.0
+        System.out.println();
 
-        MedianFinder medianFinder3 = new MedianFinder();
-        medianFinder3.addNum(1);
-        System.out.println(medianFinder3.findMedian()); // 1.0
-        medianFinder3.addNum(2);
-        System.out.println(medianFinder3.findMedian()); // 1.5
-        medianFinder3.addNum(3);
-        System.out.println(medianFinder3.findMedian()); // 2.0
-        medianFinder3.addNum(4);
-        System.out.println(medianFinder3.findMedian()); // 2.5
-        medianFinder3.addNum(5);
-        System.out.println(medianFinder3.findMedian()); // 3.0
+        // Test Case 3: Mixed numbers and duplicates
+        System.out.println("Test Case 3:");
+        MedianFinder mf3 = new MedianFinder();
+        mf3.addNum(6);
+        System.out.println("Median: " + mf3.findMedian()); // Output: 6.0
+        mf3.addNum(10);
+        System.out.println("Median: " + mf3.findMedian()); // Output: 8.0
+        mf3.addNum(2);
+        System.out.println("Median: " + mf3.findMedian()); // Output: 6.0
+        mf3.addNum(6);
+        System.out.println("Median: " + mf3.findMedian()); // Output: 6.0
+        System.out.println();
 
-
+        // Test Case 4: Zeros
+        System.out.println("Test Case 4:");
+        MedianFinder mf4 = new MedianFinder();
+        mf4.addNum(0);
+        System.out.println("Median: " + mf4.findMedian()); // Output: 0.0
+        mf4.addNum(0);
+        System.out.println("Median: " + mf4.findMedian()); // Output: 0.0
+        System.out.println();
+        
+        // Test Case 5: Descending order
+        System.out.println("Test Case 5:");
+        MedianFinder mf5 = new MedianFinder();
+        mf5.addNum(5);
+        mf5.addNum(4);
+        mf5.addNum(3);
+        mf5.addNum(2);
+        mf5.addNum(1);
+        System.out.println("Median: " + mf5.findMedian()); // Output: 3.0
     }
 }

@@ -1,58 +1,58 @@
 package ourMethod.gemini;
-import java.math.BigDecimal;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Task181 {
 
-    private static class Account {
-        private final int accountNumber;
-        private BigDecimal balance;
-        private boolean isOpen;
+    public static class Account {
+        private double balance;
+        private volatile boolean isOpen;
         private final ReentrantLock lock = new ReentrantLock();
 
-        public Account(int accountNumber) {
-            this.accountNumber = accountNumber;
-            this.balance = BigDecimal.ZERO;
+        public Account(double initialBalance) {
+            if (initialBalance < 0) {
+                throw new IllegalArgumentException("Initial balance cannot be negative.");
+            }
+            this.balance = initialBalance;
             this.isOpen = true;
         }
 
-        public synchronized void deposit(BigDecimal amount) {
+        public void deposit(double amount) {
+            if (amount <= 0) {
+                throw new IllegalArgumentException("Deposit amount must be positive.");
+            }
             lock.lock();
             try {
                 if (!isOpen) {
                     throw new IllegalStateException("Account is closed.");
                 }
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalArgumentException("Deposit amount must be positive.");
-                }
-                balance = balance.add(amount);
+                balance += amount;
             } finally {
                 lock.unlock();
             }
         }
 
-        public synchronized BigDecimal withdraw(BigDecimal amount) {
+        public void withdraw(double amount) {
+            if (amount <= 0) {
+                throw new IllegalArgumentException("Withdrawal amount must be positive.");
+            }
             lock.lock();
             try {
                 if (!isOpen) {
                     throw new IllegalStateException("Account is closed.");
                 }
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalArgumentException("Withdrawal amount must be positive.");
+                if (balance < amount) {
+                    throw new IllegalStateException("Insufficient funds.");
                 }
-                if (balance.compareTo(amount) < 0) {
-                    throw new IllegalArgumentException("Insufficient balance.");
-                }
-                balance = balance.subtract(amount);
-                return amount;
+                balance -= amount;
             } finally {
                 lock.unlock();
             }
-
         }
 
-
-        public synchronized BigDecimal getBalance() {
+        public double getBalance() {
             lock.lock();
             try {
                 if (!isOpen) {
@@ -64,53 +64,98 @@ public class Task181 {
             }
         }
 
-
-        public synchronized void close() {
+        public void close() {
             lock.lock();
             try {
-                if (!isOpen) {
-                    throw new IllegalStateException("Account is already closed.");
-                }
-                isOpen = false;
+                this.isOpen = false;
             } finally {
                 lock.unlock();
             }
         }
-
-        public synchronized int getAccountNumber(){
-            return accountNumber;
-        }
     }
 
+    private final ConcurrentHashMap<Long, Account> accounts = new ConcurrentHashMap<>();
+    private final AtomicLong nextAccountId = new AtomicLong(1);
+
+    public long openAccount(double initialBalance) {
+        long accountId = nextAccountId.getAndIncrement();
+        Account account = new Account(initialBalance);
+        accounts.put(accountId, account);
+        return accountId;
+    }
+
+    private Account getAccount(long accountId) {
+        Account account = accounts.get(accountId);
+        if (account == null) {
+            throw new IllegalArgumentException("Account not found: " + accountId);
+        }
+        return account;
+    }
+
+    public void deposit(long accountId, double amount) {
+        getAccount(accountId).deposit(amount);
+    }
+
+    public void withdraw(long accountId, double amount) {
+        getAccount(accountId).withdraw(amount);
+    }
+
+    public double getBalance(long accountId) {
+        return getAccount(accountId).getBalance();
+    }
+
+    public void closeAccount(long accountId) {
+        // The account is not removed from the map, just marked as closed.
+        // This prevents the accountId from being reused and avoids some race conditions.
+        getAccount(accountId).close();
+    }
 
     public static void main(String[] args) {
-        Account account1 = new Account(1);
-        account1.deposit(BigDecimal.valueOf(100));
-        System.out.println("Balance:" + account1.getBalance());
-        account1.withdraw(BigDecimal.valueOf(50));
-        System.out.println("Balance:" + account1.getBalance());
+        Task181 bank = new Task181();
+        System.out.println("--- Bank System Test ---");
 
-        Account account2 = new Account(2);
-        account2.deposit(BigDecimal.valueOf(500.25));
-        System.out.println("AccountNumber:" + account2.getAccountNumber() + ", Balance:" + account2.getBalance());
-        account2.close();
+        // Test Case 1: Open an account and check initial balance
+        System.out.println("\n--- Test Case 1: Open Account ---");
+        long acc1 = bank.openAccount(100.0);
+        System.out.println("Opened account " + acc1 + " with balance: " + bank.getBalance(acc1));
 
+        // Test Case 2: Deposit money
+        System.out.println("\n--- Test Case 2: Deposit ---");
+        System.out.println("Depositing 50.0 into account " + acc1);
+        bank.deposit(acc1, 50.0);
+        System.out.println("New balance for account " + acc1 + ": " + bank.getBalance(acc1));
 
-        Account account3 = new Account(3);
-        account3.deposit(BigDecimal.valueOf(1500));
-        System.out.println("Balance:" + account3.getBalance());
+        // Test Case 3: Withdraw money
+        System.out.println("\n--- Test Case 3: Withdraw ---");
+        System.out.println("Withdrawing 30.0 from account " + acc1);
+        bank.withdraw(acc1, 30.0);
+        System.out.println("New balance for account " + acc1 + ": " + bank.getBalance(acc1));
 
-        Account account4 = new Account(4);
-        account4.deposit(BigDecimal.valueOf(10000));
-        System.out.println("Balance:" + account4.getBalance());
-        account4.withdraw(BigDecimal.valueOf(2000));
-        System.out.println("Balance:" + account4.getBalance());
+        // Test Case 4: Attempt to withdraw more than available funds
+        System.out.println("\n--- Test Case 4: Insufficient Funds ---");
+        try {
+            System.out.println("Attempting to withdraw 200.0 from account " + acc1);
+            bank.withdraw(acc1, 200.0);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+            System.out.println("Balance remains: " + bank.getBalance(acc1));
+        }
 
-
-        Account account5 = new Account(5);
-        account5.deposit(BigDecimal.valueOf(2342.32));
-        System.out.println("Balance:" + account5.getBalance());
-        account5.close();
-
+        // Test Case 5: Close account and attempt a transaction
+        System.out.println("\n--- Test Case 5: Closed Account ---");
+        System.out.println("Closing account " + acc1);
+        bank.closeAccount(acc1);
+        try {
+            System.out.println("Attempting to deposit 10.0 into closed account " + acc1);
+            bank.deposit(acc1, 10.0);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+        }
+        try {
+            System.out.println("Attempting to get balance of closed account " + acc1);
+            bank.getBalance(acc1);
+        } catch (IllegalStateException e) {
+            System.out.println("Caught expected exception: " + e.getMessage());
+        }
     }
 }

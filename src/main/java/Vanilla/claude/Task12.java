@@ -1,30 +1,39 @@
 package Vanilla.claude;
 
 public class Task12 {
-    public static String highestScoringWord(String str) {
-        String[] words = str.split(" ");
-        int maxScore = 0;
-        String maxWord = "";
+    public static String highestScoringWord(String s) {
+        String[] words = s.split(" ");
+        String highestWord = "";
+        int highestScore = 0;
         
-        for(String word : words) {
+        for (String word : words) {
             int score = 0;
-            for(char c : word.toCharArray()) {
-                score += (c - 'a' + 1);
+            for (char c : word.toCharArray()) {
+                score += c - 'a' + 1;
             }
-            if(score > maxScore) {
-                maxScore = score;
-                maxWord = word;
+            if (score > highestScore) {
+                highestScore = score;
+                highestWord = word;
             }
         }
-        return maxWord;
+        
+        return highestWord;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(highestScoringWord("man i need a taxi up to ubud")); // taxi
-        System.out.println(highestScoringWord("what time are we climbing up to the volcano")); // volcano
-        System.out.println(highestScoringWord("take me to semynak")); // semynak
-        System.out.println(highestScoringWord("aa b")); // aa
-        System.out.println(highestScoringWord("b aa")); // b
+        // Test case 1
+        System.out.println(highestScoringWord("man i need a taxi up to ubud"));
+        
+        // Test case 2
+        System.out.println(highestScoringWord("what time are we climbing up the volcano"));
+        
+        // Test case 3
+        System.out.println(highestScoringWord("take me to semynak"));
+        
+        // Test case 4
+        System.out.println(highestScoringWord("aa b"));
+        
+        // Test case 5
+        System.out.println(highestScoringWord("abad"));
     }
 }

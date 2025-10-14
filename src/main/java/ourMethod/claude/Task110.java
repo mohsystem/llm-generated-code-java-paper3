@@ -1,49 +1,71 @@
 package ourMethod.claude;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 public class Task110 {
-    // Validate URL using multiple checks
-    public static boolean isValidURL(String urlStr) {
-        if (urlStr == null || urlStr.isEmpty()) {
+    private static final int MAX_URL_LENGTH = 2048;
+    private static final Pattern VALID_SCHEME = Pattern.compile("^(https?|ftp)$");
+    private static final Pattern VALID_HOST = Pattern.compile("^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\\\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
+
+    public static boolean validateURL(String url) {
+        if (url == null || url.isEmpty()) {
             return false;
         }
 
-        // Check for malicious characters
-        if (containsMaliciousChars(urlStr)) {
+        if (url.length() > MAX_URL_LENGTH) {
             return false;
         }
 
-        // Check URL format using regex
-        String urlRegex = "^(https?://)?([\\\\w\\\\d.-]+)\\\\.([a-zA-Z]{2,})(:\\\\d{2,5})?(/[\\\\w\\\\d./?=#&-]*)?$";
-        if (!Pattern.matches(urlRegex, urlStr)) {
+        String trimmedUrl = url.trim();
+        if (trimmedUrl.isEmpty()) {
             return false;
         }
 
-        // Validate URL using Java URL class
         try {
-            URL url = new URL(urlStr);
-            url.toURI(); // Additional validation
+            URI uri = new URI(trimmedUrl);
+
+            String scheme = uri.getScheme();
+            if (scheme == null || !VALID_SCHEME.matcher(scheme.toLowerCase()).matches()) {
+                return false;
+            }
+
+            String host = uri.getHost();
+            if (host == null || host.isEmpty()) {
+                return false;
+            }
+
+            if (!VALID_HOST.matcher(host).matches()) {
+                try {
+                    java.net.InetAddress.getByName(host);
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+
+            int port = uri.getPort();
+            if (port < -1 || port > 65535) {
+                return false;
+            }
+
+            String path = uri.getPath();
+            if (path != null && (path.contains("..") || path.contains("//") || path.contains("\\"))) {
+                return false;
+            }
             return true;
+        } catch (URISyntaxException e) {
+            return false;
         } catch (Exception e) {
             return false;
         }
     }
 
-    // Check for malicious characters
-    private static boolean containsMaliciousChars(String url) {
-        String[] maliciousChars = {"<", ">", "'", "\"", ";", "(", ")", "{", "}", "|", "\\\\"};
-
-         for (String c : maliciousChars) {
-             if (url.contains(c)) {
-                 return true;
-             }
-         }
-         return false;
+    public static void main(String[] args) {
+        String[] testCases = {"https://www.example.com", "http://example.com/path/to/resource", "ftp://ftp.example.com:21/file.txt", "javascript:alert('xss')", "http://.invalid..domain/path"};
+        for (String testUrl : testCases) {
+            boolean result = validateURL(testUrl);
+            System.out.println("URL: " + testUrl + " -> Valid: " + result);
+        }
     }
-//    public static void main(String[] args) {\n        // Test cases\n        String[] testUrls = {\n            "https://www.example.com",\n            "http://subdomain.example.co.uk/path?param=value",\n            "ftp://invalid.com", // Invalid protocol\n            "https://invalid<>.com", // Contains malicious chars\n            "not_a_url",\n            "https://example.com:8080/path"\n        };\n\n        for (String url : testUrls) {\n            System.out.println("URL: " + url + " is " + (isValidURL(url) ? "valid" : "invalid"));
-//        }
-//    }
 }

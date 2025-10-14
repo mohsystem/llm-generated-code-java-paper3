@@ -1,72 +1,77 @@
 package ourMethod.gemini;
+
 import java.util.concurrent.Semaphore;
 
-class Task188 {
+public class Task188 {
 
-    private int n;
-    private Semaphore fooSemaphore;
-    private Semaphore barSemaphore;
+    static class FooBar {
+        private int n;
+        private final Semaphore fooSem;
+        private final Semaphore barSem;
 
-    public Task188(int n) {
-        this.n = n;
-        this.fooSemaphore = new Semaphore(1);
-        this.barSemaphore = new Semaphore(0);
-    }
+        public FooBar(int n) {
+            this.n = n;
+            this.fooSem = new Semaphore(1);
+            this.barSem = new Semaphore(0);
+        }
 
-    public void foo() {
-        for (int i = 0; i < n; i++) {
-            try {
-                fooSemaphore.acquire();
-                System.out.print("foo");
-                barSemaphore.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        public void foo(Runnable printFoo) throws InterruptedException {
+            for (int i = 0; i < n; i++) {
+                fooSem.acquire();
+                printFoo.run();
+                barSem.release();
+            }
+        }
+
+        public void bar(Runnable printBar) throws InterruptedException {
+            for (int i = 0; i < n; i++) {
+                barSem.acquire();
+                printBar.run();
+                fooSem.release();
             }
         }
     }
 
-    public void bar() {
-        for (int i = 0; i < n; i++) {
+    private static void runTest(int n) {
+        System.out.println("Test with n = " + n + ":");
+        FooBar fooBar = new FooBar(n);
+        
+        Runnable printFoo = () -> System.out.print("foo");
+        Runnable printBar = () -> System.out.print("bar");
+
+        Thread threadA = new Thread(() -> {
             try {
-                barSemaphore.acquire();
-                System.out.print("bar");
-                fooSemaphore.release();
+                fooBar.foo(printFoo);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
+        });
+
+        Thread threadB = new Thread(() -> {
+            try {
+                fooBar.bar(printBar);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+
+        try {
+            threadA.join();
+            threadB.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+        System.out.println("\n");
     }
 
     public static void main(String[] args) {
-        Task188 fb1 = new Task188(1);
-        Thread t1 = new Thread(() -> fb1.foo());
-        Thread t2 = new Thread(() -> fb1.bar());
-        t1.start();
-        t2.start();
-
-
-        Task188 fb2 = new Task188(2);
-        Thread t3 = new Thread(() -> fb2.foo());
-        Thread t4 = new Thread(() -> fb2.bar());
-        t3.start();
-        t4.start();
-
-        Task188 fb3 = new Task188(3);
-        Thread t5 = new Thread(() -> fb3.foo());
-        Thread t6 = new Thread(() -> fb3.bar());
-        t5.start();
-        t6.start();
-
-        Task188 fb4 = new Task188(4);
-        Thread t7 = new Thread(() -> fb4.foo());
-        Thread t8 = new Thread(() -> fb4.bar());
-        t7.start();
-        t8.start();
-
-        Task188 fb5 = new Task188(5);
-        Thread t9 = new Thread(() -> fb5.foo());
-        Thread t10 = new Thread(() -> fb5.bar());
-        t9.start();
-        t10.start();
+        runTest(1);
+        runTest(2);
+        runTest(5);
+        runTest(10);
+        runTest(0); // Edge case
     }
 }

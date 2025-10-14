@@ -1,56 +1,69 @@
 package CoT.gemini;
-import java.sql.*;
-import java.util.Scanner;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Task137 {
 
-    public static String getProductDetails(String productName) {
-        String productDetails = null;
-        try {
-            // Establish database connection (replace with your actual credentials)
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database_name", "your_username", "your_password");
-            
-            // Prepare statement to prevent SQL injection
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM products WHERE product_name = ?");
-            statement.setString(1, productName);
+    // A private nested class to represent a product.
+    private static class Product {
+        private final String name;
+        private final double price;
 
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                productDetails = "Product ID: " + resultSet.getInt("product_id") + "\n" +
-                                 "Product Name: " + resultSet.getString("product_name") + "\n" +
-                                 "Price: " + resultSet.getDouble("price") + "\n" +
-                                 "Description: " + resultSet.getString("description");
-            } else {
-                productDetails = "Product not found.";
-            }
-
-            resultSet.close();
-            statement.close();
-            connection.close();
-
-        } catch (SQLException e) {
-            productDetails = "Error accessing database: " + e.getMessage();
+        public Product(String name, double price) {
+            this.name = name;
+            this.price = price;
         }
 
-        return productDetails;
+        @Override
+        public String toString() {
+            return String.format("Name: %s, Price: $%.2f", name, price);
+        }
     }
 
+    // A static map to act as our in-memory product table.
+    // Using 'final' ensures the map reference cannot be changed.
+    private static final Map<Integer, Product> productTable = new HashMap<>();
+
+    // Static initializer block to populate the product table.
+    static {
+        productTable.put(101, new Product("Laptop", 1200.50));
+        productTable.put(102, new Product("Mouse", 25.00));
+        productTable.put(103, new Product("Keyboard", 75.75));
+        productTable.put(104, new Product("Monitor", 300.00));
+        productTable.put(105, new Product("Webcam", 50.25));
+    }
+
+    /**
+     * Inquires the product table for a product's details based on its ID.
+     *
+     * @param productId The ID of the product to look up.
+     * @return A string containing the product details or a "not found" message.
+     */
+    public static String getProductDetails(int productId) {
+        // Use containsKey for a clear check, preventing potential null pointer issues
+        // if the map were allowed to store null values.
+        if (productTable.containsKey(productId)) {
+            Product product = productTable.get(productId);
+            // Defensive check in case a null product was somehow inserted.
+            if (product != null) {
+                return String.format("Product ID: %d, %s", productId, product.toString());
+            }
+        }
+        return "Product with ID " + productId + " not found.";
+    }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter product name: ");
-        String productName = scanner.nextLine();
+        System.out.println("--- Product Inquiry System ---");
 
-        String details = getProductDetails(productName);
-        System.out.println(details);
+        // Test cases
+        int[] testCases = {101, 104, 105, 999, -1};
 
-        // Test Cases
-        System.out.println(getProductDetails("Laptop"));
-        System.out.println(getProductDetails("Keyboard"));
-        System.out.println(getProductDetails("Mouse"));
-        System.out.println(getProductDetails("Monitor"));
-        System.out.println(getProductDetails("NonExistentProduct")); 
-        scanner.close();
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ": Searching for product ID " + testCases[i]);
+            String result = getProductDetails(testCases[i]);
+            System.out.println("Result: " + result);
+            System.out.println();
+        }
     }
 }

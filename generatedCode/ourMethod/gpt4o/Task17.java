@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task17 {
 
     public static String toJadenCase(String phrase) {

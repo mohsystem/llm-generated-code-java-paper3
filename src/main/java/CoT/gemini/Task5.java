@@ -1,8 +1,17 @@
 package CoT.gemini;
-class Task5 {
+
+public class Task5 {
+
+    /**
+     * Calculates the multiplicative persistence of a positive number.
+     *
+     * @param n A positive long integer.
+     * @return The number of times digits must be multiplied to reach a single digit.
+     */
     public static int persistence(long n) {
         int count = 0;
         while (n >= 10) {
+            count++;
             long product = 1;
             long temp = n;
             while (temp > 0) {
@@ -10,17 +19,20 @@ class Task5 {
                 temp /= 10;
             }
             n = product;
-            count++;
         }
         return count;
     }
 
     public static void main(String[] args) {
-        System.out.println(persistence(39)); // Output: 3
-        System.out.println(persistence(999)); // Output: 4
-        System.out.println(persistence(4)); // Output: 0
-        System.out.println(persistence(25)); // Output: 2
-        System.out.println(persistence(77)); //Output: 4
+        // Test cases
+        long[] testCases = {39, 999, 4, 25, 679};
+        int[] expectedResults = {3, 4, 0, 2, 5};
 
+        for (int i = 0; i < testCases.length; i++) {
+            long input = testCases[i];
+            int expected = expectedResults[i];
+            int result = persistence(input);
+            System.out.println("Input: " + input + ", Output: " + result + ", Expected: " + expected);
+        }
     }
 }

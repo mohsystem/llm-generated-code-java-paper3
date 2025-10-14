@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 interface MountainArray {
     int get(int index);
     int length();

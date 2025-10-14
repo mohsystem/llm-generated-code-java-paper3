@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import javax.naming.*;
 import javax.naming.directory.*;
 import java.util.Hashtable;

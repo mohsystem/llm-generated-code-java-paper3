@@ -2,41 +2,34 @@ package CoT.claude;
 
 public class Task17 {
     public static String toJadenCase(String phrase) {
-        if (phrase == null || phrase.isEmpty()) return null;
+        if (phrase == null || phrase.isEmpty()) {
+            return null;
+        }
         
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
         
-        for (char c : phrase.toCharArray()) {
+        for (int i = 0; i < phrase.length(); i++) {
+            char c = phrase.charAt(i);
             if (Character.isWhitespace(c)) {
-                capitalizeNext = true;
                 result.append(c);
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                result.append(Character.toUpperCase(c));
+                capitalizeNext = false;
             } else {
-                if (capitalizeNext) {
-                    result.append(Character.toUpperCase(c));
-                    capitalizeNext = false;
-                } else {
-                    result.append(c);
-                }
+                result.append(c);
             }
         }
+        
         return result.toString();
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
-            "How can mirrors be real if our eyes aren't real",
-            "School is the tool to brainwash the youth",
-            "if everybody in the world dropped out of school we would have a much more intelligent society",
-            "Most trees are blue",
-            "All the rules in this world were made by someone no smarter than you"
-        };
-        
-        for (String test : tests) {
-            System.out.println("Original: " + test);
-            System.out.println("Jaden Case: " + toJadenCase(test));
-            System.out.println();
-        }
+        System.out.println("Test 1: " + toJadenCase("How can mirrors be real if our eyes aren't real"));
+        System.out.println("Test 2: " + toJadenCase("this is a test"));
+        System.out.println("Test 3: " + toJadenCase("i love programming"));
+        System.out.println("Test 4: " + toJadenCase(null));
+        System.out.println("Test 5: " + toJadenCase(""));
     }
 }

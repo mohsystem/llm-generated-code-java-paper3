@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task174 {
     public static String shortestPalindrome(String s) {
         int n = s.length();

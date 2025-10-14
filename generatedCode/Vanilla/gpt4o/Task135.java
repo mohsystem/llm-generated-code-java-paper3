@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,27 +1,42 @@
 package Vanilla.gemini;
-class Task17 {
+
+public class Task17 {
+
     public String toJadenCase(String phrase) {
         if (phrase == null || phrase.isEmpty()) {
             return null;
         }
 
-        String[] words = phrase.split(" ");
-        StringBuilder jadenCase = new StringBuilder();
+        char[] chars = phrase.toCharArray();
+        boolean capitalizeNext = true;
 
-        for (String word : words) {
-            jadenCase.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isWhitespace(chars[i])) {
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                chars[i] = Character.toUpperCase(chars[i]);
+                capitalizeNext = false;
+            }
         }
-
-        return jadenCase.toString().trim();
+        return new String(chars);
     }
 
     public static void main(String[] args) {
-        Task17 task17 = new Task17();
-        System.out.println(task17.toJadenCase("How can mirrors be real if our eyes aren't real"));
-        System.out.println(task17.toJadenCase("most trees are blue"));
-        System.out.println(task17.toJadenCase(""));
-        System.out.println(task17.toJadenCase(null));
-        System.out.println(task17.toJadenCase("All the rules in this world were made by someone no smarter than you. So make your own."));
+        Task17 jadenCaser = new Task17();
+        String[] testCases = {
+            "How can mirrors be real if our eyes aren't real",
+            "most trees are blue",
+            "",
+            null,
+            "all the flowers are crying."
+        };
 
+        for (int i = 0; i < testCases.length; i++) {
+            System.out.println("Test Case " + (i + 1) + ":");
+            System.out.println("Original: " + testCases[i]);
+            String jadenCased = jadenCaser.toJadenCase(testCases[i]);
+            System.out.println("Jaden-Cased: " + jadenCased);
+            System.out.println();
+        }
     }
 }

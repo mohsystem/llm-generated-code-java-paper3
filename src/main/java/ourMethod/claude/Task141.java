@@ -1,43 +1,46 @@
 package ourMethod.claude;
 
-public class Task141 {
-    public static String reverseString(String input) {
-        // Input validation
-        if (input == null) {
-            return null;
-        }
-        
-        // Convert string to char array for more efficient reversal
-        char[] chars = input.toCharArray();
-        int left = 0;
-        int right = chars.length - 1;
-        
-        // Reverse by swapping characters from start and end
-        while (left < right) {
-            char temp = chars[left];
-            chars[left] = chars[right]; 
-            chars[right] = temp;
-            left++;
-            right--;
-        }
-        
-        return new String(chars);
-    }
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
+public class Task141 {
+    private static final int MAX_INPUT_LENGTH = 10000;
+    
+    public static String reverseString(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input cannot be null");
+        }
+        
+        if (input.length() > MAX_INPUT_LENGTH) {
+            throw new IllegalArgumentException("Input exceeds maximum length of " + MAX_INPUT_LENGTH);
+        }
+        
+        byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        StringBuilder reversed = new StringBuilder(input.length());
+        
+        for (int i = input.length() - 1; i >= 0; i--) {
+            reversed.append(input.charAt(i));
+        }
+        
+        return reversed.toString();
+    }
+    
     public static void main(String[] args) {
-        // Test cases
-        String[] tests = {
+        String[] testCases = {
             "hello",
-            "",
-            "a",
+            "world",
             "12345",
-            "Hello World!"
+            "a",
+            "racecar"
         };
         
-        for (String test : tests) {
-            System.out.println("Input: \"" + test + "\"");
-            System.out.println("Output: \"" + reverseString(test) + "\"");
-            System.out.println();
+        for (String testCase : testCases) {
+            try {
+                String result = reverseString(testCase);
+                System.out.println("Input: \"" + testCase + "\" -> Output: \"" + result + "\"");
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error: " + e.getMessage());
+            }
         }
     }
 }

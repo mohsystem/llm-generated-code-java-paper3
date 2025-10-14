@@ -1,49 +1,47 @@
 package CoT.claude;
 
+import java.util.Arrays;
+
 public class Task143 {
+    /**
+     * Sorts an array of integers in ascending order
+     * @param arr The input array to be sorted
+     * @return A new sorted array (original array remains unchanged)
+     */
     public static int[] sortArray(int[] arr) {
-        if (arr == null || arr.length == 0) {
+        // Input validation - prevent null pointer exceptions
+        if (arr == null) {
             return new int[0];
         }
         
-        int n = arr.length;
-        int temp;
+        // Create a copy to avoid modifying the original array
+        int[] result = Arrays.copyOf(arr, arr.length);
         
-        for (int i = 0; i < n-1; i++) {
-            for (int j = 0; j < n-i-1; j++) {
-                if (arr[j] > arr[j+1]) {
-                    temp = arr[j];
-                    arr[j] = arr[j+1];
-                    arr[j+1] = temp;
-                }
-            }
-        }
-        return arr;
+        // Use built-in sort which is secure and efficient
+        Arrays.sort(result);
+        
+        return result;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        int[][] testCases = {
-            {64, 34, 25, 12, 22, 11, 90},
-            {5, 2, 8, 1, 9},
-            {1},
-            {},
-            {10, 10, 10, 10}
-        };
+        // Test case 1: Normal array
+        int[] test1 = {5, 2, 8, 1, 9};
+        System.out.println("Test 1: " + Arrays.toString(sortArray(test1)));
         
-        for (int i = 0; i < testCases.length; i++) {
-            System.out.print("Test case " + (i+1) + " Input: ");
-            for (int num : testCases[i]) {
-                System.out.print(num + " ");
-            }
-            System.out.println();
-            
-            int[] result = sortArray(testCases[i]);
-            System.out.print("Sorted array: ");
-            for (int num : result) {
-                System.out.print(num + " ");
-            }
-            System.out.println("\\n");
-        }
+        // Test case 2: Already sorted array
+        int[] test2 = {1, 2, 3, 4, 5};
+        System.out.println("Test 2: " + Arrays.toString(sortArray(test2)));
+        
+        // Test case 3: Reverse sorted array
+        int[] test3 = {9, 7, 5, 3, 1};
+        System.out.println("Test 3: " + Arrays.toString(sortArray(test3)));
+        
+        // Test case 4: Array with duplicates
+        int[] test4 = {4, 2, 7, 2, 9, 4};
+        System.out.println("Test 4: " + Arrays.toString(sortArray(test4)));
+        
+        // Test case 5: Empty array
+        int[] test5 = {};
+        System.out.println("Test 5: " + Arrays.toString(sortArray(test5)));
     }
 }

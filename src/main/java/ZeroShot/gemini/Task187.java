@@ -1,93 +1,93 @@
 package ZeroShot.gemini;
+
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-class Task187 {
+class H2O {
+    private final Semaphore hSem = new Semaphore(0);
+    private final Semaphore oSem = new Semaphore(0);
+    private final Lock lock = new ReentrantLock();
+    private int hAtomsWaiting = 0;
 
-    private Semaphore hydrogenSemaphore = new Semaphore(0);
-    private Semaphore oxygenSemaphore = new Semaphore(0);
-    private AtomicInteger hydrogenCount = new AtomicInteger(0);
-    private AtomicInteger oxygenCount = new AtomicInteger(0);
-    private final Object lock = new Object();
+    public H2O() {}
 
-
-    public void releaseHydrogen() throws InterruptedException {
-        synchronized (lock) {
-            hydrogenCount.incrementAndGet();
-            if (hydrogenCount.get() >= 2 && oxygenCount.get() >= 1) {
-                hydrogenSemaphore.release(2);
-                oxygenSemaphore.release();
-                hydrogenCount.set(0);
-                oxygenCount.set(0);
-            } else {
-                lock.notifyAll();
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        lock.lock();
+        try {
+            hAtomsWaiting++;
+            if (hAtomsWaiting >= 2) {
+                // A pair of H atoms is ready. Wake them up along with an O atom.
+                hSem.release(2);
+                hAtomsWaiting -= 2;
+                oSem.release(1);
             }
+        } finally {
+            lock.unlock();
         }
-
-        hydrogenSemaphore.acquire();
-        // Bind with oxygen and another hydrogen
-        System.out.print("H");
+        
+        hSem.acquire();
+        releaseHydrogen.run();
     }
 
-    public void releaseOxygen() throws InterruptedException {
-        synchronized (lock) {
-            oxygenCount.incrementAndGet();
-            if (hydrogenCount.get() >= 2 && oxygenCount.get() >= 1) {
-                hydrogenSemaphore.release(2);
-                oxygenSemaphore.release();
-                hydrogenCount.set(0);
-                oxygenCount.set(0);
-            }  else {
-                lock.notifyAll();
-            }
-        }
-
-        oxygenSemaphore.acquire();
-        // Bind with two hydrogens
-        System.out.print("O");
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        oSem.acquire();
+        releaseOxygen.run();
     }
+}
 
+public class Task187 {
     public static void main(String[] args) {
-        Task187 task = new Task187();
-        String[] testCases = {"HOH", "OOHHHH", "HOHHOH", "OHHHHO", "HHOOHH"};
+        String[] testCases = {"HOH", "OOHHHH", "HHHHOO", "HOOHH", "HHHHHHOOO"};
 
         for (String testCase : testCases) {
+            System.out.println("Testing with input: " + testCase);
+            StringBuilder output = new StringBuilder();
+            H2O h2o = new H2O();
+            
             Thread[] threads = new Thread[testCase.length()];
             for (int i = 0; i < testCase.length(); i++) {
-                char c = testCase.charAt(i);
-                if (c == 'H') {
-                    final int index = i;
+                final char type = testCase.charAt(i);
+                if (type == 'H') {
                     threads[i] = new Thread(() -> {
                         try {
-                            task.releaseHydrogen();
+                            h2o.hydrogen(() -> {
+                                synchronized(output) {
+                                    output.append('H');
+                                }
+                            });
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Thread.currentThread().interrupt();
                         }
                     });
-                } else {
-                    final int index = i;
+                } else { // 'O'
                     threads[i] = new Thread(() -> {
                         try {
-                            task.releaseOxygen();
+                            h2o.oxygen(() -> {
+                                synchronized(output) {
+                                    output.append('O');
+                                }
+                            });
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Thread.currentThread().interrupt();
                         }
                     });
                 }
             }
 
-            for (Thread thread : threads) {
-                thread.start();
+            for (Thread t : threads) {
+                t.start();
             }
-            try {
-                for (Thread thread : threads) {
-                    thread.join();
+
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-            System.out.println();
+            System.out.println("Output: " + output.toString());
+            System.out.println("--------------------");
         }
-
     }
 }

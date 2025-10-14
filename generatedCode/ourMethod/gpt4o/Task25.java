@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task25 {
     public static List<String> numberLines(List<String> lines) {
         List<String> numberedLines = new ArrayList<>();

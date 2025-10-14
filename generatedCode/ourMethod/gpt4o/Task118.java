@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task118 {
     public static boolean validateIPAddress(String ipAddress) {
         String[] parts = ipAddress.split("\\.");

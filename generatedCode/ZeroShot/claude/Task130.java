@@ -32,7 +32,7 @@ public class Task130 {
             }
 
             // Handle actual request
-            String response = "{\\"message\\": \\"API response\\"}";
+            String response = "{\"message\": \"API response\"}";
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, response.length());
             

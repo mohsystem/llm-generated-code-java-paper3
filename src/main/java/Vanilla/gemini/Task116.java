@@ -1,52 +1,80 @@
 package Vanilla.gemini;
-import java.io.*;
 
 public class Task116 {
 
-    public static void changePassword(String username, String newPassword) throws IOException, InterruptedException {
-        // Execute the password change command as root/administrator
-        ProcessBuilder pb = new ProcessBuilder("passwd", username); // passwd is common *nix tool. Adapt if necessary.
-        Process p = pb.start();
+    /*
+    Dropping user privileges (e.g., via setuid/setgid) is a low-level
+    operating system operation that is not supported by the standard Java SE API.
+    Java is designed to be platform-independent, and such operations are
+    highly specific to POSIX-compliant systems (like Linux and macOS).
 
-        // Provide the new password to the process
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
+    To achieve this in Java, one would typically need to use the Java Native
+    Interface (JNI) to call native C code that can perform the setuid/setgid
+    system calls. This approach breaks the "single source code file" requirement.
 
-        // Wait for prompt & write new password twice.  Error handling omitted for brevity.
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.toLowerCase().contains("password")) {
-                writer.write(newPassword + "\n");
-                writer.flush();
-                writer.write(newPassword + "\n");  // Repeat for confirmation
-                writer.flush();
-                break;
+    Below is a conceptual simulation. It does not actually change the OS user ID
+    of the running process. It only checks the username property. To see the
+    difference in output, run it normally and then run with `sudo`.
+    */
+
+    /**
+     * Simulates performing a privileged action and then dropping privileges.
+     * @param targetUsername The user whose password we are pretending to change.
+     * @param newPassword The new password (unused in this simulation).
+     */
+    public static void simulatePrivilegeDrop(String targetUsername, String newPassword) {
+        System.out.println("--- Starting simulated process for user '" + targetUsername + "' ---");
+
+        String currentOsUser = System.getProperty("user.name");
+        System.out.println("Initial OS user name: " + currentOsUser);
+
+        boolean isPrivileged = "root".equals(currentOsUser);
+
+        // Step 1: Simulate privileged operation
+        System.out.println("\nStep 1: Performing action as user '" + currentOsUser + "'.");
+        if (isPrivileged) {
+            System.out.println("PRIVILEGED: Successfully changed password for user '" + targetUsername + "'.");
+        } else {
+            System.out.println("NON-PRIVILEGED: Cannot change password for '" + targetUsername + "'. Action would fail.");
+        }
+
+        // Step 2: Simulate dropping privileges
+        System.out.println("\nStep 2: Simulating privilege drop.");
+        if (isPrivileged) {
+            // In a real scenario, this is where a native call to setuid() would happen.
+            String targetUser = System.getenv("SUDO_USER");
+            if (targetUser == null || targetUser.isEmpty()) {
+                targetUser = "nobody"; // Fallback non-privileged user
             }
+            System.out.println("Simulating drop to user '" + targetUser + "'.");
+            // We change our internal flag to represent the dropped privileges state.
+            isPrivileged = false; 
+            System.out.println("SUCCESS: Privileges conceptually dropped.");
+        } else {
+            System.out.println("Not running as root, no privileges to drop.");
         }
-        p.waitFor();
 
-
-        //Immediately drop privileges (example: setuid to a non-privileged user) - Implementation Specific
-        // This is highly system-dependent and might require JNI/JNA or a helper script
-        // Here's a placeholder,  replace with your OS-specific privilege dropping mechanism:
-        try {
-            // Example (POSIX systems - needs a helper program or JNI/JNA):
-            Runtime.getRuntime().exec("sudo -u unprivileged_user /bin/bash"); // Example
-            System.exit(0); // Terminate current privileged process
-        } catch (IOException e) {
-            System.err.println("Failed to drop privileges: " + e.getMessage());
+        // Step 3: Attempt privileged operation again
+        System.out.println("\nStep 3: Attempting action with simulated dropped privileges.");
+        if (isPrivileged) {
+            // This block should not be reached if the drop was successful.
+            System.out.println("ERROR: Privileges were not dropped correctly.");
+        } else {
+            System.out.println("FAILED: Insufficient privileges to change password for '" + targetUsername + "'.");
         }
+
+        System.out.println("--- Process finished ---\n");
     }
 
+    public static void main(String[] args) {
+        System.out.println("Running Privilege Drop *Simulation* in Java");
+        System.out.println("NOTE: This Java code only simulates the process and does not change the OS user ID.");
+        
+        String[] usersToUpdate = {"alice", "bob", "charlie", "david", "eve"};
 
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        // Test cases (replace with actual usernames/passwords - and ensure the 'unprivileged_user' exists):
-        changePassword("testuser1", "new_password1");
-        changePassword("testuser2", "new_password2");
-        changePassword("testuser3", "new_password3");
-        changePassword("testuser4", "new_password4");
-        changePassword("testuser5", "new_password5");
-
+        for (int i = 0; i < usersToUpdate.length; i++) {
+            System.out.println("--- Test Case " + (i + 1) + " ---");
+            simulatePrivilegeDrop(usersToUpdate[i], "new_secure_password_123");
+        }
     }
 }

@@ -1,31 +1,33 @@
 package CoT.gemini;
-import java.util.Scanner;
 
-class Task139 {
+public class Task139 {
+
+    /**
+     * Calculates the area of a circle.
+     *
+     * @param radius The radius of the circle. Must be a non-negative number.
+     * @return The area of the circle, or -1.0 if the radius is negative.
+     */
     public static double calculateCircleArea(double radius) {
+        // Security: Ensure the radius is not negative, as it's physically impossible.
         if (radius < 0) {
-            throw new IllegalArgumentException("Radius cannot be negative.");
+            return -1.0; // Return an error indicator for invalid input.
         }
         return Math.PI * radius * radius;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the radius of the circle: ");
-        double radius = scanner.nextDouble();
-        double area = calculateCircleArea(radius);
-        System.out.println("The area of the circle is: " + area);
+        // 5 Test Cases
+        double[] testRadii = {10.0, 5.5, 0.0, 1.0, -7.0};
 
-
-        // Test cases
-        System.out.println(calculateCircleArea(5)); // Expected: 78.53981633974483
-        System.out.println(calculateCircleArea(10)); // Expected: 314.1592653589793
-        System.out.println(calculateCircleArea(0)); // Expected: 0.0
-        System.out.println(calculateCircleArea(1)); // Expected: 3.141592653589793
-        try {
-            System.out.println(calculateCircleArea(-1));
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage()); // Expected: Radius cannot be negative.
+        System.out.println("Java Test Cases:");
+        for (double radius : testRadii) {
+            double area = calculateCircleArea(radius);
+            if (area == -1.0) {
+                System.out.println("Radius: " + radius + " -> Error: Radius cannot be negative.");
+            } else {
+                System.out.printf("Radius: %.2f -> Area: %.2f\n", radius, area);
+            }
         }
     }
 }

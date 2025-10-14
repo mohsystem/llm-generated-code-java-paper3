@@ -1,20 +1,23 @@
 package ZeroShot.gemini;
-import java.util.ArrayList;
-import java.util.List;
 
-class Task20 {
+import java.lang.Math;
+
+public class Task20 {
+
+    /**
+     * Finds a positive integer k, if it exists, such that the sum of the digits of n
+     * raised to consecutive powers starting from p is equal to k * n.
+     *
+     * @param n A positive integer.
+     * @param p A positive integer.
+     * @return The integer k if found, otherwise -1.
+     */
     public static long digPow(int n, int p) {
-        List<Integer> digits = new ArrayList<>();
-        int temp = n;
-        while (temp > 0) {
-            digits.add(0, temp % 10);
-            temp /= 10;
-        }
-
+        String nStr = Integer.toString(n);
         long sum = 0;
-        for (int digit : digits) {
-            sum += Math.pow(digit, p);
-            p++;
+        for (int i = 0; i < nStr.length(); i++) {
+            int digit = Character.getNumericValue(nStr.charAt(i));
+            sum += (long) Math.pow(digit, p + i);
         }
 
         if (sum % n == 0) {
@@ -25,10 +28,11 @@ class Task20 {
     }
 
     public static void main(String[] args) {
-        System.out.println(digPow(89, 1)); // 1
-        System.out.println(digPow(92, 1)); // -1
-        System.out.println(digPow(695, 2)); // 2
-        System.out.println(digPow(46288, 3)); // 51
-        System.out.println(digPow(123, 4)); //-1
+        // Test cases
+        System.out.println("n=89, p=1 -> " + digPow(89, 1));
+        System.out.println("n=92, p=1 -> " + digPow(92, 1));
+        System.out.println("n=695, p=2 -> " + digPow(695, 2));
+        System.out.println("n=46288, p=3 -> " + digPow(46288, 3));
+        System.out.println("n=135, p=1 -> " + digPow(135, 1));
     }
 }

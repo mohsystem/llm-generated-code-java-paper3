@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task147 {
     public static int findKthLargest(int[] nums, int k) {
         Arrays.sort(nums);

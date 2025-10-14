@@ -1,35 +1,45 @@
 package ourMethod.gemini;
-import java.util.HashMap;
-import java.util.Map;
 
-class Task26 {
+public class Task26 {
+
+    /**
+     * Finds the integer that appears an odd number of times in an array.
+     * It is guaranteed that exactly one such integer exists.
+     *
+     * @param arr The input array of integers.
+     * @return The integer that appears an odd number of times.
+     */
     public static int findOdd(int[] arr) {
-        Map<Integer, Integer> counts = new HashMap<>();
+        if (arr == null) {
+            // As per problem description, array is valid. This is for robustness.
+            return 0; 
+        }
+        int result = 0;
         for (int num : arr) {
-            counts.put(num, counts.getOrDefault(num, 0) + 1);
+            result ^= num;
         }
-
-        for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
-            if (entry.getValue() % 2 != 0) {
-                return entry.getKey();
-            }
-        }
-        return -1; // Should not happen according to problem statement
+        return result;
     }
 
     public static void main(String[] args) {
-        int[] test1 = {7};
-        int[] test2 = {0};
-        int[] test3 = {1, 1, 2};
-        int[] test4 = {0, 1, 0, 1, 0};
-        int[] test5 = {1, 2, 2, 3, 3, 3, 4, 3, 3, 3, 2, 2, 1};
+        // Test Case 1
+        int[] arr1 = {7};
+        System.out.println("Test Case 1: [7] -> " + findOdd(arr1));
 
-        System.out.println(findOdd(test1)); // Expected: 7
-        System.out.println(findOdd(test2)); // Expected: 0
-        System.out.println(findOdd(test3)); // Expected: 2
-        System.out.println(findOdd(test4)); // Expected: 0
-        System.out.println(findOdd(test5)); // Expected: 4
+        // Test Case 2
+        int[] arr2 = {0};
+        System.out.println("Test Case 2: [0] -> " + findOdd(arr2));
 
+        // Test Case 3
+        int[] arr3 = {1, 1, 2};
+        System.out.println("Test Case 3: [1, 1, 2] -> " + findOdd(arr3));
 
+        // Test Case 4
+        int[] arr4 = {0, 1, 0, 1, 0};
+        System.out.println("Test Case 4: [0, 1, 0, 1, 0] -> " + findOdd(arr4));
+
+        // Test Case 5
+        int[] arr5 = {1, 2, 2, 3, 3, 3, 4, 3, 3, 3, 2, 2, 1};
+        System.out.println("Test Case 5: [1, 2, 2, ...] -> " + findOdd(arr5));
     }
 }

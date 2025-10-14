@@ -1,31 +1,43 @@
 package ourMethod.claude;
 
 public class Task18 {
-    public static int convertBinaryArrayToInt(int[] binary) {
-        if (binary == null || binary.length == 0) {
-            return 0;
+    public static int binaryArrayToInt(int[] binary) {
+        if (binary == null) {
+            throw new IllegalArgumentException("Input array cannot be null");
+        }
+        
+        if (binary.length == 0) {
+            throw new IllegalArgumentException("Input array cannot be empty");
+        }
+        
+        if (binary.length > 31) {
+            throw new IllegalArgumentException("Input array length exceeds maximum supported size (31 bits)");
         }
         
         int result = 0;
-        int power = 1;
         
-        for (int i = binary.length - 1; i >= 0; i--) {
+        for (int i = 0; i < binary.length; i++) {
             if (binary[i] != 0 && binary[i] != 1) {
-                throw new IllegalArgumentException("Array must contain only 0s and 1s");
+                throw new IllegalArgumentException("Array must contain only 0 or 1 values");
             }
-            result += binary[i] * power;
-            power *= 2;
+            result = (result << 1) | binary[i];
         }
         
         return result;
     }
     
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(convertBinaryArrayToInt(new int[]{0, 0, 0, 1})); // 1
-        System.out.println(convertBinaryArrayToInt(new int[]{0, 0, 1, 0})); // 2 
-        System.out.println(convertBinaryArrayToInt(new int[]{0, 1, 0, 1})); // 5
-        System.out.println(convertBinaryArrayToInt(new int[]{1, 0, 0, 1})); // 9
-        System.out.println(convertBinaryArrayToInt(new int[]{1, 1, 1, 1})); // 15
+        int[][] testCases = {
+            {0, 0, 0, 1},
+            {0, 0, 1, 0},
+            {0, 1, 0, 1},
+            {1, 0, 0, 1},
+            {1, 1, 1, 1}
+        };
+        
+        for (int[] testCase : testCases) {
+            System.out.println("Input: " + java.util.Arrays.toString(testCase) + 
+                             " => Output: " + binaryArrayToInt(testCase));
+        }
     }
 }

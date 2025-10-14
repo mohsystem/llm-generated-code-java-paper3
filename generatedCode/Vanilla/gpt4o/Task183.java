@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task183 {
     public static int largestProduct(String input, int span) {
         int maxProduct = 0;

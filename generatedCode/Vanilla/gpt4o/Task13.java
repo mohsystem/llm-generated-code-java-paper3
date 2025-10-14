@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task13 {
     public static boolean isValidWalk(char[] walk) {
         if (walk.length != 10) return false;

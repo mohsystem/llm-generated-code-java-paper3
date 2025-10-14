@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.io.Console;
 
 public class Task116 {

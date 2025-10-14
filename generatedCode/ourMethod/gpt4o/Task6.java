@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task6 {
     public static double findUniq(double[] arr) {
         double a = arr[0];

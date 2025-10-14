@@ -1,114 +1,181 @@
 package ourMethod.claude;
 
-// Task49.java
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
+
+import java.io.*;
 import java.net.InetSocketAddress;
-import java.sql.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.*;
 import java.util.regex.Pattern;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 public class Task49 {
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_\\\\s]{1,100}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$");
+    private static final int MAX_INPUT_LENGTH = 1000;
     private static final String DB_URL = "jdbc:sqlite:users.db";
-    
+
     public static void main(String[] args) throws Exception {
-        // Initialize database
-        initializeDatabase();
+        initDatabase();
         
-        // Create HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.createContext("/api/users", new UserHandler());
+        server.createContext("/api/user", new UserHandler());
         server.setExecutor(null);
         server.start();
+        
         System.out.println("Server started on port 8080");
+        
+        // Test cases
+        testApiEndpoint("John Doe", "john@example.com");
+        testApiEndpoint("Jane Smith", "jane@example.com");
+        testApiEndpoint("Bob_123", "bob@test.org");
+        testApiEndpoint("Alice", "alice@domain.co.uk");
+        testApiEndpoint("Charlie99", "charlie@mail.com");
+        
+        Thread.sleep(2000);
+        server.stop(0);
+        displayUsers();
     }
-    
+
+    private static void initDatabase() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement()) {
+            String sql = "CREATE TABLE IF NOT EXISTS users (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "name TEXT NOT NULL," +
+                        "email TEXT NOT NULL UNIQUE," +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+            stmt.execute(sql);
+        }
+    }
+
+    private static String validateInput(String input, Pattern pattern, String fieldName) {
+        if (input == null || input.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " is required");
+        }
+        if (input.length() > MAX_INPUT_LENGTH) {
+            throw new IllegalArgumentException(fieldName + " exceeds maximum length");
+        }
+        String trimmed = input.trim();
+        if (!pattern.matcher(trimmed).matches()) {
+            throw new IllegalArgumentException(fieldName + " contains invalid characters");
+        }
+        return trimmed;
+    }
+
+    private static String storeUser(String name, String email) throws SQLException {
+        String validName = validateInput(name, NAME_PATTERN, "Name");
+        String validEmail = validateInput(email, EMAIL_PATTERN, "Email");
+        
+        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, validName);
+            pstmt.setString(2, validEmail);
+            pstmt.executeUpdate();
+            return "{\"status\":\"success\",\"message\":\"User created\"}";
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed")) {
+                return "{\"status\":\"error\",\"message\":\"Email already exists\"}";
+            }
+            throw e;
+        }
+    }
+
     static class UserHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            try {
-                if (!"POST".equals(exchange.getRequestMethod())) {
-                    sendResponse(exchange, 405, "Method Not Allowed");
-                    return;
-                }
+            if (!"POST".equals(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
 
-                // Read request body
-                String requestBody = readRequestBody(exchange.getRequestBody());
+            try (InputStream is = exchange.getRequestBody();
+                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 
-                // Validate input
-                if (!isValidUserData(requestBody)) {
-                    sendResponse(exchange, 400, "Invalid input data");
-                    return;
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                int totalBytes = 0;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    totalBytes += bytesRead;
+                    if (totalBytes > MAX_INPUT_LENGTH) {
+                        sendResponse(exchange, 413, "{\"error\":\"Request too large\"}");
+                        return;
+                    }
+                    baos.write(buffer, 0, bytesRead);
                 }
                 
-                // Store in database
-                boolean success = storeUserData(requestBody);
+                String body = baos.toString(StandardCharsets.UTF_8.name());
+                String[] parts = body.split("&");
+                String name = null;
+                String email = null;
                 
-                if (success) {
-                    sendResponse(exchange, 200, "User data stored successfully");
-                } else {
-                    sendResponse(exchange, 500, "Failed to store user data");
+                for (String part : parts) {
+                    String[] kv = part.split("=", 2);
+                    if (kv.length == 2) {
+                        if ("name".equals(kv[0])) {
+                            name = java.net.URLDecoder.decode(kv[1], StandardCharsets.UTF_8.name());
+                        } else if ("email".equals(kv[0])) {
+                            email = java.net.URLDecoder.decode(kv[1], StandardCharsets.UTF_8.name());
+                        }
+                    }
                 }
                 
+                String result = storeUser(name, email);
+                sendResponse(exchange, 200, result);
+                
+            } catch (IllegalArgumentException e) {
+                sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
-                sendResponse(exchange, 500, "Internal Server Error");
+                sendResponse(exchange, 500, "{\"error\":\"Internal server error\"}");
             }
         }
-        
-        private String readRequestBody(InputStream inputStream) throws IOException {
-            StringBuilder body = new StringBuilder();
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                body.append(new String(buffer, 0, length, StandardCharsets.UTF_8));
-            }
-            return body.toString();
-        }
-        
-        private boolean isValidUserData(String data) {
-            if (data == null || data.trim().isEmpty()) {
-                return false;
-            }
-            // Add more validation as per requirements
-            Pattern pattern = Pattern.compile("^[a-zA-Z0-9\\\\s,.:@-]{1,100}$");
-            return pattern.matcher(data).matches();
-        }
-        
+
         private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
-            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-            exchange.sendResponseHeaders(statusCode, response.getBytes(StandardCharsets.UTF_8).length);
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(statusCode, bytes.length);
             try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes(StandardCharsets.UTF_8));
+                os.write(bytes);
             }
         }
     }
-    
-    private static void initializeDatabase() {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.execute();
+
+    private static void testApiEndpoint(String name, String email) {
+        try {
+            String urlParameters = "name=" + java.net.URLEncoder.encode(name, StandardCharsets.UTF_8.name()) +
+                                 "&email=" + java.net.URLEncoder.encode(email, StandardCharsets.UTF_8.name());
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+            
+            java.net.URL url = new java.net.URL("http://localhost:8080/api/user");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(postData);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            
+            int responseCode = conn.getResponseCode();
+            System.out.println("Test: " + name + " - Response: " + responseCode);
+            
+        } catch (Exception e) {
+            System.err.println("Test failed: " + e.getMessage());
         }
     }
-    
-    private static boolean storeUserData(String data) {
-        String sql = "INSERT INTO users (data) VALUES (?)";
+
+    private static void displayUsers() throws SQLException {
+        System.out.println("\\nStored users:");
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, data);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT name, email FROM users")) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("name") + ", Email: " + rs.getString("email"));
+            }
         }
     }
-
-
 }

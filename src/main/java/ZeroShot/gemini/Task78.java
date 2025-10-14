@@ -1,74 +1,85 @@
-package ZeroShot.gemini;
+package ZeroShot.gemini;/*
+NOTE: This Java code requires the Bouncy Castle library.
+Please add the following dependencies to your project's build file.
+For Maven:
+<dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk18on</artifactId>
+    <version>1.78</version>
+</dependency>
+<dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcpkix-jdk18on</artifactId>
+    <version>1.78</version>
+</dependency>
+
+For Gradle:
+implementation 'org.bouncycastle:bcprov-jdk18on:1.78'
+implementation 'org.bouncycastle:bcpkix-jdk18on:1.78'
+*/
+import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfoBuilder;
-import org.bouncycastle.pkcs.PKCSException;
-import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
-import org.bouncycastle.asn1.pkcs.EncryptionScheme;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import java.io.StringWriter;
-import java.io.IOException;
 import java.security.Security;
-
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 public class Task78 {
 
-    public static String generateAndExportRsaPrivateKey(String passphrase) throws NoSuchAlgorithmException, OperatorCreationException, IOException, PKCSException, InvalidKeySpecException {
-        Security.addProvider(new BouncyCastleProvider());
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(2048); // Key size
-        KeyPair keyPair = keyGen.generateKeyPair();
-        PrivateKey privateKey = keyPair.getPrivate();
-
-        if (passphrase != null && !passphrase.isEmpty()) { // Encrypt with passphrase if provided
-            //todo cannot find symbol method getDefaultPBEStringEncryptorBuilder(String)
-
-//            JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey,
-//                    JcePKCSPBEOutputEncryptorBuilder.getDefaultPBEStringEncryptorBuilder(passphrase).build());
-
-            StringWriter sw = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(sw);
-//            pemWriter.writeObject(gen);
-            pemWriter.flush();
-            String privateKeyPEM = sw.toString(); // Use toString instead of getWriter
-            pemWriter.close();
-
-            return privateKeyPEM;
-        } else { // Unencrypted private key
-            StringWriter sw = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(sw);
-            pemWriter.writeObject(privateKey);
-            pemWriter.flush();
-            String privateKeyPEM = sw.toString();
-            pemWriter.close();
-            return privateKeyPEM;
+    static {
+        // Add Bouncy Castle as a security provider
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
         }
     }
 
+    /**
+     * Generates an RSA private key and exports it in the OpenSSH format.
+     *
+     * @param keySize The size of the key in bits (e.g., 2048, 4096).
+     * @return The RSA private key in OpenSSH PEM format, or null on error.
+     */
+    public static String generateAndExportRsaKey(int keySize) {
+        if (keySize < 2048) {
+            System.err.println("Warning: Key sizes smaller than 2048 are not recommended.");
+        }
 
+        try {
+            // 1. Generate RSA Key Pair
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+            keyGen.initialize(keySize);
+            KeyPair keyPair = keyGen.generateKeyPair();
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, OperatorCreationException, IOException, PKCSException, InvalidKeySpecException {
-        String key1 = generateAndExportRsaPrivateKey(null);
-        System.out.println(key1);
-        String key2 = generateAndExportRsaPrivateKey("testpassword");
-        System.out.println(key2);
-        String key3 = generateAndExportRsaPrivateKey("");
-        System.out.println(key3);
-        String key4 = generateAndExportRsaPrivateKey("another_password");
-        System.out.println(key4);
-        String key5 = generateAndExportRsaPrivateKey(null);
-        System.out.println(key5);
+            // 2. Use Bouncy Castle's PEM generator for OpenSSH format
+            StringWriter stringWriter = new StringWriter();
+            try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+                pemWriter.writeObject(new JcaMiscPEMGenerator(keyPair.getPrivate()));
+            }
 
+            return stringWriter.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            // This should not happen if RSA is supported by the provider
+            System.err.println("RSA algorithm not found: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An error occurred during key generation or export: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        // 5 Test Cases
+        int[] keySizes = {2048, 2048, 3072, 4096, 4096};
+        for (int i = 0; i < keySizes.length; i++) {
+            System.out.println("--- Test Case " + (i + 1) + " (Key Size: " + keySizes[i] + ") ---");
+            String openSshKey = generateAndExportRsaKey(keySizes[i]);
+            if (openSshKey != null) {
+                System.out.println(openSshKey);
+            } else {
+                System.out.println("Failed to generate key.");
+            }
+        }
     }
 }

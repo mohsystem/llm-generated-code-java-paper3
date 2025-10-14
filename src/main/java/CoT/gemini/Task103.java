@@ -1,40 +1,48 @@
 package CoT.gemini;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-class Task103 {
-    public static boolean isStrongPassword(String password) {
-        if (password.length() < 8) {
+public class Task103 {
+
+    /**
+     * Checks the strength of a given password.
+     *
+     * @param password The password string to check.
+     * @return true if the password is strong, false otherwise.
+     */
+    public static boolean checkPasswordStrength(String password) {
+        // Handle null or empty input
+        if (password == null || password.length() < 8) {
             return false;
         }
 
-        Pattern uppercasePattern = Pattern.compile("[A-Z]");
-        Matcher uppercaseMatcher = uppercasePattern.matcher(password);
-        if (!uppercaseMatcher.find()) {
-            return false;
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
+
+        for (char ch : password.toCharArray()) {
+            if (Character.isUpperCase(ch)) {
+                hasUpper = true;
+            } else if (Character.isLowerCase(ch)) {
+                hasLower = true;
+            } else if (Character.isDigit(ch)) {
+                hasDigit = true;
+            }
         }
 
-        Pattern lowercasePattern = Pattern.compile("[a-z]");
-        Matcher lowercaseMatcher = lowercasePattern.matcher(password);
-        if (!lowercaseMatcher.find()) {
-            return false;
-        }
-
-        Pattern digitPattern = Pattern.compile("[0-9]");
-        Matcher digitMatcher = digitPattern.matcher(password);
-        if (!digitMatcher.find()) {
-            return false;
-        }
-
-
-        return true;
+        return hasUpper && hasLower && hasDigit;
     }
 
     public static void main(String[] args) {
-        System.out.println(isStrongPassword("Test1")); //false
-        System.out.println(isStrongPassword("TestTest1")); //true
-        System.out.println(isStrongPassword("TestTest")); //false
-        System.out.println(isStrongPassword("testtest1")); //false
-        System.out.println(isStrongPassword("TESTTEST1")); //false
+        String[] testCases = {
+            "StrongPass123", // Strong
+            "weak",          // Weak: too short, no upper, no digit
+            "NoDigitPass",   // Weak: no digit
+            "nouppercase1",  // Weak: no uppercase
+            "NOLOWERCASE1"   // Weak: no lowercase
+        };
+
+        System.out.println("Java Test Cases:");
+        for (String pass : testCases) {
+            System.out.println("Password: \"" + pass + "\" -> Strong: " + checkPasswordStrength(pass));
+        }
     }
 }

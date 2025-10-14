@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task168 {
     public static String tweakLetters(String word, int[] tweaks) {
         StringBuilder result = new StringBuilder();

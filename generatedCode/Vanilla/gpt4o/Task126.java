@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 class Task126 {
     public static String redirectToPage(String userInput) {
         switch (userInput.toLowerCase()) {

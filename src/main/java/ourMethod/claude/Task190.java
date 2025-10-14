@@ -1,72 +1,106 @@
 package ourMethod.claude;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
 
 public class Task190 {
-    public static List<String> transposeFile(String fileName) {
-        List<List<String>> matrix = new ArrayList<>();
-        List<String> result = new ArrayList<>();
-        
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.trim().split(" ");
-                matrix.add(Arrays.asList(parts));
-            }
-            
-            if (matrix.isEmpty()) return result;
-            
-            int rows = matrix.size();
-            int cols = matrix.get(0).size();
-            
-            for (int j = 0; j < cols; j++) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < rows; i++) {
-                    if (i > 0) sb.append(" ");
-                    sb.append(matrix.get(i).get(j));
-                }
-                result.add(sb.toString());
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+    private static final String BASE_DIR = ".";
+    
+    public static String transposeFile(String filename) {
+        if (filename == null || filename.trim().isEmpty()) {
+            throw new IllegalArgumentException("Filename cannot be null or empty");
         }
-        return result;
-    }
-
-    public static void main(String[] args) {
-        // Test cases
-        try {
-            // Test Case 1: Normal case
-            FileWriter fw = new FileWriter("test1.txt");
-            fw.write("name age\\nalice 21\\nryan 30");
-            fw.close();
-            System.out.println("Test 1: " + transposeFile("test1.txt"));
-
-            // Test Case 2: Empty file
-            fw = new FileWriter("test2.txt");
-            fw.close();
-            System.out.println("Test 2: " + transposeFile("test2.txt"));
-
-            // Test Case 3: Single line
-            fw = new FileWriter("test3.txt");
-            fw.write("a b c");
-            fw.close();
-            System.out.println("Test 3: " + transposeFile("test3.txt"));
-
-            // Test Case 4: Single column
-            fw = new FileWriter("test4.txt");
-            fw.write("a\\nb\\nc");
-            fw.close();
-            System.out.println("Test 4: " + transposeFile("test4.txt"));
-
-            // Test Case 5: Multiple spaces
-            fw = new FileWriter("test5.txt");
-            fw.write("a  b\\nc  d");
-            fw.close();
-            System.out.println("Test 5: " + transposeFile("test5.txt"));
+        
+        Path basePath = Paths.get(BASE_DIR).toAbsolutePath().normalize();
+        Path filePath = basePath.resolve(filename).normalize();
+        
+        if (!filePath.startsWith(basePath)) {
+            throw new SecurityException("Path traversal attempt detected");
+        }
+        
+        if (!Files.exists(filePath)) {
+            throw new IllegalArgumentException("File does not exist: " + filename);
+        }
+        
+        if (!Files.isRegularFile(filePath)) {
+            throw new IllegalArgumentException("Path is not a regular file: " + filename);
+        }
+        
+        List<String[]> rows = new ArrayList<>();
+        int maxCols = 0;
+        
+        try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] fields = line.split(" ", -1);
+                rows.add(fields);
+                maxCols = Math.max(maxCols, fields.length);
+            }
         } catch (IOException e) {
-            System.err.println("Error in test cases: " + e.getMessage());
+            throw new RuntimeException("Error reading file: " + e.getMessage(), e);
+        }
+        
+        if (rows.isEmpty()) {
+            return "";
+        }
+        
+        StringBuilder result = new StringBuilder();
+        for (int col = 0; col < maxCols; col++) {
+            for (int row = 0; row < rows.size(); row++) {
+                String[] currentRow = rows.get(row);
+                if (col < currentRow.length) {
+                    result.append(currentRow[col]);
+                }
+                if (row < rows.size() - 1) {
+                    result.append(" ");
+                }
+            }
+            if (col < maxCols - 1) {
+                result.append("\\n");
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    public static void main(String[] args) {
+        try {
+            String testFile1 = "test1.txt";
+            Files.write(Paths.get(testFile1), "name age\\nalice 21\\nryan 30".getBytes(StandardCharsets.UTF_8));
+            System.out.println("Test 1:");
+            System.out.println(transposeFile(testFile1));
+            System.out.println();
+            
+            String testFile2 = "test2.txt";
+            Files.write(Paths.get(testFile2), "a b c\\nd e f".getBytes(StandardCharsets.UTF_8));
+            System.out.println("Test 2:");
+            System.out.println(transposeFile(testFile2));
+            System.out.println();
+            
+            String testFile3 = "test3.txt";
+            Files.write(Paths.get(testFile3), "x\\ny\\nz".getBytes(StandardCharsets.UTF_8));
+            System.out.println("Test 3:");
+            System.out.println(transposeFile(testFile3));
+            System.out.println();
+            
+            String testFile4 = "test4.txt";
+            Files.write(Paths.get(testFile4), "one two three four".getBytes(StandardCharsets.UTF_8));
+            System.out.println("Test 4:");
+            System.out.println(transposeFile(testFile4));
+            System.out.println();
+            
+            String testFile5 = "test5.txt";
+            Files.write(Paths.get(testFile5), "hello world\\nfoo bar\\ntest case".getBytes(StandardCharsets.UTF_8));
+            System.out.println("Test 5:");
+            System.out.println(transposeFile(testFile5));
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

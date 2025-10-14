@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task27 {
     public static int findOutlier(int[] integers) {
         int countEven = 0;

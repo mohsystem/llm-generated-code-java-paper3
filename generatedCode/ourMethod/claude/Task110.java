@@ -34,7 +34,7 @@ public class Task110 {
 
     // Check for malicious characters
     private static boolean containsMaliciousChars(String url) {
-        String[] maliciousChars = {"<", ">", "'", "\\"", ";", "(", ")", "{", "}", "|", "\\\\"};\n        for (String c : maliciousChars) {\n            if (url.contains(c)) {\n                return true;\n            }\n        }\n        return false;\n    }\n\n    public static void main(String[] args) {\n        // Test cases\n        String[] testUrls = {\n            "https://www.example.com",\n            "http://subdomain.example.co.uk/path?param=value",\n            "ftp://invalid.com", // Invalid protocol\n            "https://invalid<>.com", // Contains malicious chars\n            "not_a_url",\n            "https://example.com:8080/path"\n        };\n\n        for (String url : testUrls) {\n            System.out.println("URL: " + url + " is " + (isValidURL(url) ? "valid" : "invalid"));
+        String[] maliciousChars = {"<", ">", "'", "\"", ";", "(", ")", "{", "}", "|", "\\"};\n        for (String c : maliciousChars) {\n            if (url.contains(c)) {\n                return true;\n            }\n        }\n        return false;\n    }\n\n    public static void main(String[] args) {\n        // Test cases\n        String[] testUrls = {\n            "https://www.example.com",\n            "http://subdomain.example.co.uk/path?param=value",\n            "ftp://invalid.com", // Invalid protocol\n            "https://invalid<>.com", // Contains malicious chars\n            "not_a_url",\n            "https://example.com:8080/path"\n        };\n\n        for (String url : testUrls) {\n            System.out.println("URL: " + url + " is " + (isValidURL(url) ? "valid" : "invalid"));
         }
     }
 }

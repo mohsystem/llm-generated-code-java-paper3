@@ -3,94 +3,169 @@ package Vanilla.claude;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.*;
 
-public class Task48 {
-    private static final int PORT = 5000;
-    private static HashSet<PrintWriter> writers = new HashSet<>();
-
-    public static void main(String[] args) throws Exception {
-        ServerSocket listener = new ServerSocket(PORT);
-        try {
-            while (true) {
-                new Handler(listener.accept()).start();
-            }
-        } finally {
-            listener.close();
-        }
-    }
-
-    private static class Handler extends Thread {
+class Task48 {
+    private static final int PORT = 12345;
+    private static Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
+    
+    static class ClientHandler implements Runnable {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
-        private String name;
-
-        public Handler(Socket socket) {
+        private String clientName;
+        
+        public ClientHandler(Socket socket) {
             this.socket = socket;
         }
-
+        
+        @Override
         public void run() {
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
-
-                writers.add(out);
-
-                while (true) {
-                    String input = in.readLine();
-                    if (input == null) {
-                        return;
+                
+                out.println("Enter your name:");
+                clientName = in.readLine();
+                broadcast(clientName + " has joined the chat!");
+                
+                String message;
+                while ((message = in.readLine()) != null) {
+                    if (message.equalsIgnoreCase("/quit")) {
+                        break;
                     }
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + input);
-                    }
+                    broadcast(clientName + ": " + message);
                 }
             } catch (IOException e) {
-                System.out.println(e);
+                System.out.println("Error handling client: " + e.getMessage());
             } finally {
-                if (out != null) {
-                    writers.remove(out);
+                cleanup();
+            }
+        }
+        
+        private void cleanup() {
+            try {
+                clients.remove(this);
+                if (clientName != null) {
+                    broadcast(clientName + " has left the chat!");
                 }
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
+                if (socket != null) socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        public void sendMessage(String message) {
+            if (out != null) {
+                out.println(message);
             }
         }
     }
-}
-
-// Client code
-class ChatClient {
-    private BufferedReader in;
-    private PrintWriter out;
-    private Socket socket;
-
-    public ChatClient() throws Exception {
-        socket = new Socket("localhost", 5000);
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
-
-        // Test cases
-        String[] messages = {
-            "Hello everyone!",
-            "How are you doing?",
-            "This is a test message",
-            "Testing broadcast",
-            "Goodbye!"
-        };
-
-        for(String msg : messages) {
-            sendMessage(msg);
-            Thread.sleep(1000);
+    
+    private static void broadcast(String message) {
+        System.out.println("[Server] " + message);
+        for (ClientHandler client : clients) {
+            client.sendMessage(message);
         }
     }
-
-    private void sendMessage(String message) {
-        out.println(message);
+    
+    public static void startServer() {
+        System.out.println("Chat server starting on port " + PORT);
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                ClientHandler handler = new ClientHandler(clientSocket);
+                clients.add(handler);
+                new Thread(handler).start();
+            }
+        } catch (IOException e) {
+            System.out.println("Server error: " + e.getMessage());
+        }
     }
-
-    public static void main(String[] args) throws Exception {
-        new ChatClient();
+    
+    static class ChatClient {
+        private Socket socket;
+        private PrintWriter out;
+        private BufferedReader in;
+        
+        public void connect(String host, int port, String name) throws IOException {
+            socket = new Socket(host, port);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            
+            System.out.println(in.readLine());
+            out.println(name);
+            
+            new Thread(() -> {
+                try {
+                    String message;
+                    while ((message = in.readLine()) != null) {
+                        System.out.println(message);
+                    }
+                } catch (IOException e) {
+                    System.out.println("Connection closed");
+                }
+            }).start();
+        }
+        
+        public void sendMessage(String message) {
+            if (out != null) {
+                out.println(message);
+            }
+        }
+        
+        public void disconnect() throws IOException {
+            if (socket != null) socket.close();
+        }
+    }
+    
+    public static void main(String[] args) {
+        Thread serverThread = new Thread(() -> startServer());
+        serverThread.setDaemon(true);
+        serverThread.start();
+        
+        try {
+            Thread.sleep(1000);
+            
+            System.out.println("\\n=== Test Case 1: Single client connection ===");
+            ChatClient client1 = new ChatClient();
+            client1.connect("localhost", PORT, "Alice");
+            Thread.sleep(500);
+            client1.sendMessage("Hello from Alice!");
+            Thread.sleep(500);
+            
+            System.out.println("\\n=== Test Case 2: Multiple clients ===");
+            ChatClient client2 = new ChatClient();
+            client2.connect("localhost", PORT, "Bob");
+            Thread.sleep(500);
+            client2.sendMessage("Hi everyone from Bob!");
+            Thread.sleep(500);
+            
+            System.out.println("\\n=== Test Case 3: Broadcasting ===");
+            client1.sendMessage("This is Alice speaking");
+            Thread.sleep(500);
+            client2.sendMessage("Bob here too");
+            Thread.sleep(500);
+            
+            System.out.println("\\n=== Test Case 4: Third client joins ===");
+            ChatClient client3 = new ChatClient();
+            client3.connect("localhost", PORT, "Charlie");
+            Thread.sleep(500);
+            client3.sendMessage("Charlie joined the chat");
+            Thread.sleep(500);
+            
+            System.out.println("\\n=== Test Case 5: Client disconnection ===");
+            client1.sendMessage("/quit");
+            Thread.sleep(500);
+            client2.sendMessage("Alice left");
+            Thread.sleep(500);
+            
+            client2.disconnect();
+            client3.disconnect();
+            Thread.sleep(1000);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

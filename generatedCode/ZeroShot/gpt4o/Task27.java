@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task27 {
     public static int findOutlier(int[] array) {
         int countEven = 0, countOdd = 0, lastEven = 0, lastOdd = 0;

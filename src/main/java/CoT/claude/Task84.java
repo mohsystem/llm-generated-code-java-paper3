@@ -1,19 +1,26 @@
 package CoT.claude;
 
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 public class Task84 {
-    public static String generateSessionId() {
-        // Generate random UUID and convert to string
-        UUID uuid = UUID.randomUUID();
-        return uuid.toString();
+    
+    public static String generateSessionID() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] randomBytes = new byte[32]; // 256 bits
+        secureRandom.nextBytes(randomBytes);
+        
+        // Use URL-safe Base64 encoding and remove padding
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
     
     public static void main(String[] args) {
-        // Test cases
-        for(int i = 0; i < 5; i++) {
-            String sessionId = generateSessionId();
-            System.out.println("Generated Session ID " + (i+1) + ": " + sessionId);
+        System.out.println("Generating 5 unique session IDs:\\n");
+        
+        for (int i = 1; i <= 5; i++) {
+            String sessionId = generateSessionID();
+            System.out.println("Session ID " + i + ": " + sessionId);
+            System.out.println("Length: " + sessionId.length() + " characters\\n");
         }
     }
 }

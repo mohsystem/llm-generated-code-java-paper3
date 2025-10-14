@@ -1,81 +1,97 @@
 package ZeroShot.gemini;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class ProductOfNumbers {
-    List<Integer> list;
+public class Task176 {
 
-    public ProductOfNumbers() {
-        list = new ArrayList<>();
-        list.add(1);
+    private List<Integer> prefixProducts;
+
+    public Task176() {
+        prefixProducts = new ArrayList<>();
+        prefixProducts.add(1);
     }
 
     public void add(int num) {
         if (num == 0) {
-            list = new ArrayList<>();
-            list.add(1);
+            prefixProducts.clear();
+            prefixProducts.add(1);
         } else {
-            list.add(list.get(list.size() - 1) * num);
+            int lastProduct = prefixProducts.get(prefixProducts.size() - 1);
+            prefixProducts.add(lastProduct * num);
         }
     }
 
     public int getProduct(int k) {
-        int n = list.size();
+        int n = prefixProducts.size();
         if (k >= n) {
             return 0;
         }
-        return list.get(n - 1) / list.get(n - 1 - k);
+        int totalProduct = prefixProducts.get(n - 1);
+        int prevProduct = prefixProducts.get(n - 1 - k);
+        return totalProduct / prevProduct;
     }
 
     public static void main(String[] args) {
-        ProductOfNumbers productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(3);        // [3]
-        productOfNumbers.add(0);        // [3,0]
-        productOfNumbers.add(2);        // [3,0,2]
-        productOfNumbers.add(5);        // [3,0,2,5]
-        productOfNumbers.add(4);        // [3,0,2,5,4]
-        System.out.println(productOfNumbers.getProduct(2)); // return 20. The product of the last 2 numbers is 5 * 4 = 20
-        System.out.println(productOfNumbers.getProduct(3)); // return 40. The product of the last 3 numbers is 2 * 5 * 4 = 40
-        System.out.println(productOfNumbers.getProduct(4)); // return 0. The product of the last 4 numbers is 0 * 2 * 5 * 4 = 0
-        productOfNumbers.add(8);        // [3,0,2,5,4,8]
-        System.out.println(productOfNumbers.getProduct(2)); // return 32. The product of the last 2 numbers is 4 * 8 = 32 
-        
-        productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(1);
-        System.out.println(productOfNumbers.getProduct(1));
+        // Test Case 1
+        Task176 pon1 = new Task176();
+        pon1.add(3);
+        pon1.add(0);
+        pon1.add(2);
+        pon1.add(5);
+        pon1.add(4);
+        System.out.println(pon1.getProduct(2)); // 20
+        System.out.println(pon1.getProduct(3)); // 40
+        System.out.println(pon1.getProduct(4)); // 0
+        pon1.add(8);
+        System.out.println(pon1.getProduct(2)); // 32
+        System.out.println();
 
-        productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(7);
-        productOfNumbers.add(4);
-        productOfNumbers.add(10);
-        productOfNumbers.add(1);
-        System.out.println(productOfNumbers.getProduct(1));
-        System.out.println(productOfNumbers.getProduct(2));
-        System.out.println(productOfNumbers.getProduct(3));
-        System.out.println(productOfNumbers.getProduct(4));
+        // Test Case 2
+        Task176 pon2 = new Task176();
+        pon2.add(1);
+        pon2.add(2);
+        pon2.add(3);
+        pon2.add(4);
+        pon2.add(5);
+        System.out.println(pon2.getProduct(1)); // 5
+        System.out.println(pon2.getProduct(2)); // 20
+        System.out.println(pon2.getProduct(5)); // 120
+        System.out.println();
 
-        productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(10);
-        productOfNumbers.add(5);
-        productOfNumbers.add(7);
-        productOfNumbers.add(2);
-        productOfNumbers.add(1);
-        System.out.println(productOfNumbers.getProduct(1));
-        System.out.println(productOfNumbers.getProduct(2));
-        System.out.println(productOfNumbers.getProduct(3));
-        System.out.println(productOfNumbers.getProduct(4));
-        System.out.println(productOfNumbers.getProduct(5));
+        // Test Case 3
+        Task176 pon3 = new Task176();
+        pon3.add(0);
+        pon3.add(10);
+        pon3.add(20);
+        System.out.println(pon3.getProduct(1)); // 20
+        System.out.println(pon3.getProduct(2)); // 200
+        System.out.println(pon3.getProduct(3)); // 0
+        System.out.println();
 
-        productOfNumbers = new ProductOfNumbers();
-        productOfNumbers.add(5);
-        productOfNumbers.add(5);
-        productOfNumbers.add(6);
-        productOfNumbers.add(6);
-        productOfNumbers.add(10);
-        System.out.println(productOfNumbers.getProduct(1));
-        System.out.println(productOfNumbers.getProduct(2));
-        System.out.println(productOfNumbers.getProduct(3));
-        System.out.println(productOfNumbers.getProduct(4));
-        System.out.println(productOfNumbers.getProduct(5));
+        // Test Case 4
+        Task176 pon4 = new Task176();
+        pon4.add(5);
+        pon4.add(6);
+        pon4.add(0);
+        pon4.add(7);
+        pon4.add(0);
+        pon4.add(8);
+        pon4.add(9);
+        System.out.println(pon4.getProduct(1)); // 9
+        System.out.println(pon4.getProduct(2)); // 72
+        System.out.println(pon4.getProduct(3)); // 0
+        System.out.println();
+
+        // Test Case 5
+        Task176 pon5 = new Task176();
+        pon5.add(42);
+        System.out.println(pon5.getProduct(1)); // 42
+        pon5.add(0);
+        System.out.println(pon5.getProduct(1)); // 0
+        pon5.add(1);
+        System.out.println(pon5.getProduct(1)); // 1
+        System.out.println(pon5.getProduct(2)); // 0
+        System.out.println();
     }
 }

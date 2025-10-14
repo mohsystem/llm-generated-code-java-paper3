@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task60 {
 
     public static String expandedForm(int num) {

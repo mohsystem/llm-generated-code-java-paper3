@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task79 {
     public static String encryptMessage(String message, String key) {
         StringBuilder encrypted = new StringBuilder();

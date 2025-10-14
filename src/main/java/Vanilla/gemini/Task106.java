@@ -1,47 +1,91 @@
 package Vanilla.gemini;
-import java.math.BigInteger;
-import java.util.Random;
 
-class Task106 {
+import java.math.BigInteger;
+
+public class Task106 {
+
     private BigInteger p, q, n, phi, e, d;
 
-    public Task106(int bitLength) {
-        Random rnd = new Random();
-        p = BigInteger.probablePrime(bitLength / 2, rnd);
-        q = BigInteger.probablePrime(bitLength / 2, rnd);
+    // Constructor to generate keys with fixed p and q for demonstration
+    public Task106() {
+        // Using small primes for demonstration consistency with C/C++
+        // In a real-world scenario, use large, randomly generated primes.
+        p = new BigInteger("61");
+        q = new BigInteger("53");
+
+        // n = p * q
         n = p.multiply(q);
+        
+        // phi = (p - 1) * (q - 1)
         phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
-        e = BigInteger.valueOf(65537);
+
+        // Choose e such that 1 < e < phi and gcd(e, phi) = 1
+        e = new BigInteger("17"); // A common choice for e
+
+        // Calculate d, the modular multiplicative inverse of e mod phi
         d = e.modInverse(phi);
     }
 
-    public BigInteger encrypt(BigInteger message) {
+    public BigInteger getPublicKeyE() {
+        return e;
+    }
+
+    public BigInteger getPrivateKeyD() {
+        return d;
+    }
+
+    public BigInteger getModulusN() {
+        return n;
+    }
+
+    /**
+     * Encrypts a message using the public key.
+     * @param message The message to encrypt as a BigInteger.
+     * @param e The public exponent.
+     * @param n The modulus.
+     * @return The encrypted message (ciphertext) as a BigInteger.
+     */
+    public static BigInteger encrypt(BigInteger message, BigInteger e, BigInteger n) {
         return message.modPow(e, n);
     }
 
-    public BigInteger decrypt(BigInteger ciphertext) {
-        return ciphertext.modPow(d, n);
+    /**
+     * Decrypts a message using the private key.
+     * @param encryptedMessage The ciphertext to decrypt.
+     * @param d The private exponent.
+     * @param n The modulus.
+     * @return The decrypted message (plaintext) as a BigInteger.
+     */
+    public static BigInteger decrypt(BigInteger encryptedMessage, BigInteger d, BigInteger n) {
+        return encryptedMessage.modPow(d, n);
     }
 
     public static void main(String[] args) {
-        Task106 rsa = new Task106(1024);
+        Task106 rsa = new Task106();
 
-        BigInteger[] messages = {
-            BigInteger.valueOf(12345),
-            BigInteger.valueOf(67890),
-            BigInteger.valueOf(13579),
-            BigInteger.valueOf(24680),
-            new BigInteger("12345678901234567890")
-        };
+        BigInteger publicKeyE = rsa.getPublicKeyE();
+        BigInteger privateKeyD = rsa.getPrivateKeyD();
+        BigInteger modulusN = rsa.getModulusN();
 
-        for (BigInteger message : messages) {
-            BigInteger ciphertext = rsa.encrypt(message);
-            BigInteger decryptedMessage = rsa.decrypt(ciphertext);
-            System.out.println("Message: " + message);
-            System.out.println("Ciphertext: " + ciphertext);
-            System.out.println("Decrypted: " + decryptedMessage);
-            System.out.println("-----");
+        System.out.println("Public Key (e, n): (" + publicKeyE + ", " + modulusN + ")");
+        System.out.println("Private Key (d, n): (" + privateKeyD + ", " + modulusN + ")");
+        System.out.println("----------------------------------------");
+
+        long[] testMessages = {123, 89, 999, 2500, 3000};
+
+        for (int i = 0; i < testMessages.length; i++) {
+            BigInteger originalMessage = BigInteger.valueOf(testMessages[i]);
+            System.out.println("Test Case " + (i + 1));
+            System.out.println("Original Message: " + originalMessage);
+
+            // Encrypt the message
+            BigInteger encryptedMessage = encrypt(originalMessage, publicKeyE, modulusN);
+            System.out.println("Encrypted Message: " + encryptedMessage);
+
+            // Decrypt the message
+            BigInteger decryptedMessage = decrypt(encryptedMessage, privateKeyD, modulusN);
+            System.out.println("Decrypted Message: " + decryptedMessage);
+            System.out.println("----------------------------------------");
         }
-
     }
 }

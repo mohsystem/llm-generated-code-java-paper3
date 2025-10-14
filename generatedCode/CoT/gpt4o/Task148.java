@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task148 {
     private static class Stack {
         private int[] elements;

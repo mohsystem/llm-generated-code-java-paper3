@@ -25,7 +25,7 @@ public class Task121 extends HttpServlet {
 
         // Save the file
         String uploadPath = "C:\\uploads"; // Change this to your desired upload directory
-        filePart.write(uploadPath + "\\" + fileName);
+        filePart.write(uploadPath + "\" + fileName);
 
         out.println("File uploaded successfully: " + fileName);
     }

@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

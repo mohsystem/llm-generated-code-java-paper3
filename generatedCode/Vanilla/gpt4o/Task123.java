@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task123 {
     private HashMap<String, String> sessions = new HashMap<>();
 

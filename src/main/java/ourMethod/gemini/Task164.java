@@ -1,43 +1,89 @@
 package ourMethod.gemini;
+
 import java.util.Arrays;
 import java.util.Comparator;
 
 public class Task164 {
 
+    /**
+     * Sorts an array of names by the length of their last name, then alphabetically by last name.
+     *
+     * @param names An array of strings, where each string is a full name.
+     * @return A new array containing the sorted names.
+     */
     public static String[] lastNameLensort(String[] names) {
-        Arrays.sort(names, new Comparator<String>() {
+        if (names == null) {
+            return new String[0];
+        }
+        
+        String[] sortedNames = Arrays.copyOf(names, names.length);
+
+        Comparator<String> lastNameComparator = new Comparator<String>() {
+            private String getLastName(String fullName) {
+                if (fullName == null || fullName.isEmpty()) {
+                    return "";
+                }
+                int lastSpaceIndex = fullName.lastIndexOf(' ');
+                if (lastSpaceIndex == -1) {
+                    return fullName;
+                }
+                return fullName.substring(lastSpaceIndex + 1);
+            }
+
             @Override
             public int compare(String name1, String name2) {
-                String lastName1 = name1.split(" ")[1];
-                String lastName2 = name2.split(" ")[1];
-                int len1 = lastName1.length();
-                int len2 = lastName2.length();
+                String lastName1 = getLastName(name1);
+                String lastName2 = getLastName(name2);
 
-                if (len1 != len2) {
-                    return len1 - len2;
+                int lengthCompare = Integer.compare(lastName1.length(), lastName2.length());
+                if (lengthCompare != 0) {
+                    return lengthCompare;
                 } else {
                     return lastName1.compareTo(lastName2);
                 }
             }
-        });
-        return names;
+        };
+
+        Arrays.sort(sortedNames, lastNameComparator);
+        return sortedNames;
     }
 
     public static void main(String[] args) {
-        String[] testCase1 = {"Jennifer Figueroa", "Heather Mcgee", "Amanda Schwartz", "Nicole Yoder", "Melissa Hoffman"};
-        System.out.println(Arrays.toString(lastNameLensort(testCase1)));
+        // Test Case 1
+        String[] names1 = {
+            "Jennifer Figueroa", "Heather Mcgee", "Amanda Schwartz", "Nicole Yoder", "Melissa Hoffman"
+        };
+        System.out.println("Test Case 1:");
+        System.out.println("Input: " + Arrays.toString(names1));
+        System.out.println("Output: " + Arrays.toString(lastNameLensort(names1)));
+        System.out.println();
 
-        String[] testCase2 = {"Kate Hudson", "Emma Stone", "Jennifer Aniston"};
-        System.out.println(Arrays.toString(lastNameLensort(testCase2)));
+        // Test Case 2: Same last name length
+        String[] names2 = {"John Smith", "Jane Doe", "Peter Jones"};
+        System.out.println("Test Case 2:");
+        System.out.println("Input: " + Arrays.toString(names2));
+        System.out.println("Output: " + Arrays.toString(lastNameLensort(names2)));
+        System.out.println();
 
-        String[] testCase3 = {"Sandra Bullock", "Julia Roberts", "Nicole Kidman"};
-        System.out.println(Arrays.toString(lastNameLensort(testCase3)));
+        // Test Case 3: Empty array
+        String[] names3 = {};
+        System.out.println("Test Case 3:");
+        System.out.println("Input: " + Arrays.toString(names3));
+        System.out.println("Output: " + Arrays.toString(lastNameLensort(names3)));
+        System.out.println();
 
-        String[] testCase4 = {"Scarlett Johansson", "Elizabeth Olsen", "Brie Larson"};
-        System.out.println(Arrays.toString(lastNameLensort(testCase4)));
+        // Test Case 4: Single-word names
+        String[] names4 = {"Cher", "Madonna", "Prince"};
+        System.out.println("Test Case 4:");
+        System.out.println("Input: " + Arrays.toString(names4));
+        System.out.println("Output: " + Arrays.toString(lastNameLensort(names4)));
+        System.out.println();
 
-        String[] testCase5 = {"Angelina Jolie", "Jennifer Lawrence", "Meryl Streep"};
-        System.out.println(Arrays.toString(lastNameLensort(testCase5)));
-
+        // Test Case 5: Names with same last names
+        String[] names5 = {"David Lee", "Bruce Lee", "Sara Lee"};
+        System.out.println("Test Case 5:");
+        System.out.println("Input: " + Arrays.toString(names5));
+        System.out.println("Output: " + Arrays.toString(lastNameLensort(names5)));
+        System.out.println();
     }
 }

@@ -1,71 +1,109 @@
 package CoT.gemini;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Task138 {
 
-    private Map<String, List<String>> userPermissions;
-
-    public Task138() {
-        userPermissions = new HashMap<>();
+    // Enum for type-safe permissions
+    enum Permission {
+        READ,
+        WRITE,
+        DELETE,
+        EXECUTE
     }
 
-    public void addUser(String user) {
-        if (!userPermissions.containsKey(user)) {
-            userPermissions.put(user, new ArrayList<>());
+    // Manages users, roles, and permissions
+    static class PermissionManager {
+        private final Map<String, Set<Permission>> roles; // Role name -> Set of permissions
+        private final Map<String, String> users;          // User name -> Role name
+
+        public PermissionManager() {
+            this.roles = new HashMap<>();
+            this.users = new HashMap<>();
+        }
+
+        // Add a new role with a set of permissions
+        public void addRole(String roleName, Set<Permission> permissions) {
+            if (roleName != null && !roleName.trim().isEmpty() && permissions != null) {
+                roles.put(roleName, new HashSet<>(permissions));
+            }
+        }
+
+        // Assign a role to a user
+        public void assignRoleToUser(String userName, String roleName) {
+            // Ensure the role exists before assigning
+            if (userName != null && !userName.trim().isEmpty() && roles.containsKey(roleName)) {
+                users.put(userName, roleName);
+            }
+        }
+
+        /**
+         * Checks if a user has a specific permission.
+         *
+         * @param userName   The name of the user.
+         * @param permission The permission to check.
+         * @return true if the user has the permission, false otherwise.
+         */
+        public boolean checkPermission(String userName, Permission permission) {
+            if (userName == null || permission == null) {
+                return false;
+            }
+
+            // 1. Find the user's role
+            String roleName = users.get(userName);
+            if (roleName == null) {
+                // User does not exist or has no role
+                return false;
+            }
+
+            // 2. Get the permissions for that role
+            Set<Permission> permissions = roles.get(roleName);
+            if (permissions == null) {
+                // Role exists for user, but role definition is missing (should not happen with proper setup)
+                return false;
+            }
+
+            // 3. Check if the permission is in the set
+            return permissions.contains(permission);
         }
     }
-
-    public void addPermission(String user, String permission) {
-        if (!userPermissions.containsKey(user)) {
-            addUser(user);
-        }
-        userPermissions.get(user).add(permission);
-    }
-
-    public void removePermission(String user, String permission) {
-        if (userPermissions.containsKey(user)) {
-            userPermissions.get(user).remove(permission);
-        }
-    }
-
-    public boolean hasPermission(String user, String permission) {
-        return userPermissions.containsKey(user) && userPermissions.get(user).contains(permission);
-    }
-
-    public List<String> getUserPermissions(String user) {
-        return userPermissions.getOrDefault(user, new ArrayList<>());
-    }
-
 
     public static void main(String[] args) {
-        Task138 permissionManager = new Task138();
+        PermissionManager manager = new PermissionManager();
 
-        // Test cases
-        permissionManager.addUser("alice");
-        permissionManager.addPermission("alice", "read");
-        permissionManager.addPermission("alice", "write");
-        System.out.println(permissionManager.hasPermission("alice", "read")); // true
-        System.out.println(permissionManager.hasPermission("alice", "execute")); // false
+        // 1. Define roles and their permissions
+        manager.addRole("ADMIN", Set.of(Permission.READ, Permission.WRITE, Permission.DELETE, Permission.EXECUTE));
+        manager.addRole("EDITOR", Set.of(Permission.READ, Permission.WRITE));
+        manager.addRole("VIEWER", Set.of(Permission.READ));
 
-        permissionManager.addUser("bob");
-        permissionManager.addPermission("bob", "execute");
-        System.out.println(permissionManager.getUserPermissions("bob")); // [execute]
+        // 2. Create users and assign roles
+        manager.assignRoleToUser("alice", "ADMIN");
+        manager.assignRoleToUser("bob", "EDITOR");
+        manager.assignRoleToUser("charlie", "VIEWER");
 
-        permissionManager.removePermission("alice", "write");
-        System.out.println(permissionManager.getUserPermissions("alice")); // [read]
+        System.out.println("Running test cases...\n");
 
-        System.out.println(permissionManager.hasPermission("charlie", "read")); // false
+        // Test Case 1: Admin user checking an admin-only permission
+        System.out.println("Test 1: Does alice (ADMIN) have DELETE permission?");
+        System.out.println("Result: " + manager.checkPermission("alice", Permission.DELETE)); // Expected: true
 
+        // Test Case 2: Editor user checking an editor permission
+        System.out.println("\nTest 2: Does bob (EDITOR) have WRITE permission?");
+        System.out.println("Result: " + manager.checkPermission("bob", Permission.WRITE)); // Expected: true
 
-        permissionManager.addUser("eve");
-        permissionManager.addPermission("eve","read");
-        permissionManager.addPermission("eve","write");
-        permissionManager.removePermission("eve", "write");
-        System.out.println(permissionManager.getUserPermissions("eve")); //[read]
+        // Test Case 3: Editor user checking an admin-only permission
+        System.out.println("\nTest 3: Does bob (EDITOR) have DELETE permission?");
+        System.out.println("Result: " + manager.checkPermission("bob", Permission.DELETE)); // Expected: false
 
+        // Test Case 4: Viewer user checking a read-only permission
+        System.out.println("\nTest 4: Does charlie (VIEWER) have READ permission?");
+        System.out.println("Result: " + manager.checkPermission("charlie", Permission.READ)); // Expected: true
 
+        // Test Case 5: Non-existent user checking any permission
+        System.out.println("\nTest 5: Does david (non-existent) have READ permission?");
+        System.out.println("Result: " + manager.checkPermission("david", Permission.READ)); // Expected: false
     }
 }

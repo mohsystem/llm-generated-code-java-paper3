@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task57 {
     public static int factorial(int n) {
         if (n <= 1) return 1;

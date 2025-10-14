@@ -1,93 +1,131 @@
 package ZeroShot.claude;
 
-import java.util.*;
-import java.security.*;
-import java.time.Instant;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-class Task123 {
-    private static Map<String, Session> sessions = new HashMap<>();
-    private static final int SESSION_TIMEOUT_MINS = 30;
+public class Task123 {
+    private static final int SESSION_TIMEOUT_MINUTES = 30;
+    private static final int TOKEN_LENGTH = 32;
+    
+    private Map<String, Session> sessions;
+    private SecureRandom secureRandom;
+    
+    public Task123() {
+        this.sessions = new ConcurrentHashMap<>();
+        this.secureRandom = new SecureRandom();
+    }
     
     static class Session {
-        private String sessionId;
-        private String userId;
-        private Instant lastAccessTime;
-        private boolean isValid;
+        String userId;
+        String token;
+        LocalDateTime createdAt;
+        LocalDateTime lastAccessedAt;
         
-        public Session(String userId) {
+        public Session(String userId, String token) {
             this.userId = userId;
-            this.lastAccessTime = Instant.now();
-            this.isValid = true;
-            try {
-                this.sessionId = generateSessionId();
-            } catch (NoSuchAlgorithmException e) {
-                this.sessionId = UUID.randomUUID().toString();
-            }
+            this.token = token;
+            this.createdAt = LocalDateTime.now();
+            this.lastAccessedAt = LocalDateTime.now();
         }
         
-        private String generateSessionId() throws NoSuchAlgorithmException {
-            SecureRandom sr = SecureRandom.getInstanceStrong();
-            byte[] bytes = new byte[32];
-            sr.nextBytes(bytes);
-            return Base64.getEncoder().encodeToString(bytes);
+        public boolean isExpired() {
+            return ChronoUnit.MINUTES.between(lastAccessedAt, LocalDateTime.now()) > SESSION_TIMEOUT_MINUTES;
         }
     }
     
-    public static String createSession(String userId) {
-        if(userId == null || userId.trim().isEmpty()) {
+    public String createSession(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
             return null;
         }
         
-        Session session = new Session(userId);
-        sessions.put(session.sessionId, session);
-        return session.sessionId;
+        byte[] tokenBytes = new byte[TOKEN_LENGTH];
+        secureRandom.nextBytes(tokenBytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
+        
+        Session session = new Session(userId, token);
+        sessions.put(token, session);
+        
+        return token;
     }
     
-    public static boolean validateSession(String sessionId) {
-        if(sessionId == null || !sessions.containsKey(sessionId)) {
+    public boolean validateSession(String token) {
+        if (token == null || token.trim().isEmpty()) {
             return false;
         }
         
-        Session session = sessions.get(sessionId);
-        if(!session.isValid) {
+        Session session = sessions.get(token);
+        if (session == null) {
             return false;
         }
         
-        Instant now = Instant.now();
-        if(now.isAfter(session.lastAccessTime.plusSeconds(SESSION_TIMEOUT_MINS * 60))) {
-            invalidateSession(sessionId);
+        if (session.isExpired()) {
+            sessions.remove(token);
             return false;
         }
         
-        session.lastAccessTime = now;
+        session.lastAccessedAt = LocalDateTime.now();
         return true;
     }
     
-    public static void invalidateSession(String sessionId) {
-        if(sessions.containsKey(sessionId)) {
-            Session session = sessions.get(sessionId);
-            session.isValid = false;
-            sessions.remove(sessionId);
+    public String getSessionUser(String token) {
+        if (!validateSession(token)) {
+            return null;
         }
+        
+        Session session = sessions.get(token);
+        return session != null ? session.userId : null;
+    }
+    
+    public boolean destroySession(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        
+        return sessions.remove(token) != null;
+    }
+    
+    public void cleanupExpiredSessions() {
+        sessions.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
     
     public static void main(String[] args) {
-        // Test Case 1: Create valid session
-        String sessionId1 = createSession("user123");
-        System.out.println("Test 1: " + (sessionId1 != null && validateSession(sessionId1)));
+        Task123 sessionManager = new Task123();
         
-        // Test Case 2: Invalid session id
-        System.out.println("Test 2: " + (!validateSession("invalid_session")));
+        // Test Case 1: Create a session for a user
+        System.out.println("Test Case 1: Create Session");
+        String token1 = sessionManager.createSession("user123");
+        System.out.println("Token created: " + (token1 != null ? "Yes" : "No"));
+        System.out.println();
         
-        // Test Case 3: Null session id
-        System.out.println("Test 3: " + (!validateSession(null)));
+        // Test Case 2: Validate an existing session
+        System.out.println("Test Case 2: Validate Session");
+        boolean isValid = sessionManager.validateSession(token1);
+        System.out.println("Session valid: " + isValid);
+        System.out.println();
         
-        // Test Case 4: Invalidate session
-        String sessionId2 = createSession("user456");
-        invalidateSession(sessionId2);
-        System.out.println("Test 4: " + (!validateSession(sessionId2)));
+        // Test Case 3: Get user from session
+        System.out.println("Test Case 3: Get Session User");
+        String userId = sessionManager.getSessionUser(token1);
+        System.out.println("User ID: " + userId);
+        System.out.println();
         
-        // Test Case 5: Empty user id
-        System.out.println("Test 5: " + (createSession("") == null));
+        // Test Case 4: Destroy a session
+        System.out.println("Test Case 4: Destroy Session");
+        boolean destroyed = sessionManager.destroySession(token1);
+        System.out.println("Session destroyed: " + destroyed);
+        boolean validAfterDestroy = sessionManager.validateSession(token1);
+        System.out.println("Session valid after destroy: " + validAfterDestroy);
+        System.out.println();
+        
+        // Test Case 5: Invalid session token
+        System.out.println("Test Case 5: Invalid Session Token");
+        boolean invalidToken = sessionManager.validateSession("invalid_token_xyz");
+        System.out.println("Invalid token validation: " + invalidToken);
+        String userFromInvalid = sessionManager.getSessionUser("invalid_token_xyz");
+        System.out.println("User from invalid token: " + userFromInvalid);
     }
 }

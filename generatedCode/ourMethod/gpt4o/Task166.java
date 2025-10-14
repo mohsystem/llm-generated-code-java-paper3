@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task166 {
     public static int[] posNegSort(int[] arr) {
         int[] posArr = java.util.Arrays.stream(arr).filter(x -> x > 0).sorted().toArray();

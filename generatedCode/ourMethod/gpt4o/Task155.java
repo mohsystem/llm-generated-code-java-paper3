@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task155 {
 
     public static void heapSort(int[] array) {

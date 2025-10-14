@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 public class Task171 {
     public static int reversePairs(int[] nums) {
         return mergeSortAndCount(nums, 0, nums.length - 1);

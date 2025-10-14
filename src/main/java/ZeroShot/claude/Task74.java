@@ -3,57 +3,61 @@ package ZeroShot.claude;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Task74 {
-    public static Connection getConnection(String host, String dbName, String user, String password) {
-        Connection conn = null;
+    public static Connection createPostgresConnection(String host, int port, String database, 
+                                                     String username, String password) {
+        Connection connection = null;
         try {
-            // Build the connection URL with input parameters
-            String url = String.format("jdbc:postgresql://%s:5432/%s", host, dbName);
+            String url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
             
-            // Load the PostgreSQL driver
-            Class.forName("org.postgresql.Driver");
+            Properties props = new Properties();
+            props.setProperty("user", username);
+            props.setProperty("password", password);
+            props.setProperty("ssl", "true");
+            props.setProperty("sslmode", "require");
             
-            // Create connection with credentials
-            conn = DriverManager.getConnection(url, user, password);
+            connection = DriverManager.getConnection(url, props);
             
-            if (conn != null) {
-                return conn;
+            if (connection != null) {
+                System.out.println("Connected to PostgreSQL database successfully!");
             }
-            
-        } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL Driver not found: " + e.getMessage());
         } catch (SQLException e) {
-            System.err.println("Connection error: " + e.getMessage());
+            System.err.println("Connection failed: " + e.getMessage());
         }
-        return conn;
+        return connection;
     }
-
+    
     public static void main(String[] args) {
-        // Test cases
-        String host = "localhost";
-        String dbName = "testdb";
-        String user = "postgres";
-        String password = "securepass123";
-
-        // Test case 1: Valid connection parameters
-        Connection conn1 = getConnection(host, dbName, user, password);
-        System.out.println("Test 1: " + (conn1 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 2: Invalid host
-        Connection conn2 = getConnection("invalidhost", dbName, user, password);
-        System.out.println("Test 2: " + (conn2 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 3: Invalid database name
-        Connection conn3 = getConnection(host, "invaliddb", user, password);
-        System.out.println("Test 3: " + (conn3 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 4: Invalid username
-        Connection conn4 = getConnection(host, dbName, "invaliduser", password);
-        System.out.println("Test 4: " + (conn4 != null ? "Connection successful" : "Connection failed"));
-
-        // Test case 5: Invalid password
-        Connection conn5 = getConnection(host, dbName, user, "wrongpass");
-        System.out.println("Test 5: " + (conn5 != null ? "Connection successful" : "Connection failed"));
+        // Test case 1: Local connection
+        Connection conn1 = createPostgresConnection("localhost", 5432, "testdb", "user1", "pass1");
+        if (conn1 != null) {
+            try { conn1.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        
+        // Test case 2: Custom port
+        Connection conn2 = createPostgresConnection("localhost", 5433, "mydb", "admin", "admin123");
+        if (conn2 != null) {
+            try { conn2.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        
+        // Test case 3: Remote connection
+        Connection conn3 = createPostgresConnection("192.168.1.100", 5432, "proddb", "dbuser", "securepass");
+        if (conn3 != null) {
+            try { conn3.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        
+        // Test case 4: Different database
+        Connection conn4 = createPostgresConnection("localhost", 5432, "analytics", "analyst", "analyze123");
+        if (conn4 != null) {
+            try { conn4.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        
+        // Test case 5: Another local instance
+        Connection conn5 = createPostgresConnection("127.0.0.1", 5432, "devdb", "developer", "dev@2024");
+        if (conn5 != null) {
+            try { conn5.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
     }
 }

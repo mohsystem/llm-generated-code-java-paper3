@@ -1,35 +1,49 @@
 package CoT.gemini;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Task55 {
-
+class Task55 {
+    /**
+     * Validates an email address using a regular expression.
+     *
+     * @param email The string to validate.
+     * @return true if the email is valid, false otherwise.
+     */
     public static boolean isValidEmail(String email) {
+        // A null or empty string is not a valid email
         if (email == null || email.isEmpty()) {
             return false;
         }
 
-        // Regular expression pattern for email validation
-        String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        Pattern pattern = Pattern.compile(regex);
+        // Regex for standard email validation.
+        // ^                   # start of the string
+        // [a-zA-Z0-9._%+-]+   # local part: one or more letters, numbers, or . _ % + -
+        // @                   # a literal @
+        // [a-zA-Z0-9.-]+      # domain name: one or more letters, numbers, or . -
+        // \.                  # a literal .
+        // [a-zA-Z]{2,}        # top-level domain: 2 or more letters
+        // $                   # end of the string
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+        Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
+
         return matcher.matches();
     }
 
-
     public static void main(String[] args) {
-        String email1 = "test@example.com";
-        String email2 = "invalid.email";
-        String email3 = "another.test@subdomain.example.co.uk";
-        String email4 = "12345@numbers.com";
-        String email5 = "test+mailing@example.org";
+        String[] testEmails = {
+            "test@example.com",          // Valid
+            "test.name+alias@example.co.uk", // Valid
+            "plainaddress",              // Invalid
+            "@missing-local-part.com",   // Invalid
+            "test@domain@domain.com"     // Invalid
+        };
 
-
-        System.out.println(isValidEmail(email1)); // Output: true
-        System.out.println(isValidEmail(email2)); // Output: false
-        System.out.println(isValidEmail(email3)); // Output: true
-        System.out.println(isValidEmail(email4)); // Output: true
-        System.out.println(isValidEmail(email5)); // Output: true
-
+        System.out.println("Java Email Validation:");
+        for (String email : testEmails) {
+            System.out.println("'" + email + "' is valid: " + isValidEmail(email));
+        }
     }
 }

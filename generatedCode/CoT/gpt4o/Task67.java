@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

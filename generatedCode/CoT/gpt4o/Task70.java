@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.IOException;

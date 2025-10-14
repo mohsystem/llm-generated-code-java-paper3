@@ -3,96 +3,145 @@ package CoT.claude;
 import java.util.*;
 
 class Task180 {
-    static class Node {
+    static class TreeNode {
         int value;
-        List<Node> children;
-        Node parent;
-
-        Node(int value) {
+        List<TreeNode> children;
+        TreeNode parent;
+        
+        TreeNode(int value) {
             this.value = value;
             this.children = new ArrayList<>();
             this.parent = null;
         }
     }
-
-    public static Node reparentTree(Node root, int newRootValue) {
-        // First, create a map of all nodes
-        Map<Integer, Node> nodeMap = new HashMap<>();
-        mapNodes(root, nodeMap);
-
-        Node newRoot = nodeMap.get(newRootValue);
-        if (newRoot == null) return root;
-
-        // Build new relationships
-        Set<Node> visited = new HashSet<>();
-        reparent(newRoot, null, visited);
-
-        return newRoot;
-    }
-
-    private static void mapNodes(Node node, Map<Integer, Node> nodeMap) {
-        if (node == null) return;
-        nodeMap.put(node.value, node);
-        for (Node child : node.children) {
-            mapNodes(child, nodeMap);
+    
+    public static TreeNode reparentTree(TreeNode root, int targetValue) {
+        if (root == null) {
+            return null;
         }
-    }
-
-    private static void reparent(Node node, Node parent, Set<Node> visited) {
-        if (visited.contains(node)) return;
-        visited.add(node);
-
-        List<Node> connections = new ArrayList<>(node.children);
-        if (node.parent != null) {
-            connections.add(node.parent);
+        
+        TreeNode targetNode = findNode(root, targetValue);
+        if (targetNode == null) {
+            return root;
         }
-
-        node.children.clear();
-        node.parent = parent;
-
-        if (parent != null) {
-            if (!parent.children.contains(node)) {
-                parent.children.add(node);
+        
+        if (targetNode == root) {
+            return root;
+        }
+        
+        List<TreeNode> pathToRoot = new ArrayList<>();
+        TreeNode current = targetNode;
+        while (current != null) {
+            pathToRoot.add(current);
+            current = current.parent;
+        }
+        
+        for (int i = 0; i < pathToRoot.size() - 1; i++) {
+            TreeNode child = pathToRoot.get(i);
+            TreeNode parent = pathToRoot.get(i + 1);
+            
+            parent.children.remove(child);
+            child.children.add(parent);
+            parent.parent = child;
+        }
+        
+        targetNode.parent = null;
+        return targetNode;
+    }
+    
+    private static TreeNode findNode(TreeNode root, int value) {
+        if (root == null) {
+            return null;
+        }
+        if (root.value == value) {
+            return root;
+        }
+        for (TreeNode child : root.children) {
+            TreeNode found = findNode(child, value);
+            if (found != null) {
+                return found;
             }
         }
-
-        for (Node connection : connections) {
-            if (connection != parent) {
-                reparent(connection, node, visited);
+        return null;
+    }
+    
+    private static TreeNode buildTree(int[][] edges) {
+        if (edges == null || edges.length == 0) {
+            return null;
+        }
+        
+        Map<Integer, TreeNode> nodes = new HashMap<>();
+        Set<Integer> children = new HashSet<>();
+        
+        for (int[] edge : edges) {
+            if (edge == null || edge.length != 2) continue;
+            
+            nodes.putIfAbsent(edge[0], new TreeNode(edge[0]));
+            nodes.putIfAbsent(edge[1], new TreeNode(edge[1]));
+            
+            TreeNode parent = nodes.get(edge[0]);
+            TreeNode child = nodes.get(edge[1]);
+            
+            parent.children.add(child);
+            child.parent = parent;
+            children.add(edge[1]);
+        }
+        
+        for (Integer key : nodes.keySet()) {
+            if (!children.contains(key)) {
+                return nodes.get(key);
             }
         }
+        
+        return nodes.isEmpty() ? null : nodes.values().iterator().next();
     }
-
+    
+    private static void printTree(TreeNode root, String prefix, boolean isTail) {
+        if (root == null) return;
+        System.out.println(prefix + (isTail ? "└── " : "├── ") + root.value);
+        for (int i = 0; i < root.children.size(); i++) {
+            printTree(root.children.get(i), 
+                     prefix + (isTail ? "    " : "│   "), 
+                     i == root.children.size() - 1);
+        }
+    }
+    
     public static void main(String[] args) {
-        // Test case 1: Simple tree
-        Node root = new Node(0);
-        Node n1 = new Node(1);
-        Node n2 = new Node(2);
-        root.children.add(n1);
-        root.children.add(n2);
-        n1.parent = root;
-        n2.parent = root;
-        Node newRoot = reparentTree(root, 1);
-        System.out.println("New root value: " + newRoot.value);
-
-        // Test case 2: Complex tree (the example from the problem)
-        Node root2 = new Node(0);
-        n1 = new Node(1);
-        n2 = new Node(2);
-        Node n3 = new Node(3);
-        Node n4 = new Node(4);
-        Node n5 = new Node(5);
-        Node n6 = new Node(6);
-        Node n7 = new Node(7);
-        Node n8 = new Node(8);
-        Node n9 = new Node(9);
-
-        root2.children.addAll(Arrays.asList(n1, n2, n3));
-        n1.children.addAll(Arrays.asList(n4, n5));
-        n2.children.addAll(Arrays.asList(n6, n7));
-        n3.children.addAll(Arrays.asList(n8, n9));
-
-        newRoot = reparentTree(root2, 6);
-        System.out.println("New root value: " + newRoot.value);
+        // Test case 1: Basic tree reparenting
+        int[][] edges1 = {{0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {2, 6}, {2, 7}, {3, 8}, {3, 9}};
+        TreeNode root1 = buildTree(edges1);
+        System.out.println("Test 1 - Original tree:");
+        printTree(root1, "", true);
+        TreeNode newRoot1 = reparentTree(root1, 6);
+        System.out.println("\\nTest 1 - Reparented on node 6:");
+        printTree(newRoot1, "", true);
+        
+        // Test case 2: Reparent on root (should remain same)
+        int[][] edges2 = {{0, 1}, {0, 2}};
+        TreeNode root2 = buildTree(edges2);
+        System.out.println("\\n\\nTest 2 - Reparent on root:");
+        TreeNode newRoot2 = reparentTree(root2, 0);
+        printTree(newRoot2, "", true);
+        
+        // Test case 3: Single node tree
+        int[][] edges3 = {};
+        TreeNode root3 = new TreeNode(0);
+        System.out.println("\\n\\nTest 3 - Single node:");
+        TreeNode newRoot3 = reparentTree(root3, 0);
+        printTree(newRoot3, "", true);
+        
+        // Test case 4: Linear tree
+        int[][] edges4 = {{0, 1}, {1, 2}, {2, 3}};
+        TreeNode root4 = buildTree(edges4);
+        System.out.println("\\n\\nTest 4 - Linear tree reparented on leaf:");
+        TreeNode newRoot4 = reparentTree(root4, 3);
+        printTree(newRoot4, "", true);
+        
+        // Test case 5: Invalid target node
+        int[][] edges5 = {{0, 1}, {0, 2}};
+        TreeNode root5 = buildTree(edges5);
+        System.out.println("\\n\\nTest 5 - Invalid target (returns original):");
+        TreeNode newRoot5 = reparentTree(root5, 99);
+        printTree(newRoot5, "", true);
     }
 }

@@ -1,4 +1,4 @@
-package ourMethod.gpt4o;
+package ourMethod.openai;
 import org.json.JSONObject;
 
 public class Task62 {

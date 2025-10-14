@@ -1,31 +1,68 @@
 package CoT.gemini;
+
 import java.util.HashSet;
 import java.util.Set;
 
-class Task3 {
-    public boolean isPangram(String sentence) {
-        Set<Character> alphabet = new HashSet<>();
-        for (char c = 'a'; c <= 'z'; c++) {
-            alphabet.add(c);
+public class Task3 {
+
+    /**
+     * Checks if a given string is a pangram.
+     * A pangram is a sentence that contains every single letter of the alphabet at least once.
+     * The check is case-insensitive and ignores numbers and punctuation.
+     *
+     * @param s The input string.
+     * @return true if the string is a pangram, false otherwise.
+     */
+    public static boolean isPangram(String s) {
+        if (s == null) {
+            return false;
         }
 
-        for (char c : sentence.toLowerCase().toCharArray()) {
-            if (Character.isLetter(c)) {
-                alphabet.remove(c);
+        // A boolean array to mark the presence of each letter 'a' through 'z'.
+        boolean[] alphabetSeen = new boolean[26];
+        int uniqueLettersSeen = 0;
+
+        // Convert the entire string to lower case to handle case-insensitivity.
+        String lowerCaseString = s.toLowerCase();
+
+        for (int i = 0; i < lowerCaseString.length(); i++) {
+            char c = lowerCaseString.charAt(i);
+
+            // Check if the character is a letter from 'a' to 'z'.
+            if (c >= 'a' && c <= 'z') {
+                int index = c - 'a';
+                // If this letter has not been seen before, mark it and increment the count.
+                if (!alphabetSeen[index]) {
+                    alphabetSeen[index] = true;
+                    uniqueLettersSeen++;
+                }
+            }
+            
+            // Optimization: if all 26 letters have been found, we can stop early.
+            if (uniqueLettersSeen == 26) {
+                return true;
             }
         }
 
-        return alphabet.isEmpty();
+        // The string is a pangram if we have seen all 26 letters.
+        return uniqueLettersSeen == 26;
     }
 
     public static void main(String[] args) {
-        Task3 task3 = new Task3();
-        System.out.println(task3.isPangram("The quick brown fox jumps over the lazy dog")); // True
-        System.out.println(task3.isPangram("This is not a pangram.")); // False
-        System.out.println(task3.isPangram("Pack my box with five dozen liquor jugs.")); // True
-        System.out.println(task3.isPangram("How quickly daft jumping zebras vex.")); // True
-        System.out.println(task3.isPangram("Waltz, bad nymph, for quick jigs vex.")); // True
+        String[] testCases = {
+            "The quick brown fox jumps over the lazy dog",
+            "This is not a pangram",
+            "Pack my box with five dozen liquor jugs.",
+            "Cwm fjord bank glyphs vext quiz",
+            "A an B b C c"
+        };
 
-
+        for (int i = 0; i < testCases.length; i++) {
+            String testCase = testCases[i];
+            boolean result = isPangram(testCase);
+            System.out.println("Test Case " + (i + 1) + ": \"" + testCase + "\"");
+            System.out.println("Is Pangram? " + result);
+            System.out.println();
+        }
     }
 }

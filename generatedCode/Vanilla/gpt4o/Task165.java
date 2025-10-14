@@ -1,4 +1,4 @@
-package Vanilla.gpt4o;
+package Vanilla.openai;
 public class Task165 {
 
     public static boolean checkFlush(String[] table, String[] hand) {

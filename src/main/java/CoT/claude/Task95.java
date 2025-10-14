@@ -1,19 +1,48 @@
 package CoT.claude;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+
 public class Task95 {
-    public static long getProcessorTime() {
-        return System.nanoTime() / 1000000000; // Convert nanoseconds to seconds
+    public static double getProcessorTimeInSeconds() {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        long cpuTime = threadMXBean.getCurrentThreadCpuTime();
+        return cpuTime / 1_000_000_000.0;
+    }
+    
+    public static void printProcessorTime() {
+        double processorTime = getProcessorTimeInSeconds();
+        System.out.println("Current processor time: " + processorTime + " seconds");
     }
     
     public static void main(String[] args) {
-        // Test cases
-        for(int i=0; i<5; i++) {
-            System.out.println("Test case " + (i+1) + ": " + getProcessorTime() + " seconds");
-            try {
-                Thread.sleep(1000); // Wait 1 second between tests
-            } catch(InterruptedException e) {
-                System.err.println("Thread interrupted");
-            }
+        System.out.println("Test Case 1:");
+        printProcessorTime();
+        
+        System.out.println("\\nTest Case 2:");
+        for (int i = 0; i < 1000000; i++) {
+            Math.sqrt(i);
         }
+        printProcessorTime();
+        
+        System.out.println("\\nTest Case 3:");
+        for (int i = 0; i < 5000000; i++) {
+            Math.sin(i);
+        }
+        printProcessorTime();
+        
+        System.out.println("\\nTest Case 4:");
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        printProcessorTime();
+        
+        System.out.println("\\nTest Case 5:");
+        for (int i = 0; i < 10000000; i++) {
+            String s = String.valueOf(i);
+        }
+        printProcessorTime();
     }
 }

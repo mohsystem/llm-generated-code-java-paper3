@@ -1,108 +1,126 @@
 package ourMethod.gemini;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Comparator;
-import java.util.List;
 import java.util.PriorityQueue;
 
-class Task186 {
-    public class ListNode {
-        int val;
-        ListNode next;
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode() {}
+    ListNode(int val) { this.val = val; }
+    ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+}
 
-        ListNode() {}
+public class Task186 {
 
-        ListNode(int val) {
-            this.val = val;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
-        }
-    }
-
+    /**
+     * Merges k sorted linked lists into one sorted linked list.
+     * @param lists An array of k sorted linked lists.
+     * @return The head of the merged sorted linked list.
+     */
     public ListNode mergeKLists(ListNode[] lists) {
         if (lists == null || lists.length == 0) {
             return null;
         }
 
-        PriorityQueue<ListNode> pq = new PriorityQueue<>(Comparator.comparingInt(n -> n.val));
+        // A min-heap to store the head of each list.
+        // The comparator ensures we always get the node with the smallest value.
+        PriorityQueue<ListNode> minHeap = new PriorityQueue<>(Comparator.comparingInt(a -> a.val));
 
-        for (ListNode list : lists) {
-            if (list != null) {
-                pq.offer(list);
+        // Add the head of each non-empty list to the heap.
+        for (ListNode head : lists) {
+            if (head != null) {
+                minHeap.add(head);
             }
         }
 
-        ListNode dummy = new ListNode(0);
-        ListNode tail = dummy;
+        // A dummy node to simplify list construction.
+        ListNode dummy = new ListNode(-1);
+        ListNode current = dummy;
 
-        while (!pq.isEmpty()) {
-            ListNode node = pq.poll();
-            tail.next = node;
-            tail = node;
+        // Process nodes from the heap until it's empty.
+        while (!minHeap.isEmpty()) {
+            // Get the node with the smallest value.
+            ListNode minNode = minHeap.poll();
+            
+            // Append it to the result list.
+            current.next = minNode;
+            current = current.next;
 
-            if (node.next != null) {
-                pq.offer(node.next);
+            // If the extracted node has a next element, add it to the heap.
+            if (minNode.next != null) {
+                minHeap.add(minNode.next);
             }
+        }
+
+        return dummy.next;
+    }
+
+    // Helper function to create a linked list from an array for testing.
+    public static ListNode createLinkedList(int[] arr) {
+        if (arr == null || arr.length == 0) {
+            return null;
+        }
+        ListNode dummy = new ListNode(-1);
+        ListNode current = dummy;
+        for (int val : arr) {
+            current.next = new ListNode(val);
+            current = current.next;
         }
         return dummy.next;
     }
 
-    private ListNode createList(int[] arr) {
-        if (arr == null || arr.length == 0) {
-            return null;
+    // Helper function to print a linked list for testing.
+    public static void printLinkedList(ListNode head) {
+        System.out.print("[");
+        ListNode current = head;
+        while (current != null) {
+            System.out.print(current.val);
+            if (current.next != null) {
+                System.out.print(", ");
+            }
+            current = current.next;
         }
-
-        ListNode head = new ListNode(arr[0]);
-        ListNode curr = head;
-        for (int i = 1; i < arr.length; i++) {
-            curr.next = new ListNode(arr[i]);
-            curr = curr.next;
-        }
-        return head;
-
+        System.out.println("]");
     }
-
-    private int[] listToArray(ListNode head) {
-        if (head == null) {
-            return new int[0];
-        }
-        List<Integer> res = new ArrayList<>();
-        ListNode curr = head;
-        while (curr != null) {
-            res.add(curr.val);
-            curr = curr.next;
-        }
-
-        return res.stream().mapToInt(i -> i).toArray();
-    }
-
 
     public static void main(String[] args) {
+        Task186 solution = new Task186();
 
-        Task186 task = new Task186();
-
-        int[][][] testCases = {
-                {{1, 4, 5}, {1, 3, 4}, {2, 6}},
-                {},
-                {{}},
-                {{1}, {2}},
-                {{-2, -1, -1}, {0}}
+        // Test Case 1
+        ListNode[] lists1 = {
+            createLinkedList(new int[]{1, 4, 5}),
+            createLinkedList(new int[]{1, 3, 4}),
+            createLinkedList(new int[]{2, 6})
         };
-        for (int[][] testCase : testCases) {
+        System.out.println("Test Case 1:");
+        printLinkedList(solution.mergeKLists(lists1));
 
-            ListNode[] lists = new ListNode[testCase.length];
-            for (int i = 0; i < testCase.length; i++) {
-                lists[i] = task.createList(testCase[i]);
-            }
+        // Test Case 2
+        ListNode[] lists2 = {};
+        System.out.println("Test Case 2:");
+        printLinkedList(solution.mergeKLists(lists2));
 
-            ListNode mergedList = task.mergeKLists(lists);
-            int[] result = task.listToArray(mergedList);
+        // Test Case 3
+        ListNode[] lists3 = {createLinkedList(new int[]{})};
+        System.out.println("Test Case 3:");
+        printLinkedList(solution.mergeKLists(lists3));
 
-            System.out.println(Arrays.toString(result));
+        // Test Case 4
+        ListNode[] lists4 = {
+            createLinkedList(new int[]{}),
+            createLinkedList(new int[]{1})
+        };
+        System.out.println("Test Case 4:");
+        printLinkedList(solution.mergeKLists(lists4));
 
-        }
+        // Test Case 5
+        ListNode[] lists5 = {
+            createLinkedList(new int[]{9}),
+            createLinkedList(new int[]{1, 5, 10}),
+            createLinkedList(new int[]{2, 3, 7, 12})
+        };
+        System.out.println("Test Case 5:");
+        printLinkedList(solution.mergeKLists(lists5));
     }
 }

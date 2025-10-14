@@ -1,89 +1,159 @@
 package ourMethod.claude;
 
-import java.sql.*;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.sql.*;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 public class Task46 {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/userdb";
-    private static final String DB_USER = "user";
-    private static final String DB_PASS = "password";
-    
-    public static boolean registerUser(String name, String email, String password) {
-        // Input validation
-        if (!isValidInput(name, email, password)) {
-            return false;
-        }
+    private static final String DB_URL = "jdbc:sqlite:users.db";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$"
+    );
+    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final int MAX_INPUT_LENGTH = 255;
+    private static final int SALT_LENGTH = 16;
+    private static final int PBKDF2_ITERATIONS = 210000;
 
-        try {
-            // Generate salt and hash password
-            byte[] salt = generateSalt();
-            String hashedPassword = hashPassword(password, salt);
-            
-            // Store in database using prepared statement
-            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
-                String sql = "INSERT INTO users (name, email, password_hash, salt) VALUES (?, ?, ?, ?)";
-                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                    stmt.setString(1, name);
-                    stmt.setString(2, email); 
-                    stmt.setString(3, hashedPassword);
-                    stmt.setBytes(4, salt);
-                    stmt.executeUpdate();
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            // Log error and return false
-            System.err.println("Database error: " + e.getMessage());
-            return false;
+    public static class RegistrationResult {
+        public final boolean success;
+        public final String message;
+
+        public RegistrationResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
         }
     }
 
-    private static boolean isValidInput(String name, String email, String password) {
-        // Validate name - only letters, numbers, spaces, min 2 chars, max 50 chars
-        if (name == null || !Pattern.matches("^[a-zA-Z0-9\\\\s]{2,50}$", name)) {
-            return false;
+    public static void initializeDatabase() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement()) {
+            String sql = "CREATE TABLE IF NOT EXISTS users (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "name TEXT NOT NULL, " +
+                        "email TEXT UNIQUE NOT NULL, " +
+                        "password_hash TEXT NOT NULL, " +
+                        "salt TEXT NOT NULL)";
+            stmt.execute(sql);
         }
-
-        // Validate email format
-        if (email == null || !Pattern.matches("^[A-Za-z0-9+_.-]+@(.+)$", email)) {
-            return false;
-        }
-
-        // Validate password - min 8 chars, must contain digit, lower, upper, special char
-        if (password == null || !Pattern.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\\\S+$).{8,}$", password)) {
-            return false;
-        }
-
-        return true;
     }
 
-    private static byte[] generateSalt() {
+    public static boolean validateName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        if (name.length() > MAX_INPUT_LENGTH) {
+            return false;
+        }
+        return name.matches("^[a-zA-Z\\\\s'-]{1,255}$");
+    }
+
+    public static boolean validateEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        if (email.length() > MAX_INPUT_LENGTH) {
+            return false;
+        }
+        return EMAIL_PATTERN.matcher(email).matches();
+    }
+
+    public static boolean validatePassword(String password) {
+        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
+            return false;
+        }
+        if (password.length() > MAX_INPUT_LENGTH) {
+            return false;
+        }
+        boolean hasUpper = false, hasLower = false, hasDigit = false, hasSpecial = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c)) hasUpper = true;
+            else if (Character.isLowerCase(c)) hasLower = true;
+            else if (Character.isDigit(c)) hasDigit = true;
+            else hasSpecial = true;
+        }
+        return hasUpper && hasLower && hasDigit && hasSpecial;
+    }
+
+    public static byte[] generateSalt() {
         SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
+        byte[] salt = new byte[SALT_LENGTH];
         random.nextBytes(salt);
         return salt;
     }
 
-    private static String hashPassword(String password, byte[] salt) {
+    public static String hashPassword(String password, byte[] salt) throws Exception {
+        javax.crypto.spec.PBEKeySpec spec = new javax.crypto.spec.PBEKeySpec(
+            password.toCharArray(), salt, PBKDF2_ITERATIONS, 256
+        );
+        try (AutoCloseable ac = () -> spec.clearPassword()) {
+            javax.crypto.SecretKeyFactory factory = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            byte[] hash = factory.generateSecret(spec).getEncoded();
+            return Base64.getEncoder().encodeToString(hash);
+        }
+    }
+
+    public static RegistrationResult registerUser(String name, String email, String password) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(hashedPassword);
+            if (!validateName(name)) {
+                return new RegistrationResult(false, "Invalid name format");
+            }
+            if (!validateEmail(email)) {
+                return new RegistrationResult(false, "Invalid email format");
+            }
+            if (!validatePassword(password)) {
+                return new RegistrationResult(false, "Password must be at least 8 characters with uppercase, lowercase, digit, and special character");
+            }
+
+            byte[] salt = generateSalt();
+            String passwordHash = hashPassword(password, salt);
+            String saltBase64 = Base64.getEncoder().encodeToString(salt);
+
+            try (Connection conn = DriverManager.getConnection(DB_URL);
+                 PreparedStatement pstmt = conn.prepareStatement(
+                     "INSERT INTO users (name, email, password_hash, salt) VALUES (?, ?, ?, ?)")) {
+                pstmt.setString(1, name);
+                pstmt.setString(2, email);
+                pstmt.setString(3, passwordHash);
+                pstmt.setString(4, saltBase64);
+                pstmt.executeUpdate();
+                return new RegistrationResult(true, "User registered successfully");
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE")) {
+                return new RegistrationResult(false, "Email already registered");
+            }
+            return new RegistrationResult(false, "Database error occurred");
         } catch (Exception e) {
-            throw new RuntimeException("Error hashing password", e);
+            return new RegistrationResult(false, "Registration failed");
         }
     }
 
     public static void main(String[] args) {
-        // Test cases
-        System.out.println(registerUser("John Doe", "john@example.com", "Password123#")); // Valid
-        System.out.println(registerUser("A", "invalid-email", "short")); // Invalid - fails validation
-        System.out.println(registerUser("Jane Doe", "jane@example.com", "Password456$")); // Valid  
-        System.out.println(registerUser(null, "null@example.com", "Password789!")); // Invalid - null name
-        System.out.println(registerUser("<script>alert(1)</script>", "hack@test.com", "Hacker123$")); // Invalid - fails validation
+        try {
+            initializeDatabase();
+
+            RegistrationResult result1 = registerUser("John Doe", "john@example.com", "SecurePass123!");
+            System.out.println("Test 1: " + result1.message);
+
+            RegistrationResult result2 = registerUser("Jane Smith", "jane@example.com", "ValidP@ss456");
+            System.out.println("Test 2: " + result2.message);
+
+            RegistrationResult result3 = registerUser("", "empty@example.com", "TestPass789!");
+            System.out.println("Test 3: " + result3.message);
+
+            RegistrationResult result4 = registerUser("Bob Wilson", "invalid-email", "TestPass789!");
+            System.out.println("Test 4: " + result4.message);
+
+            RegistrationResult result5 = registerUser("Alice Brown", "alice@example.com", "weak");
+            System.out.println("Test 5: " + result5.message);
+
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
 }

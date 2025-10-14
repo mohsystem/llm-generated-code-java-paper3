@@ -1,98 +1,132 @@
 package ourMethod.gemini;
-class Task150 {
+
+public class Task150 {
+
     static class Node {
         int data;
         Node next;
 
         Node(int d) {
-            data = d;
-            next = null;
+            this.data = d;
+            this.next = null;
         }
     }
 
-    Node head;
+    static class SinglyLinkedList {
+        Node head;
 
-    public void insert(int data) {
-        Node newNode = new Node(data);
-        if (head == null) {
+        public SinglyLinkedList() {
+            this.head = null;
+        }
+
+        /**
+         * Inserts a new node at the front of the list.
+         * @param newData The data for the new node.
+         */
+        public void insert(int newData) {
+            Node newNode = new Node(newData);
+            newNode.next = head;
             head = newNode;
-            return;
-        }
-        Node temp = head;
-        while (temp.next != null) {
-            temp = temp.next;
-        }
-        temp.next = newNode;
-    }
-
-
-    public void delete(int data) {
-        if (head == null) {
-            return;
         }
 
-        if (head.data == data) {
-            head = head.next;
-            return;
-        }
+        /**
+         * Deletes the first occurrence of a node with the given key.
+         * @param key The data of the node to be deleted.
+         */
+        public void delete(int key) {
+            Node temp = head, prev = null;
 
-        Node temp = head;
-        Node prev = null;
-        while (temp != null && temp.data != data) {
-            prev = temp;
-            temp = temp.next;
-        }
-
-        if (temp == null) {
-            return;
-        }
-
-        prev.next = temp.next;
-    }
-
-    public boolean search(int data) {
-        Node temp = head;
-        while (temp != null) {
-            if (temp.data == data) {
-                return true;
+            // If the head node itself holds the key to be deleted
+            if (temp != null && temp.data == key) {
+                head = temp.next; // Change head
+                return;
             }
-            temp = temp.next;
-        }
-        return false;
-    }
 
-    public void printList() {
-        Node temp = head;
-        while (temp != null) {
-            System.out.print(temp.data + " ");
-            temp = temp.next;
-        }
-        System.out.println();
-    }
+            // Search for the key to be deleted, keeping track of the previous node
+            while (temp != null && temp.data != key) {
+                prev = temp;
+                temp = temp.next;
+            }
 
+            // If key was not present in the linked list
+            if (temp == null) {
+                return;
+            }
+
+            // Unlink the node from the linked list
+            if (prev != null) {
+                prev.next = temp.next;
+            }
+        }
+
+        /**
+         * Searches for a key in the linked list.
+         * @param key The data to search for.
+         * @return true if the key is found, false otherwise.
+         */
+        public boolean search(int key) {
+            Node current = head;
+            while (current != null) {
+                if (current.data == key) {
+                    return true; // data found
+                }
+                current = current.next;
+            }
+            return false; // data not found
+        }
+
+        /**
+         * Utility function to print the linked list.
+         */
+        public void printList() {
+            Node tnode = head;
+            while (tnode != null) {
+                System.out.print(tnode.data + " -> ");
+                tnode = tnode.next;
+            }
+            System.out.println("NULL");
+        }
+    }
 
     public static void main(String[] args) {
-        Task150 list = new Task150();
+        SinglyLinkedList list = new SinglyLinkedList();
 
-        // Test cases
-        list.insert(10);
-        list.insert(20);
-        list.insert(30);
-        list.printList(); // Output: 10 20 30
+        // Test Case 1: Insertion
+        System.out.println("--- Test Case 1: Insertion ---");
+        list.insert(3);
+        list.insert(2);
+        list.insert(1);
+        System.out.print("Created list: ");
+        list.printList();
+        System.out.println();
 
-        list.delete(20);
-        list.printList(); // Output: 10 30
+        // Test Case 2: Search for an existing element
+        System.out.println("--- Test Case 2: Search (existing) ---");
+        int keyToSearch1 = 2;
+        System.out.println("Searching for " + keyToSearch1 + ": " + (list.search(keyToSearch1) ? "Found" : "Not Found"));
+        System.out.println();
 
-        System.out.println(list.search(30)); // Output: true
-        System.out.println(list.search(20)); // Output: false
+        // Test Case 3: Search for a non-existing element
+        System.out.println("--- Test Case 3: Search (non-existing) ---");
+        int keyToSearch2 = 4;
+        System.out.println("Searching for " + keyToSearch2 + ": " + (list.search(keyToSearch2) ? "Found" : "Not Found"));
+        System.out.println();
 
-
-        list.delete(10);
-        list.printList(); // Output: 30
-
-        list.insert(40);
-        list.insert(50);
-        list.printList(); // Output: 30 40 50
-
+        // Test Case 4: Delete an element from the middle
+        System.out.println("--- Test Case 4: Deletion (middle) ---");
+        int keyToDelete1 = 2;
+        System.out.println("Deleting " + keyToDelete1);
+        list.delete(keyToDelete1);
+        System.out.print("List after deletion: ");
+        list.printList();
+        System.out.println();
+        
+        // Test Case 5: Delete the head element
+        System.out.println("--- Test Case 5: Deletion (head) ---");
+        int keyToDelete2 = 1;
+        System.out.println("Deleting " + keyToDelete2);
+        list.delete(keyToDelete2);
+        System.out.print("List after deletion: ");
+        list.printList();
     }
 }

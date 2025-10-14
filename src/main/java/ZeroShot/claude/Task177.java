@@ -1,28 +1,32 @@
 package ZeroShot.claude;
 
-import java.util.PriorityQueue;
+import java.util.*;
 
-class Task177 {
+public class Task177 {
     public static int constrainedSubsetSum(int[] nums, int k) {
         int n = nums.length;
         int[] dp = new int[n];
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> b[0] - a[0]);
+        Deque<Integer> deque = new ArrayDeque<>();
+        int maxSum = Integer.MIN_VALUE;
         
-        dp[0] = nums[0];
-        pq.offer(new int[]{dp[0], 0});
-        int maxSum = dp[0];
-        
-        for (int i = 1; i < n; i++) {
-            while (!pq.isEmpty() && i - pq.peek()[1] > k) {
-                pq.poll();
+        for (int i = 0; i < n; i++) {
+            // Remove elements outside the window
+            while (!deque.isEmpty() && deque.peekFirst() < i - k) {
+                deque.pollFirst();
             }
             
+            // Calculate dp[i]
             dp[i] = nums[i];
-            if (!pq.isEmpty()) {
-                dp[i] = Math.max(dp[i], dp[i] + pq.peek()[0]);
+            if (!deque.isEmpty()) {
+                dp[i] = Math.max(dp[i], nums[i] + dp[deque.peekFirst()]);
             }
             
-            pq.offer(new int[]{dp[i], i});
+            // Maintain deque in decreasing order of dp values
+            while (!deque.isEmpty() && dp[deque.peekLast()] <= dp[i]) {
+                deque.pollLast();
+            }
+            
+            deque.offerLast(i);
             maxSum = Math.max(maxSum, dp[i]);
         }
         
@@ -31,23 +35,28 @@ class Task177 {
     
     public static void main(String[] args) {
         // Test case 1
-        int[] nums1 = {10,2,-10,5,20};
-        System.out.println(constrainedSubsetSum(nums1, 2));  // Expected: 37
+        int[] nums1 = {10, 2, -10, 5, 20};
+        int k1 = 2;
+        System.out.println("Test 1: " + constrainedSubsetSum(nums1, k1)); // Expected: 37
         
         // Test case 2
-        int[] nums2 = {-1,-2,-3};
-        System.out.println(constrainedSubsetSum(nums2, 1));  // Expected: -1
+        int[] nums2 = {-1, -2, -3};
+        int k2 = 1;
+        System.out.println("Test 2: " + constrainedSubsetSum(nums2, k2)); // Expected: -1
         
         // Test case 3
-        int[] nums3 = {10,-2,-10,-5,20};
-        System.out.println(constrainedSubsetSum(nums3, 2));  // Expected: 23
+        int[] nums3 = {10, -2, -10, -5, 20};
+        int k3 = 2;
+        System.out.println("Test 3: " + constrainedSubsetSum(nums3, k3)); // Expected: 23
         
         // Test case 4
-        int[] nums4 = {1,2,3,4,5};
-        System.out.println(constrainedSubsetSum(nums4, 1));  // Expected: 15
+        int[] nums4 = {1, 2, 3, 4, 5};
+        int k4 = 3;
+        System.out.println("Test 4: " + constrainedSubsetSum(nums4, k4)); // Expected: 15
         
         // Test case 5
-        int[] nums5 = {-1,-2,-3,-4,-5};
-        System.out.println(constrainedSubsetSum(nums5, 3));  // Expected: -1
+        int[] nums5 = {-5, -3, -1};
+        int k5 = 2;
+        System.out.println("Test 5: " + constrainedSubsetSum(nums5, k5)); // Expected: -1
     }
 }

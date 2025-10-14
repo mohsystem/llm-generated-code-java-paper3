@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 import com.mongodb.client.*;
 import org.bson.Document;
 import com.mongodb.MongoClientSettings;

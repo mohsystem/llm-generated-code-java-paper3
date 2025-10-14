@@ -1,4 +1,4 @@
-package ZeroShot.gpt4o;
+package ZeroShot.openai;
 public class Task183 {
     public static int largestProduct(String input, int span) {
         if (span > input.length() || span <= 0) {

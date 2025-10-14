@@ -1,51 +1,104 @@
 package Vanilla.gemini;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-class Task123 {
+public class Task123 {
 
-    private Map<String, String> sessions = new HashMap<>();
+    // In-memory store for sessions. Key: Session ID, Value: Session object
+    private static final Map<String, Session> sessionStore = new HashMap<>();
 
-    public String createSession(String username) {
+    // Inner class to represent a session
+    private static class Session {
+        String username;
+        long creationTime;
+
+        Session(String username) {
+            this.username = username;
+            this.creationTime = System.currentTimeMillis();
+        }
+
+        public String getUsername() {
+            return username;
+        }
+    }
+
+    /**
+     * Creates a new session for a given user.
+     * @param username The username to associate with the session.
+     * @return The unique session ID.
+     */
+    public static String createSession(String username) {
         String sessionId = UUID.randomUUID().toString();
-        sessions.put(sessionId, username);
+        Session session = new Session(username);
+        sessionStore.put(sessionId, session);
+        System.out.println("Session created for " + username + " with ID: " + sessionId);
         return sessionId;
     }
 
-    public String getSessionUser(String sessionId) {
-        return sessions.get(sessionId);
+    /**
+     * Retrieves the username associated with a session ID.
+     * @param sessionId The session ID to look up.
+     * @return The username, or null if the session is not valid.
+     */
+    public static String getSessionUser(String sessionId) {
+        if (sessionStore.containsKey(sessionId)) {
+            return sessionStore.get(sessionId).getUsername();
+        }
+        return null;
     }
 
-    public void deleteSession(String sessionId) {
-        sessions.remove(sessionId);
+    /**
+     * Invalidates/removes a user session.
+     * @param sessionId The session ID to invalidate.
+     */
+    public static void invalidateSession(String sessionId) {
+        if (sessionStore.remove(sessionId) != null) {
+            System.out.println("Session invalidated: " + sessionId);
+        } else {
+            System.out.println("Session to invalidate not found: " + sessionId);
+        }
+    }
+
+    /**
+     * Checks if a session ID is currently valid.
+     * @param sessionId The session ID to check.
+     * @return true if the session exists, false otherwise.
+     */
+    public static boolean isSessionValid(String sessionId) {
+        return sessionStore.containsKey(sessionId);
     }
 
     public static void main(String[] args) {
-        Task123 sessionManager = new Task123();
+        System.out.println("--- Starting Session Management Test ---");
 
-        String sessionId1 = sessionManager.createSession("user1");
-        System.out.println("Session created for user1: " + sessionId1);
-        System.out.println("User for session " + sessionId1 + ": " + sessionManager.getSessionUser(sessionId1));
+        // Test Case 1: Create a session for user "alice"
+        System.out.println("\n[Test Case 1: Create session for alice]");
+        String aliceSessionId = createSession("alice");
 
-        String sessionId2 = sessionManager.createSession("user2");
-        System.out.println("Session created for user2: " + sessionId2);
-        System.out.println("User for session " + sessionId2 + ": " + sessionManager.getSessionUser(sessionId2));
+        // Test Case 2: Check if alice's session is valid and get her username
+        System.out.println("\n[Test Case 2: Validate alice's session]");
+        System.out.println("Is alice's session valid? " + isSessionValid(aliceSessionId));
+        String username = getSessionUser(aliceSessionId);
+        System.out.println("Retrieved user for session " + aliceSessionId + ": " + username);
 
-        sessionManager.deleteSession(sessionId1);
-        System.out.println("User for session " + sessionId1 + " after deletion: " + sessionManager.getSessionUser(sessionId1));
+        // Test Case 3: Create a second session for user "bob"
+        System.out.println("\n[Test Case 3: Create session for bob]");
+        String bobSessionId = createSession("bob");
+        System.out.println("Is bob's session valid? " + isSessionValid(bobSessionId));
 
-        String sessionId3 = sessionManager.createSession("user3");
-        System.out.println("Session created for user3: " + sessionId3);
-        System.out.println("User for session " + sessionId3 + ": " + sessionManager.getSessionUser(sessionId3));
+        // Test Case 4: Invalidate alice's session and verify
+        System.out.println("\n[Test Case 4: Invalidate alice's session]");
+        invalidateSession(aliceSessionId);
+        System.out.println("Is alice's session now valid? " + isSessionValid(aliceSessionId));
+        System.out.println("Attempting to get user for invalidated session: " + getSessionUser(aliceSessionId));
 
+        // Test Case 5: Verify that bob's session is still valid
+        System.out.println("\n[Test Case 5: Verify bob's session is unaffected]");
+        System.out.println("Is bob's session still valid? " + isSessionValid(bobSessionId));
+        System.out.println("Retrieved user for bob's session: " + getSessionUser(bobSessionId));
 
-        String sessionId4 = sessionManager.createSession("user4");
-        System.out.println("Session created for user4: " + sessionId4);
-        System.out.println("User for session " + sessionId4 + ": " + sessionManager.getSessionUser(sessionId4));
-
-        String sessionId5 = sessionManager.createSession("user5");
-        System.out.println("Session created for user5: " + sessionId5);
-        System.out.println("User for session " + sessionId5 + ": " + sessionManager.getSessionUser(sessionId5));
+        System.out.println("\n--- Session Management Test Finished ---");
     }
 }

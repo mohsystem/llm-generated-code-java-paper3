@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task18 {
     public static int binaryArrayToInt(int[] binaryArray) {
         int result = 0;

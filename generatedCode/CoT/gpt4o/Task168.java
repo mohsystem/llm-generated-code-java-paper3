@@ -1,4 +1,4 @@
-package CoT.gpt4o;
+package CoT.openai;
 public class Task168 {
     public static String tweakLetters(String word, int[] tweaks) {
         StringBuilder result = new StringBuilder();
