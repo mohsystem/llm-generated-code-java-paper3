@@ -218,7 +218,7 @@ class Task7 {
         }
         
         private static boolean isValidInput(String input) {
-            return input != null && !input.isEmpty() && !input.contains("\\n") && !input.contains("\\r");
+            return input != null && !input.isEmpty() && !input.contains("\n") && !input.contains("\r");
         }
         
         private static String buildLoginRequest(String username, String password) {

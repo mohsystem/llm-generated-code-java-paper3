@@ -28,7 +28,7 @@ public class Task105 {
         String line;
         int lineCount = 0;
         while ((line = in.readLine()) != null && lineCount < 20) {
-            response.append(line).append("\\n");
+            response.append(line).append("\n");
             lineCount++;
         }
         
@@ -50,8 +50,8 @@ public class Task105 {
         SSLSession session = socket.getSession();
         
         StringBuilder info = new StringBuilder();
-        info.append("Protocol: ").append(session.getProtocol()).append("\\n");
-        info.append("Cipher Suite: ").append(session.getCipherSuite()).append("\\n");
+        info.append("Protocol: ").append(session.getProtocol()).append("\n");
+        info.append("Cipher Suite: ").append(session.getCipherSuite()).append("\n");
         
         socket.close();
         return info.toString();

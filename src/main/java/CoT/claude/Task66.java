@@ -23,7 +23,7 @@ public class Task66 {
         if (userInput.contains(";") || userInput.contains("&") ||
                 userInput.contains("|") || userInput.contains(">") ||
                 userInput.contains("<") || userInput.contains("`") ||
-                userInput.contains("$") || userInput.contains("\\") || userInput.contains("\\") || userInput.contains("\\r")) {
+                userInput.contains("$") || userInput.contains("\\") || userInput.contains("\\") || userInput.contains("\r")) {
             return "Error: Command contains forbidden characters";
         }
         // Parse command and arguments
@@ -74,7 +74,7 @@ public class Task66 {
     }
 
     public static void main(String[] args) {
-        System.out.println("=== Secure Command Executor Test Cases ===\\");
+        System.out.println("=== Secure Command Executor Test Cases ===");
         String[] testCases = {"ls", "pwd", "echo Hello World", "ls; rm -rf /",
                 // Malicious attempt
                 // "cat /etc/passwd"  // Unauthorized command

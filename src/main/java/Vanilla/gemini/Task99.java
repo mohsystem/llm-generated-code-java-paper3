@@ -47,7 +47,7 @@ public class Task99 {
             Files.write(path, content.getBytes());
             
             System.out.println("\n--- Testing with file: " + fileName + " ---");
-            System.out.println("Content:\n\"" + content.replace("\n", "\\n") + "\"");
+            System.out.println("Content:\n\"" + content.replace("\n", "\n") + "\"");
             
             List<String> result = findMatchingLines(fileName);
             System.out.println("Result:");

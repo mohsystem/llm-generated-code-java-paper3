@@ -26,31 +26,31 @@ public class Task111 {
         String request1 = createXmlRpcRequest("add", new Object[]{5, 3});
         String response1 = handleRequest(request1);
         System.out.println("Test 1 - Add(5, 3):");
-        System.out.println("Response: " + response1 + "\\n");
+        System.out.println("Response: " + response1 + "\n");
 
         // Test Case 2: Multiply two numbers
         String request2 = createXmlRpcRequest("multiply", new Object[]{4, 7});
         String response2 = handleRequest(request2);
         System.out.println("Test 2 - Multiply(4, 7):");
-        System.out.println("Response: " + response2 + "\\n");
+        System.out.println("Response: " + response2 + "\n");
 
         // Test Case 3: Echo string
         String request3 = createXmlRpcRequest("echo", new Object[]{"Hello World"});
         String response3 = handleRequest(request3);
         System.out.println("Test 3 - Echo('Hello World'):");
-        System.out.println("Response: " + response3 + "\\n");
+        System.out.println("Response: " + response3 + "\n");
 
         // Test Case 4: Invalid method
         String request4 = createXmlRpcRequest("invalidMethod", new Object[]{1});
         String response4 = handleRequest(request4);
         System.out.println("Test 4 - Invalid Method:");
-        System.out.println("Response: " + response4 + "\\n");
+        System.out.println("Response: " + response4 + "\n");
 
         // Test Case 5: Hash string
         String request5 = createXmlRpcRequest("hashString", new Object[]{"testdata"});
         String response5 = handleRequest(request5);
         System.out.println("Test 5 - HashString('testdata'):");
-        System.out.println("Response: " + response5 + "\\n");
+        System.out.println("Response: " + response5 + "\n");
     }
 
     private static String createXmlRpcRequest(String methodName, Object[] params) {

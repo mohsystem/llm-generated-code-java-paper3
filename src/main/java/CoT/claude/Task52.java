@@ -84,7 +84,7 @@ public class Task52 {
             byte[] decrypted1 = decryptFile(encrypted1, key1);
             System.out.println("Original: " + text1);
             System.out.println("Decrypted: " + new String(decrypted1, "UTF-8"));
-            System.out.println("Match: " + text1.equals(new String(decrypted1, "UTF-8")) + "\\n");
+            System.out.println("Match: " + text1.equals(new String(decrypted1, "UTF-8")) + "\n");
 
             // Test Case 2: Empty content
             System.out.println("Test Case 2: Empty content");
@@ -94,7 +94,7 @@ public class Task52 {
             byte[] decrypted2 = decryptFile(encrypted2, key2);
             System.out.println("Original length: " + text2.length());
             System.out.println("Decrypted length: " + decrypted2.length);
-            System.out.println("Match: " + (text2.length() == decrypted2.length) + "\\n");
+            System.out.println("Match: " + (text2.length() == decrypted2.length) + "\n");
 
             // Test Case 3: Large text
             System.out.println("Test Case 3: Large text encryption");
@@ -108,7 +108,7 @@ public class Task52 {
             byte[] decrypted3 = decryptFile(encrypted3, key3);
             System.out.println("Original length: " + text3.length());
             System.out.println("Decrypted length: " + new String(decrypted3, "UTF-8").length());
-            System.out.println("Match: " + text3.equals(new String(decrypted3, "UTF-8")) + "\\n");
+            System.out.println("Match: " + text3.equals(new String(decrypted3, "UTF-8")) + "\n");
 
             // Test Case 4: Special characters
             System.out.println("Test Case 4: Special characters");
@@ -118,7 +118,7 @@ public class Task52 {
             byte[] decrypted4 = decryptFile(encrypted4, key4);
             System.out.println("Original: " + text4);
             System.out.println("Decrypted: " + new String(decrypted4, "UTF-8"));
-            System.out.println("Match: " + text4.equals(new String(decrypted4, "UTF-8")) + "\\n");
+            System.out.println("Match: " + text4.equals(new String(decrypted4, "UTF-8")) + "\n");
 
             // Test Case 5: Unicode characters
             System.out.println("Test Case 5: Unicode characters");
@@ -128,7 +128,7 @@ public class Task52 {
             byte[] decrypted5 = decryptFile(encrypted5, key5);
             System.out.println("Original: " + text5);
             System.out.println("Decrypted: " + new String(decrypted5, "UTF-8"));
-            System.out.println("Match: " + text5.equals(new String(decrypted5, "UTF-8")) + "\\n");
+            System.out.println("Match: " + text5.equals(new String(decrypted5, "UTF-8")) + "\n");
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());

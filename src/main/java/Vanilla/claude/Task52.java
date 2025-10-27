@@ -62,7 +62,7 @@ public class Task52 {
         System.out.println("Original: " + text1);
         System.out.println("Encrypted: " + encrypted1);
         System.out.println("Decrypted: " + decrypted1);
-        System.out.println("Match: " + text1.equals(decrypted1) + "\\n");
+        System.out.println("Match: " + text1.equals(decrypted1) + "\n");
         
         // Test Case 2: Encrypt and decrypt a longer text
         System.out.println("Test Case 2: Longer Text Encryption");
@@ -72,7 +72,7 @@ public class Task52 {
         System.out.println("Original: " + text2);
         System.out.println("Encrypted: " + encrypted2);
         System.out.println("Decrypted: " + decrypted2);
-        System.out.println("Match: " + text2.equals(decrypted2) + "\\n");
+        System.out.println("Match: " + text2.equals(decrypted2) + "\n");
         
         // Test Case 3: Encrypt and decrypt with different key
         System.out.println("Test Case 3: Different Key");
@@ -83,7 +83,7 @@ public class Task52 {
         System.out.println("Original: " + text3);
         System.out.println("Encrypted: " + encrypted3);
         System.out.println("Decrypted: " + decrypted3);
-        System.out.println("Match: " + text3.equals(decrypted3) + "\\n");
+        System.out.println("Match: " + text3.equals(decrypted3) + "\n");
         
         // Test Case 4: Empty string
         System.out.println("Test Case 4: Empty String");
@@ -93,7 +93,7 @@ public class Task52 {
         System.out.println("Original: '" + text4 + "'");
         System.out.println("Encrypted: '" + encrypted4 + "'");
         System.out.println("Decrypted: '" + decrypted4 + "'");
-        System.out.println("Match: " + text4.equals(decrypted4) + "\\n");
+        System.out.println("Match: " + text4.equals(decrypted4) + "\n");
         
         // Test Case 5: File encryption/decryption
         System.out.println("Test Case 5: File Encryption/Decryption");
@@ -121,7 +121,7 @@ public class Task52 {
             StringBuilder content = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
             }
             br.close();
             System.out.println("Decrypted content: " + content.toString().trim());

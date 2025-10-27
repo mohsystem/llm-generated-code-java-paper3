@@ -12,7 +12,7 @@ public class Task99 {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (pattern.matcher(line).matches()) {
-                    result.append(line).append("\\n");
+                    result.append(line).append("\n");
                 }
             }
         } catch (IOException e) {

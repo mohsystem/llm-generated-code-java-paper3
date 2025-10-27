@@ -156,9 +156,9 @@ public class Task91 {
             DatagramPacket response = new DatagramPacket(buffer, buffer.length);
             socket.receive(response);
             
-            System.out.println("Success: Received response for " + domain + "\\n");
+            System.out.println("Success: Received response for " + domain + "\n");
         } catch (Exception e) {
-            System.err.println("Failed: " + e.getMessage() + "\\n");
+            System.err.println("Failed: " + e.getMessage() + "\n");
         }
     }
     

@@ -46,7 +46,7 @@ public class Task190 {
         for (String test : tests) {
             System.out.println("Input:");
             System.out.println(test);
-            List<String> input = Arrays.asList(test.split("\\n"));
+            List<String> input = Arrays.asList(test.split("\n"));
             List<String> result = transposeFile(input);
             System.out.println("Output:");
             for (String line : result) {

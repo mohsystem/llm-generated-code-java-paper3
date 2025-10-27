@@ -111,8 +111,8 @@ public class Task130 {
                 return "";
             }
             return input.replace("\\", "").replace("\"", "\"")
-                       .replace("\\n", "\\\\n")
-                       .replace("\\r", "\\\\r");
+                       .replace("\n", "\\\\n")
+                       .replace("\r", "\\\\r");
         }
     }
 

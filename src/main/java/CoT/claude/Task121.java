@@ -125,31 +125,31 @@ public class Task121 {
         UploadResult result1 = uploadFile("test_document.txt", content1);
         System.out.println("Success: " + result1.success);
         System.out.println("Message: " + result1.message);
-        System.out.println("Path: " + result1.savedPath + "\\n");
+        System.out.println("Path: " + result1.savedPath + "\n");
         // Test Case 2: Invalid file extension
         System.out.println("Test 2: Invalid file extension (.exe)");
         byte[] content2 = "Malicious content".getBytes();
         UploadResult result2 = uploadFile("malware.exe", content2);
         System.out.println("Success: " + result2.success);
-        System.out.println("Message: " + result2.message + "\\n");
+        System.out.println("Message: " + result2.message + "\n");
         // Test Case 3: Path traversal attempt
         System.out.println("Test 3: Path traversal attempt");
         byte[] content3 = "Attack content".getBytes();
         UploadResult result3 = uploadFile("../../etc/passwd.txt", content3);
         System.out.println("Success: " + result3.success);
-        System.out.println("Message: " + result3.message + "\\n");
+        System.out.println("Message: " + result3.message + "\n");
         // Test Case 4: Empty filename
         System.out.println("Test 4: Empty filename");
         byte[] content4 = "Some content".getBytes();
         UploadResult result4 = uploadFile("", content4);
         System.out.println("Success: " + result4.success);
-        System.out.println("Message: " + result4.message + "\\n");
+        System.out.println("Message: " + result4.message + "\n");
         // Test Case 5: File size exceeds limit
         System.out.println("Test 5: File size exceeds limit");
         byte[] content5 = new byte[(int) (MAX_FILE_SIZE + 1)];
         Arrays.fill(content5, (byte) 'A');
         UploadResult result5 = uploadFile("large_file.txt", content5);
         System.out.println("Success: " + result5.success);
-        System.out.println("Message: " + result5.message + "\\n");
+        System.out.println("Message: " + result5.message + "\n");
     }
 }

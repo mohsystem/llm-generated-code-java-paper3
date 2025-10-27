@@ -38,7 +38,7 @@ class Task156 {
         System.out.print("Preorder: "); preorder(root1);
         System.out.print("\\nInorder: "); inorder(root1);
         System.out.print("\\nPostorder: "); postorder(root1);
-        System.out.println("\\n");
+        System.out.println("\n");
 
         // Test Case 2: Complete binary tree
         Node root2 = new Node(1);
@@ -48,7 +48,7 @@ class Task156 {
         System.out.print("Preorder: "); preorder(root2);
         System.out.print("\\nInorder: "); inorder(root2);
         System.out.print("\\nPostorder: "); postorder(root2);
-        System.out.println("\\n");
+        System.out.println("\n");
 
         // Test Case 3: Left skewed tree
         Node root3 = new Node(1);
@@ -58,7 +58,7 @@ class Task156 {
         System.out.print("Preorder: "); preorder(root3);
         System.out.print("\\nInorder: "); inorder(root3);
         System.out.print("\\nPostorder: "); postorder(root3);
-        System.out.println("\\n");
+        System.out.println("\n");
 
         // Test Case 4: Right skewed tree
         Node root4 = new Node(1);
@@ -68,7 +68,7 @@ class Task156 {
         System.out.print("Preorder: "); preorder(root4);
         System.out.print("\\nInorder: "); inorder(root4);
         System.out.print("\\nPostorder: "); postorder(root4);
-        System.out.println("\\n");
+        System.out.println("\n");
 
         // Test Case 5: Complex tree
         Node root5 = new Node(1);

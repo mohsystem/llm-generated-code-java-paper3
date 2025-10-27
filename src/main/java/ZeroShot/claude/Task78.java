@@ -44,7 +44,7 @@ public class Task78 {
             // Split into 70 character lines
             for (int i = 0; i < base64.length(); i += 70) {
                 int end = Math.min(i + 70, base64.length());
-                sb.append(base64.substring(i, end)).append("\\n");
+                sb.append(base64.substring(i, end)).append("\n");
             }
             
             sb.append("-----END OPENSSH PRIVATE KEY-----");

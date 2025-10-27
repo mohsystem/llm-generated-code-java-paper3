@@ -30,7 +30,7 @@ public class Task100 {
                 while ((line = reader.readLine()) != null) {
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
-                        result.append("Match found: ").append(matcher.group()).append("\\n");
+                        result.append("Match found: ").append(matcher.group()).append("\n");
                     }
                 }
             }

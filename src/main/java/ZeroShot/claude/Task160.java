@@ -54,7 +54,7 @@ public class Task160 {
                     in.close();
                     return "Error: Response size exceeds limit";
                 }
-                response.append(inputLine).append("\\n");
+                response.append(inputLine).append("\n");
             }
             in.close();
             
@@ -76,21 +76,21 @@ public class Task160 {
         // Test case 2: Invalid protocol
         System.out.println("Test 2: Invalid protocol (file://)");
         String result2 = makeHttpRequest("file:///etc/passwd");
-        System.out.println(result2 + "\\n");
+        System.out.println(result2 + "\n");
         
         // Test case 3: Blocked host (localhost)
         System.out.println("Test 3: Blocked host (localhost)");
         String result3 = makeHttpRequest("http://localhost:8080");
-        System.out.println(result3 + "\\n");
+        System.out.println(result3 + "\n");
         
         // Test case 4: Blocked private IP
         System.out.println("Test 4: Blocked private IP");
         String result4 = makeHttpRequest("http://192.168.1.1");
-        System.out.println(result4 + "\\n");
+        System.out.println(result4 + "\n");
         
         // Test case 5: Invalid URL
         System.out.println("Test 5: Invalid URL");
         String result5 = makeHttpRequest("not-a-valid-url");
-        System.out.println(result5 + "\\n");
+        System.out.println(result5 + "\n");
     }
 }

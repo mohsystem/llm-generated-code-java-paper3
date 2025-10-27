@@ -44,7 +44,7 @@ public class Task36 {
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    content.append(line).append("\\n");
+                    content.append(line).append("\n");
                 }
             }
             

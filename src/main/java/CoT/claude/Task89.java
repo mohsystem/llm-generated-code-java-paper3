@@ -67,27 +67,27 @@ public class Task89 {
         // Test Case 1: Correct password
         System.out.println("Test 1 - Correct password:");
         boolean result1 = verifyPassword(testFile, "SecurePass123!");
-        System.out.println("Result: " + (result1 ? "MATCH" : "NO MATCH") + "\\n");
+        System.out.println("Result: " + (result1 ? "MATCH" : "NO MATCH") + "\n");
         
         // Test Case 2: Incorrect password
         System.out.println("Test 2 - Incorrect password:");
         boolean result2 = verifyPassword(testFile, "WrongPassword");
-        System.out.println("Result: " + (result2 ? "MATCH" : "NO MATCH") + "\\n");
+        System.out.println("Result: " + (result2 ? "MATCH" : "NO MATCH") + "\n");
         
         // Test Case 3: Password with different case
         System.out.println("Test 3 - Different case:");
         boolean result3 = verifyPassword(testFile, "securepass123!");
-        System.out.println("Result: " + (result3 ? "MATCH" : "NO MATCH") + "\\n");
+        System.out.println("Result: " + (result3 ? "MATCH" : "NO MATCH") + "\n");
         
         // Test Case 4: Empty password
         System.out.println("Test 4 - Empty password:");
         boolean result4 = verifyPassword(testFile, "");
-        System.out.println("Result: " + (result4 ? "MATCH" : "NO MATCH") + "\\n");
+        System.out.println("Result: " + (result4 ? "MATCH" : "NO MATCH") + "\n");
         
         // Test Case 5: Password with extra characters
         System.out.println("Test 5 - Password with extra characters:");
         boolean result5 = verifyPassword(testFile, "SecurePass123!Extra");
-        System.out.println("Result: " + (result5 ? "MATCH" : "NO MATCH") + "\\n");
+        System.out.println("Result: " + (result5 ? "MATCH" : "NO MATCH") + "\n");
         
         // Cleanup test file
         try {

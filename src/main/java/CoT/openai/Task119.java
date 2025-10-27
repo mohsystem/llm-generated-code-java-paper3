@@ -70,7 +70,7 @@ public class Task119 {
             System.out.print("Row " + i + ": ");
             for (int j = 0; j < row.size(); j++) {
                 String f = row.get(j);
-                System.out.print("[" + f.replace("\n", "\\n").replace("\r", "\\r") + "]");
+                System.out.print("[" + f.replace("\n", "\n").replace("\r", "\r") + "]");
                 if (j + 1 < row.size()) System.out.print(" | ");
             }
             System.out.println();

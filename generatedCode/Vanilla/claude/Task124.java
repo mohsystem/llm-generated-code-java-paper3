@@ -33,7 +33,7 @@ public class Task124 {
             for(String data : testData) {
                 String encrypted = encryptData(data);
                 System.out.println("Original: " + data);
-                System.out.println("Encrypted: " + encrypted + "\\n");
+                System.out.println("Encrypted: " + encrypted + "\n");
             }
         } catch(Exception e) {
             System.out.println("Encryption error: " + e.getMessage());

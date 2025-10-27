@@ -47,7 +47,7 @@ public class Task97 {
             // Format results
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < nodes.getLength(); i++) {
-                result.append(nodes.item(i).getTextContent()).append("\\n");
+                result.append(nodes.item(i).getTextContent()).append("\n");
             }
             
             return result.toString();

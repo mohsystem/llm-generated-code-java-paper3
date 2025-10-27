@@ -52,7 +52,7 @@ public class Task101 {
         for (int i = 0; i < testContents.length; i++) {
             System.out.println("Test case " + (i + 1) + ":");
             boolean result = createExecutableScript(testContents[i]);
-            System.out.println("Result: " + result + "\\n");
+            System.out.println("Result: " + result + "\n");
         }
     }
 }

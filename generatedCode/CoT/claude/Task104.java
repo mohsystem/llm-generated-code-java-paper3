@@ -16,7 +16,7 @@ public class Task104 {
         for (int i = 0; i < length; i++) {
             buffer[i] = input.charAt(i);
         }
-        buffer[length] = '\\0'; // Null terminate
+        buffer[length] = '\0'; // Null terminate
         
         return new String(buffer, 0, length);
     }

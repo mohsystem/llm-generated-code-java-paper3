@@ -128,22 +128,22 @@ public class Task46 {
         // Test Case 1: Valid registration
         RegistrationResult result1 = registerUser("John Doe", "john.doe@example.com", "SecurePass123");
         System.out.println("Test 1 - Valid registration:");
-        System.out.println("Result: " + result1.success + " - " + result1.message + "\\n");
+        System.out.println("Result: " + result1.success + " - " + result1.message + "\n");
         
         // Test Case 2: Duplicate email
         RegistrationResult result2 = registerUser("Jane Doe", "john.doe@example.com", "AnotherPass456");
         System.out.println("Test 2 - Duplicate email:");
-        System.out.println("Result: " + result2.success + " - " + result2.message + "\\n");
+        System.out.println("Result: " + result2.success + " - " + result2.message + "\n");
         
         // Test Case 3: Invalid email format
         RegistrationResult result3 = registerUser("Bob Smith", "invalid-email", "Password789");
         System.out.println("Test 3 - Invalid email:");
-        System.out.println("Result: " + result3.success + " - " + result3.message + "\\n");
+        System.out.println("Result: " + result3.success + " - " + result3.message + "\n");
         
         // Test Case 4: Weak password
         RegistrationResult result4 = registerUser("Alice Brown", "alice@example.com", "weak");
         System.out.println("Test 4 - Weak password:");
-        System.out.println("Result: " + result4.success + " - " + result4.message + "\\n");
+        System.out.println("Result: " + result4.success + " - " + result4.message + "\n");
         
         // Test Case 5: Valid registration with different user
         RegistrationResult result5 = registerUser("Charlie Wilson", "charlie@example.com", "StrongPass999");

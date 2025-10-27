@@ -39,7 +39,7 @@ public class Task76 {
             String line;
             
             while ((line = reader.readLine()) != null) {
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
                 if (content.length() > 1000000) { // Limit content size
                     break;
                 }

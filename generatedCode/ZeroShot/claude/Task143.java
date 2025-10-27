@@ -41,7 +41,7 @@ public class Task143 {
             for(int num : sorted) {
                 System.out.print(num + " ");
             }
-            System.out.println("\\n");
+            System.out.println("\n");
         }
     }
 }

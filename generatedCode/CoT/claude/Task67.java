@@ -94,10 +94,10 @@ class Customer {
     @Override
     public String toString() {
         return "Customer{id=" + id + 
-               ", username='" + username + '\\'' +
-               ", firstName='" + firstName + '\\'' +
-               ", lastName='" + lastName + '\\'' +
-               ", email='" + email + '\\'' +
+               ", username='" + username + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", email='" + email + '\'' +
                '}';
     }
 }

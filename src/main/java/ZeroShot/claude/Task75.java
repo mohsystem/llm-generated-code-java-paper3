@@ -30,11 +30,11 @@ public class Task75 {
             String line;
             
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\\n");
+                output.append(line).append("\n");
             }
             
             while ((line = errorReader.readLine()) != null) {
-                output.append(line).append("\\n");
+                output.append(line).append("\n");
             }
             
             int exitCode = process.waitFor();

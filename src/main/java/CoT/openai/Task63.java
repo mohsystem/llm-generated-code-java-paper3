@@ -419,8 +419,8 @@ public class Task63 {
                 case '"': out.append("\""); break;
                 case '\b': out.append("\\b"); break;
                 case '\f': out.append("\\f"); break;
-                case '\n': out.append("\\n"); break;
-                case '\r': out.append("\\r"); break;
+                case '\n': out.append("\n"); break;
+                case '\r': out.append("\r"); break;
                 case '\t': out.append("\\t"); break;
                 default:
                     if (c <= 0x1F) {

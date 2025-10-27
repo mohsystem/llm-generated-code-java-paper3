@@ -33,7 +33,7 @@ public class Task158 {
             StringBuilder output = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\\n");
+                output.append(line).append("\n");
             }
             
             int exitCode = process.waitFor();

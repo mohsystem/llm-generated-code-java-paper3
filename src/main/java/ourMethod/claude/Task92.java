@@ -65,7 +65,7 @@ public class Task92 {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+        System.out.println("Final counter: " + getCurrentCounter() + "\n");
 
         System.out.println("Test Case 2: Threads exceeding maxCounter");
         resetCounter();
@@ -78,19 +78,19 @@ public class Task92 {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+        System.out.println("Final counter: " + getCurrentCounter() + "\n");
 
         System.out.println("Test Case 3: maxCounter=0");
         resetCounter();
         accessSharedResource("T_Zero", 0);
-        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+        System.out.println("Final counter: " + getCurrentCounter() + "\n");
 
         System.out.println("Test Case 4: Sequential access");
         resetCounter();
         for (int i = 0; i < 3; i++) {
             accessSharedResource("T_Seq" + i, 10);
         }
-        System.out.println("Final counter: " + getCurrentCounter() + "\\n");
+        System.out.println("Final counter: " + getCurrentCounter() + "\n");
 
         System.out.println("Test Case 5: Invalid inputs");
         resetCounter();

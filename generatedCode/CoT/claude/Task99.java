@@ -12,14 +12,14 @@ public class Task99 {
             
             while ((line = reader.readLine()) != null) {
                 if (pattern.matcher(line).matches()) {
-                    matches.append(line).append("\\n");
+                    matches.append(line).append("\n");
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
             return new String[0];
         }
-        return matches.toString().split("\\n");
+        return matches.toString().split("\n");
     }
 
     public static void main(String[] args) {

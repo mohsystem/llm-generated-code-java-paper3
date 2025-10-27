@@ -113,7 +113,7 @@ public class Task117 {
             extractZip(testZip1, "extracted_zip1");
             System.out.println("Test 1 passed: Simple ZIP extraction\\n");
         } catch (Exception e) {
-            System.out.println("Test 1 error: " + e.getMessage() + "\\n");
+            System.out.println("Test 1 error: " + e.getMessage() + "\n");
         }
         
         // Test Case 2: Extract ZIP with subdirectories
@@ -123,7 +123,7 @@ public class Task117 {
             extractZip(testZip2, "extracted_zip2");
             System.out.println("Test 2 passed: ZIP with subdirectories\\n");
         } catch (Exception e) {
-            System.out.println("Test 2 error: " + e.getMessage() + "\\n");
+            System.out.println("Test 2 error: " + e.getMessage() + "\n");
         }
         
         // Test Case 3: Extract TAR file
@@ -133,7 +133,7 @@ public class Task117 {
             extractTar(testTar, "extracted_tar");
             System.out.println("Test 3 passed: TAR extraction\\n");
         } catch (Exception e) {
-            System.out.println("Test 3 error: " + e.getMessage() + "\\n");
+            System.out.println("Test 3 error: " + e.getMessage() + "\n");
         }
         
         // Test Case 4: Test path traversal prevention
@@ -145,7 +145,7 @@ public class Task117 {
         } catch (IOException e) {
             System.out.println("Test 4 passed: Path traversal prevented\\n");
         } catch (Exception e) {
-            System.out.println("Test 4 error: " + e.getMessage() + "\\n");
+            System.out.println("Test 4 error: " + e.getMessage() + "\n");
         }
         
         // Test Case 5: Empty archive handling
@@ -155,7 +155,7 @@ public class Task117 {
             extractZip(emptyZip, "extracted_empty");
             System.out.println("Test 5 passed: Empty ZIP handled\\n");
         } catch (Exception e) {
-            System.out.println("Test 5 error: " + e.getMessage() + "\\n");
+            System.out.println("Test 5 error: " + e.getMessage() + "\n");
         }
     }
     

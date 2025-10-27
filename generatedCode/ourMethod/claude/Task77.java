@@ -113,7 +113,7 @@ public class Task77 {
     private static void clearSensitiveData(String password) {
         if(password != null) {
             char[] chars = password.toCharArray();
-            Arrays.fill(chars, '\\0');
+            Arrays.fill(chars, '\0');
         }
     }
 }

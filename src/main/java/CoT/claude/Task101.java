@@ -72,22 +72,22 @@ public class Task101 {
 public static void main(String[] args) {
     System.out.println("Test Case 1: Create script.sh");
     boolean result1 = createExecutableScript("script.sh");
-    System.out.println("Result: " + (result1 ? "Success" : "Failed") + "\\n");
+    System.out.println("Result: " + (result1 ? "Success" : "Failed") + "\n");
 
     System.out.println("Test Case 2: Create test_script.sh");
     boolean result2 = createExecutableScript("test_script.sh");
-    System.out.println("Result: " + (result2 ? "Success" : "Failed") + "\\n");
+    System.out.println("Result: " + (result2 ? "Success" : "Failed") + "\n");
 
     System.out.println("Test Case 3: Create another_script.sh");
     boolean result3 = createExecutableScript("another_script.sh");
-    System.out.println("Result: " + (result3 ? "Success" : "Failed") + "\\n");
+    System.out.println("Result: " + (result3 ? "Success" : "Failed") + "\n");
 
     System.out.println("Test Case 4: Create deploy.sh");
     boolean result4 = createExecutableScript("deploy.sh");
-    System.out.println("Result: " + (result4 ? "Success" : "Failed") + "\\n");
+    System.out.println("Result: " + (result4 ? "Success" : "Failed") + "\n");
 
     System.out.println("Test Case 5: Create backup.sh");
     boolean result5 = createExecutableScript("backup.sh");
-    System.out.println("Result: " + (result5 ? "Success" : "Failed") + "\\n");
+    System.out.println("Result: " + (result5 ? "Success" : "Failed") + "\n");
 }
 }

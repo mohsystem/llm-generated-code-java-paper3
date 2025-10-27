@@ -100,22 +100,22 @@ public class Task50 {
 
         // Test Case 1: Valid text file
         String result1 = uploadFile("test1.txt", "Hello World!".getBytes());
-        System.out.println("Test 1: " + result1 + "\\n");
+        System.out.println("Test 1: " + result1 + "\n");
 
         // Test Case 2: Valid PDF file (simulated)
         String result2 = uploadFile("document.pdf", "PDF content simulation".getBytes());
-        System.out.println("Test 2: " + result2 + "\\n");
+        System.out.println("Test 2: " + result2 + "\n");
 
         // Test Case 3: Invalid filename with path traversal
         String result3 = uploadFile("../../../etc/passwd", "malicious content".getBytes());
-        System.out.println("Test 3: " + result3 + "\\n");
+        System.out.println("Test 3: " + result3 + "\n");
 
         // Test Case 4: Disallowed file extension
         String result4 = uploadFile("script.exe", "executable content".getBytes());
-        System.out.println("Test 4: " + result4 + "\\n");
+        System.out.println("Test 4: " + result4 + "\n");
 
         // Test Case 5: Valid image file
         String result5 = uploadFile("photo.jpg", "JPEG image data".getBytes());
-        System.out.println("Test 5: " + result5 + "\\n");
+        System.out.println("Test 5: " + result5 + "\n");
     }
 }

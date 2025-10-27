@@ -142,20 +142,20 @@ class Task43 {
         System.out.println("Test 1: Create session");
         String sessionId1 = createSession("user123");
         System.out.println("Session created: " + sessionId1);
-        System.out.println("Valid: " + validateSession(sessionId1) + "\\n");
+        System.out.println("Valid: " + validateSession(sessionId1) + "\n");
         
         // Test Case 2: Validate existing session
         System.out.println("Test 2: Validate session");
         boolean isValid = validateSession(sessionId1);
         System.out.println("Session valid: " + isValid);
-        System.out.println("User ID: " + getSessionUserId(sessionId1) + "\\n");
+        System.out.println("User ID: " + getSessionUserId(sessionId1) + "\n");
         
         // Test Case 3: Set and get session attributes
         System.out.println("Test 3: Session attributes");
         setSessionAttribute(sessionId1, "role", "admin");
         setSessionAttribute(sessionId1, "preference", "dark_mode");
         System.out.println("Role: " + getSessionAttribute(sessionId1, "role"));
-        System.out.println("Preference: " + getSessionAttribute(sessionId1, "preference") + "\\n");
+        System.out.println("Preference: " + getSessionAttribute(sessionId1, "preference") + "\n");
         
         // Test Case 4: Multiple sessions
         System.out.println("Test 4: Multiple sessions");
@@ -165,7 +165,7 @@ class Task43 {
         System.out.println("Session 3 created: " + sessionId3);
         System.out.println("Session 1 valid: " + validateSession(sessionId1));
         System.out.println("Session 2 valid: " + validateSession(sessionId2));
-        System.out.println("Session 3 valid: " + validateSession(sessionId3) + "\\n");
+        System.out.println("Session 3 valid: " + validateSession(sessionId3) + "\n");
         
         // Test Case 5: Terminate session
         System.out.println("Test 5: Terminate session");

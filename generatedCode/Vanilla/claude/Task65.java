@@ -24,7 +24,7 @@ public class Task65 {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
             }
             return content.toString();
         } catch (IOException e) {

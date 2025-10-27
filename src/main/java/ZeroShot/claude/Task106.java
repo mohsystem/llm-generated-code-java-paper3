@@ -62,7 +62,7 @@ public class Task106 {
         String decrypted1 = rsa1.decryptString(encrypted1);
         System.out.println("Original: " + msg1);
         System.out.println("Decrypted: " + decrypted1);
-        System.out.println("Match: " + msg1.equals(decrypted1) + "\\n");
+        System.out.println("Match: " + msg1.equals(decrypted1) + "\n");
 
         // Test Case 2
         System.out.println("Test Case 2:");
@@ -72,7 +72,7 @@ public class Task106 {
         String decrypted2 = rsa2.decryptString(encrypted2);
         System.out.println("Original: " + msg2);
         System.out.println("Decrypted: " + decrypted2);
-        System.out.println("Match: " + msg2.equals(decrypted2) + "\\n");
+        System.out.println("Match: " + msg2.equals(decrypted2) + "\n");
 
         // Test Case 3
         System.out.println("Test Case 3:");
@@ -82,7 +82,7 @@ public class Task106 {
         BigInteger decrypted3 = rsa3.decrypt(encrypted3);
         System.out.println("Original: " + num3);
         System.out.println("Decrypted: " + decrypted3);
-        System.out.println("Match: " + num3.equals(decrypted3) + "\\n");
+        System.out.println("Match: " + num3.equals(decrypted3) + "\n");
 
         // Test Case 4
         System.out.println("Test Case 4:");
@@ -92,7 +92,7 @@ public class Task106 {
         String decrypted4 = rsa4.decryptString(encrypted4);
         System.out.println("Original: " + msg4);
         System.out.println("Decrypted: " + decrypted4);
-        System.out.println("Match: " + msg4.equals(decrypted4) + "\\n");
+        System.out.println("Match: " + msg4.equals(decrypted4) + "\n");
 
         // Test Case 5
         System.out.println("Test Case 5:");
@@ -102,6 +102,6 @@ public class Task106 {
         String decrypted5 = rsa5.decryptString(encrypted5);
         System.out.println("Original: " + msg5);
         System.out.println("Decrypted: " + decrypted5);
-        System.out.println("Match: " + msg5.equals(decrypted5) + "\\n");
+        System.out.println("Match: " + msg5.equals(decrypted5) + "\n");
     }
 }

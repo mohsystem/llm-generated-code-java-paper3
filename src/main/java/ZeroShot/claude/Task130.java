@@ -58,10 +58,10 @@ public class Task130 {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("Status Code: ").append(statusCode).append("\\n");
+            sb.append("Status Code: ").append(statusCode).append("\n");
             sb.append("Headers:\\n");
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                sb.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\\n");
+                sb.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             }
             sb.append("Body: ").append(body);
             return sb.toString();
@@ -136,30 +136,30 @@ public class Task130 {
         System.out.println("Test Case 1: Preflight OPTIONS request from allowed origin");
         APIResponse response1 = handleAPIRequest("https://example.com", "OPTIONS", "/api/data");
         System.out.println(response1);
-        System.out.println("\\n" + "=".repeat(60) + "\\n");
+        System.out.println("\n" + "=".repeat(60) + "\n");
         
         // Test Case 2: GET request from allowed origin
         System.out.println("Test Case 2: GET request from allowed origin");
         APIResponse response2 = handleAPIRequest("https://example.com", "GET", "/api/data");
         System.out.println(response2);
-        System.out.println("\\n" + "=".repeat(60) + "\\n");
+        System.out.println("\n" + "=".repeat(60) + "\n");
         
         // Test Case 3: POST request from allowed origin
         System.out.println("Test Case 3: POST request from allowed origin");
         APIResponse response3 = handleAPIRequest("http://localhost:3000", "POST", "/api/data");
         System.out.println(response3);
-        System.out.println("\\n" + "=".repeat(60) + "\\n");
+        System.out.println("\n" + "=".repeat(60) + "\n");
         
         // Test Case 4: Request from disallowed origin
         System.out.println("Test Case 4: Request from disallowed origin");
         APIResponse response4 = handleAPIRequest("https://malicious.com", "GET", "/api/data");
         System.out.println(response4);
-        System.out.println("\\n" + "=".repeat(60) + "\\n");
+        System.out.println("\n" + "=".repeat(60) + "\n");
         
         // Test Case 5: Request with disallowed method
         System.out.println("Test Case 5: Request with disallowed method");
         APIResponse response5 = handleAPIRequest("https://example.com", "PATCH", "/api/data");
         System.out.println(response5);
-        System.out.println("\\n" + "=".repeat(60) + "\\n");
+        System.out.println("\n" + "=".repeat(60) + "\n");
     }
 }

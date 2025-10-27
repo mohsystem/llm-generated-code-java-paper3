@@ -50,22 +50,22 @@ public class Task120 {
     public static void main(String[] args) {
         System.out.println("Test Case 1: Simple text");
         System.out.println(generateWebPage("Hello, World!"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 2: Text with HTML tags (XSS prevention)");
         System.out.println(generateWebPage("<script>alert('XSS')</script>"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 3: Text with special characters");
         System.out.println(generateWebPage("Price: $100 & up, 50% off!"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 4: Multi-line text");
         System.out.println(generateWebPage("Line 1\\nLine 2\\nLine 3"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 5: Empty input");
         System.out.println(generateWebPage(""));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
     }
 }

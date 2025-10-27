@@ -52,14 +52,14 @@ public class Task100 {
                       .append(matcher.start())
                       .append(": ")
                       .append(matcher.group())
-                      .append("\\n");
+                      .append("\n");
                 matchCount++;
             }
             
             if (matchCount == 0) {
                 result.append("No matches found\\n");
             } else {
-                result.append("Total matches: ").append(matchCount).append("\\n");
+                result.append("Total matches: ").append(matchCount).append("\n");
             }
             
         } catch (IOException e) {

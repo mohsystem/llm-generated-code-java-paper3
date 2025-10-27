@@ -61,7 +61,7 @@ public class Task190 {
                 }
             }
             if (col < maxCols - 1) {
-                result.append("\\n");
+                result.append("\n");
             }
         }
         

@@ -105,7 +105,7 @@ public class Task121 {
         UploadResult result1 = uploadFile("test.txt", content1);
         System.out.println("Success: " + result1.success);
         System.out.println("Message: " + result1.message);
-        System.out.println("Path: " + result1.savedPath + "\\n");
+        System.out.println("Path: " + result1.savedPath + "\n");
 
         // Test Case 2: Valid PDF file
         System.out.println("Test Case 2: Valid PDF file");
@@ -114,27 +114,27 @@ public class Task121 {
         UploadResult result2 = uploadFile("document.pdf", content2);
         System.out.println("Success: " + result2.success);
         System.out.println("Message: " + result2.message);
-        System.out.println("Path: " + result2.savedPath + "\\n");
+        System.out.println("Path: " + result2.savedPath + "\n");
 
         // Test Case 3: Invalid file extension
         System.out.println("Test Case 3: Invalid file extension");
         byte[] content3 = "Executable content".getBytes();
         UploadResult result3 = uploadFile("malicious.exe", content3);
         System.out.println("Success: " + result3.success);
-        System.out.println("Message: " + result3.message + "\\n");
+        System.out.println("Message: " + result3.message + "\n");
 
         // Test Case 4: File too large
         System.out.println("Test Case 4: File too large");
         byte[] content4 = new byte[(int) (MAX_FILE_SIZE + 1)];
         UploadResult result4 = uploadFile("large_file.txt", content4);
         System.out.println("Success: " + result4.success);
-        System.out.println("Message: " + result4.message + "\\n");
+        System.out.println("Message: " + result4.message + "\n");
 
         // Test Case 5: Path traversal attempt
         System.out.println("Test Case 5: Path traversal attempt");
         byte[] content5 = "Malicious content".getBytes();
         UploadResult result5 = uploadFile("../../etc/passwd.txt", content5);
         System.out.println("Success: " + result5.success);
-        System.out.println("Message: " + result5.message + "\\n");
+        System.out.println("Message: " + result5.message + "\n");
     }
 }

@@ -62,12 +62,12 @@ public class Task105 {
                 int maxLines = 100;
                 int lineCount = 0;
                 while ((line = reader.readLine()) != null && lineCount < maxLines) {
-                    response.append(line).append("\\n");
+                    response.append(line).append("\n");
                     lineCount++;
                 }
             }
             
-            return "Response Code: " + responseCode + "\\n" + response.toString();
+            return "Response Code: " + responseCode + "\n" + response.toString();
             
         } catch (Exception e) {
             throw new RuntimeException("Secure connection failed: " + e.getMessage());
@@ -149,7 +149,7 @@ public class Task105 {
                 String result = connectSecurely(url);
                 System.out.println("Success: " + result.substring(0, Math.min(100, result.length())) + "...\\n");
             } catch (Exception e) {
-                System.out.println("Failed: " + e.getMessage() + "\\n");
+                System.out.println("Failed: " + e.getMessage() + "\n");
             }
         }
     }

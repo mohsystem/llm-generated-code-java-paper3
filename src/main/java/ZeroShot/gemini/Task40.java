@@ -46,7 +46,7 @@ public class Task40 {
         System.out.println("\n--- Test Case 2: Submit form with a valid token (SUCCESS) ---");
         System.out.println("1. First, run Test Case 1 to get a valid token from the HTML output.");
         System.out.println("2. Replace 'VALID_TOKEN_FROM_STEP_1' with the actual token.");
-        System.out.println("curl -v -X POST -b cookie-jar.txt -c cookie-jar.txt \\");
+        System.out.println("curl -v -X POST -b cookie-jar.txt -c cookie-jar.txt ");
         System.out.println("  --data-urlencode \"email=new.email@example.com\" \\");
         System.out.println("  --data-urlencode \"csrf_token=VALID_TOKEN_FROM_STEP_1\" \\");
         System.out.println("  http://localhost:8080/settings");

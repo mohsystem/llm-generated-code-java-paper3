@@ -39,7 +39,7 @@ public class Task116 {
             if (os.contains("linux") || os.contains("unix")) {
                 // Send password via stdin for Unix-like systems
                 try (OutputStream out = process.getOutputStream()) {
-                    out.write((newPassword + "\\n" + newPassword + "\\n").getBytes());
+                    out.write((newPassword + "\n" + newPassword + "\n").getBytes());
                     out.flush();
                 }
             }

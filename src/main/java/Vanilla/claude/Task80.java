@@ -38,7 +38,7 @@ public class Task80 {
                 socket.close();
                 System.out.println("Connection closed.\\n");
             } catch (Exception e) {
-                System.out.println("Failed to connect: " + e.getMessage() + "\\n");
+                System.out.println("Failed to connect: " + e.getMessage() + "\n");
             }
         }
     }

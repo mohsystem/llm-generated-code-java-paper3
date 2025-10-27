@@ -97,7 +97,7 @@ public class Task127 {
             System.out.println("Result: " + (result != null ? "Success - " + result : "Failed"));
             System.out.println();
         } catch (Exception e) {
-            System.out.println("Test Case 1 setup failed: " + e.getMessage() + "\\n");
+            System.out.println("Test Case 1 setup failed: " + e.getMessage() + "\n");
         }
         
         // Test Case 2: Non-existent file

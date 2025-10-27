@@ -71,7 +71,7 @@ public class Task97 {
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < nodeList.getLength(); i++) {
                 result.append("Node ").append(i + 1).append(": ")
-                      .append(nodeList.item(i).getTextContent()).append("\\n");
+                      .append(nodeList.item(i).getTextContent()).append("\n");
             }
             
             return result.length() > 0 ? result.toString() : "No matching nodes found";

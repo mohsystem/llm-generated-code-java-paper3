@@ -106,13 +106,13 @@ class Task54 {
         String otp1 = authenticateCredentials("user1", "pass123");
         System.out.println("Generated OTP: " + otp1);
         String result1 = performLogin("user1", "pass123", otp1);
-        System.out.println("Result: " + result1 + "\\n");
+        System.out.println("Result: " + result1 + "\n");
 
         // Test Case 2: Wrong password
         System.out.println("Test Case 2: Wrong password");
         registerUser("user2", "pass456", "user2@example.com");
         String result2 = performLogin("user2", "wrongpass", "123456");
-        System.out.println("Result: " + result2 + "\\n");
+        System.out.println("Result: " + result2 + "\n");
 
         // Test Case 3: Wrong OTP
         System.out.println("Test Case 3: Wrong OTP");
@@ -120,7 +120,7 @@ class Task54 {
         String otp3 = authenticateCredentials("user3", "pass789");
         System.out.println("Generated OTP: " + otp3);
         String result3 = performLogin("user3", "pass789", "000000");
-        System.out.println("Result: " + result3 + "\\n");
+        System.out.println("Result: " + result3 + "\n");
 
         // Test Case 4: User doesn't exist        
         System.out.println("Test Case 4: User doesn't exist");

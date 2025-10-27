@@ -95,7 +95,7 @@ class Task131 {
             System.out.println("Deserialized: " + deserialized);
             System.out.println("Success!\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 2: Deserialize String
@@ -108,7 +108,7 @@ class Task131 {
             System.out.println("Deserialized: " + deserialized);
             System.out.println("Success!\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 3: Deserialize Integer
@@ -121,7 +121,7 @@ class Task131 {
             System.out.println("Deserialized: " + deserialized);
             System.out.println("Success!\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 4: JSON-based serialization (safer alternative)
@@ -135,7 +135,7 @@ class Task131 {
             System.out.println("Deserialized: " + deserialized);
             System.out.println("Success!\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 5: Attempt to deserialize unauthorized class (should fail)
@@ -146,7 +146,7 @@ class Task131 {
             System.out.println("Only allowed classes: " + ALLOWED_CLASSES);
             System.out.println("Success!\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
     }
 }

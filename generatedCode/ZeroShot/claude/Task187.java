@@ -51,7 +51,7 @@ class Task187 {
                     }).start();
                 }
             }
-            System.out.println("\\n");
+            System.out.println("\n");
         }
     }
 }

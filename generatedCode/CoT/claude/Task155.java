@@ -60,7 +60,7 @@ public class Task155 {
             System.out.print("\\nAfter sorting: ");
             for(int num : testCases[i])
                 System.out.print(num + " ");
-            System.out.println("\\n");
+            System.out.println("\n");
         }
     }
 }

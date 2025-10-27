@@ -29,11 +29,11 @@ public class Task160 {
             
             String line;
             while ((line = reader.readLine()) != null) {
-                response.append(line).append("\\n");
+                response.append(line).append("\n");
             }
             reader.close();
             
-            return "Response Code: " + responseCode + "\\n" + response.toString();
+            return "Response Code: " + responseCode + "\n" + response.toString();
             
         } catch (Exception e) {
             return "Error: " + e.getMessage();

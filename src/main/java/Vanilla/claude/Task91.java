@@ -140,22 +140,22 @@ public class Task91 {
         System.out.println("Test 1: Parse DNS Query");
         byte[] testQuery1 = createTestQuery("example.com");
         String parsed1 = parseDNSQuery(testQuery1);
-        System.out.println("Parsed domain: " + parsed1 + "\\n");
+        System.out.println("Parsed domain: " + parsed1 + "\n");
         
         // Test Case 2: Resolve DNS record
         System.out.println("Test 2: Resolve DNS Record");
         String resolved = resolveDNSRecord("google.com");
-        System.out.println("Resolved IP: " + resolved + "\\n");
+        System.out.println("Resolved IP: " + resolved + "\n");
         
         // Test Case 3: Resolve unknown domain
         System.out.println("Test 3: Resolve Unknown Domain");
         String unknownResolved = resolveDNSRecord("unknown.com");
-        System.out.println("Resolved IP: " + unknownResolved + "\\n");
+        System.out.println("Resolved IP: " + unknownResolved + "\n");
         
         // Test Case 4: Create DNS response
         System.out.println("Test 4: Create DNS Response");
         byte[] response = createDNSResponse(testQuery1, "93.184.216.34");
-        System.out.println("Response created with length: " + response.length + "\\n");
+        System.out.println("Response created with length: " + response.length + "\n");
         
         // Test Case 5: Multiple domain parsing
         System.out.println("Test 5: Parse Multiple Domains");

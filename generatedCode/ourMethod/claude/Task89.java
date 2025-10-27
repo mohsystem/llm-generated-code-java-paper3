@@ -29,14 +29,14 @@ public class Task89 {
             boolean result = comparePasswords(storedChars, inputPassword);
             
             // Clean up sensitive data
-            Arrays.fill(storedChars, '\\0');
+            Arrays.fill(storedChars, '\0');
             
             return result;
         } catch (IOException e) {
             return false;
         } finally {
             // Clean up input password
-            Arrays.fill(inputPassword, '\\0');
+            Arrays.fill(inputPassword, '\0');
         }
     }
 

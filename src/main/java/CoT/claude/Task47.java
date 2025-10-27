@@ -59,7 +59,7 @@ public class Task47 {
                 if (totalLength > MAX_CONTENT_LENGTH) {
                     throw new Exception("Content too large");
                 }
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
             }
         }
         

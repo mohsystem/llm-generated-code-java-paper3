@@ -134,14 +134,14 @@ class Task40 {
         String token1 = generateCSRFToken(session1);
         System.out.println("Generated CSRF Token: " + token1);
         String result1 = updateUserSettings(session1, token1, "john_doe", "john@example.com", "dark");
-        System.out.println(result1 + "\\n");
+        System.out.println(result1 + "\n");
         
         // Test Case 2: Invalid CSRF token (should fail)
         System.out.println("Test Case 2: Invalid CSRF token");
         String session2 = "session_" + UUID.randomUUID().toString();
         generateCSRFToken(session2);
         String result2 = updateUserSettings(session2, "invalid_token_12345", "jane_doe", "jane@example.com", "light");
-        System.out.println(result2 + "\\n");
+        System.out.println(result2 + "\n");
         
         // Test Case 3: Reusing token (should fail)
         System.out.println("Test Case 3: Token reuse attempt");
@@ -149,20 +149,20 @@ class Task40 {
         String token3 = generateCSRFToken(session3);
         updateUserSettings(session3, token3, "alice", "alice@example.com", "blue");
         String result3 = updateUserSettings(session3, token3, "alice_updated", "alice2@example.com", "red");
-        System.out.println(result3 + "\\n");
+        System.out.println(result3 + "\n");
         
         // Test Case 4: Invalid email format
         System.out.println("Test Case 4: Invalid email format");
         String session4 = "session_" + UUID.randomUUID().toString();
         String token4 = generateCSRFToken(session4);
         String result4 = updateUserSettings(session4, token4, "bob", "invalid-email", "green");
-        System.out.println(result4 + "\\n");
+        System.out.println(result4 + "\n");
         
         // Test Case 5: Empty username
         System.out.println("Test Case 5: Empty username");
         String session5 = "session_" + UUID.randomUUID().toString();
         String token5 = generateCSRFToken(session5);
         String result5 = updateUserSettings(session5, token5, "", "test@example.com", "yellow");
-        System.out.println(result5 + "\\n");
+        System.out.println(result5 + "\n");
     }
 }

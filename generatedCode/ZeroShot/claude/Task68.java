@@ -45,12 +45,12 @@ public class Task68 {
             while (searchResults.hasMore()) {
                 SearchResult sr = searchResults.next();
                 Attributes attrs = sr.getAttributes();
-                result.append("DN: ").append(sr.getNameInNamespace()).append("\\n");
+                result.append("DN: ").append(sr.getNameInNamespace()).append("\n");
                 
                 NamingEnumeration<? extends Attribute> attributes = attrs.getAll();
                 while(attributes.hasMore()) {
                     Attribute attr = attributes.next();
-                    result.append(attr.getID()).append(": ").append(attr.get()).append("\\n");
+                    result.append(attr.getID()).append(": ").append(attr.get()).append("\n");
                 }
             }
 
@@ -70,7 +70,7 @@ public class Task68 {
     }
 
     private static String escapeSpecialChars(String input) {
-        return input.replace("\\", "\\\\\\\")\n                   .replace("*", "\\\\2a")\n                   .replace("(", "\\\\28")\n                   .replace(")", "\\\\29")\n                   .replace("\\u0000", "\\\\00");\n    }\n\n    public static void main(String[] args) {\n        // Test cases\n        System.out.println("Test Case 1:");\n        System.out.println(searchLDAP("example.com", "john.doe"));\n\n        System.out.println("\
+        return input.replace("\", "\\\\\\")\n                   .replace("*", "\\\\2a")\n                   .replace("(", "\\\\28")\n                   .replace(")", "\\\\29")\n                   .replace("\\u0000", "\\\\00");\n    }\n\n    public static void main(String[] args) {\n        // Test cases\n        System.out.println("Test Case 1:");\n        System.out.println(searchLDAP("example.com", "john.doe"));\n\n        System.out.println("\
 Test Case 2:");\n        System.out.println(searchLDAP("company.local", "admin"));\n\n        System.out.println("\
 Test Case 3:");\n        System.out.println(searchLDAP("", "user")); // Invalid input\n\n        System.out.println("\
 Test Case 4:");\n        System.out.println(searchLDAP("test.com", "")); // Invalid input\n\n        System.out.println("\

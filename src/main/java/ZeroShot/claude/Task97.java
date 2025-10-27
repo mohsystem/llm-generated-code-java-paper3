@@ -54,7 +54,7 @@ public class Task97 {
                 result.append(nodeList.item(i).getNodeName())
                       .append(": ")
                       .append(nodeList.item(i).getTextContent())
-                      .append("\\n");
+                      .append("\n");
             }
             
             return result.length() > 0 ? result.toString().trim() : "No results found";

@@ -101,7 +101,7 @@ public class Task89 {
         
         byte[] hash = hashPassword(password, salt);
         
-        String content = bytesToHex(salt) + "\\n" + bytesToHex(hash);
+        String content = bytesToHex(salt) + "\n" + bytesToHex(hash);
         Files.writeString(path, content, StandardCharsets.UTF_8);
     }
     

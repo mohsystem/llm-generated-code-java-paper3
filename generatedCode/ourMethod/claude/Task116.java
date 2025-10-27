@@ -25,7 +25,7 @@ public class Task116 {
             Process process = Runtime.getRuntime().exec(cmd);
             
             // Write new password to process
-            process.getOutputStream().write((newPassword + "\\n" + newPassword + "\\n").getBytes());
+            process.getOutputStream().write((newPassword + "\n" + newPassword + "\n").getBytes());
             process.getOutputStream().flush();
             process.getOutputStream().close();
             

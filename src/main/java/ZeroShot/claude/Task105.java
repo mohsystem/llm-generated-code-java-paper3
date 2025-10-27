@@ -51,7 +51,7 @@ public class Task105 {
         StringBuilder response = new StringBuilder();
         String line;
         while ((line = in.readLine()) != null && response.length() < 10000) {
-            response.append(line).append("\\n");
+            response.append(line).append("\n");
             if (line.isEmpty()) break;
         }
         

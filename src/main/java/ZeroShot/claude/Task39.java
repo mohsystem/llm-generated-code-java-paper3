@@ -25,14 +25,14 @@ public class Task39 {
             
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\\n");
+                output.append(line).append("\n");
             }
             
             BufferedReader errorReader = new BufferedReader(
                 new InputStreamReader(process.getErrorStream())
             );
             while ((line = errorReader.readLine()) != null) {
-                output.append("ERROR: ").append(line).append("\\n");
+                output.append("ERROR: ").append(line).append("\n");
             }
             
             process.waitFor();

@@ -7,7 +7,7 @@ public class Task39 {
 
     public static String displayFileContent(String filename) throws IOException {
         // Sanitize input
-        if (filename == null || filename.isEmpty() || filename.contains("..") || filename.contains("/") || filename.contains("\")) {
+        if (filename == null || filename.isEmpty() || filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
             throw new IllegalArgumentException("Invalid filename.");
         }
         StringBuilder content = new StringBuilder();

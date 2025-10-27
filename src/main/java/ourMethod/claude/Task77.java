@@ -111,12 +111,12 @@ public class Task77 {
     
     private static boolean validateUsername(String username) {
         return username != null && username.length() > 0 && username.length() <= MAX_USERNAME_LENGTH 
-               && !username.contains("\\r") && !username.contains("\\n");
+               && !username.contains("\r") && !username.contains("\n");
     }
     
     private static boolean validatePassword(String password) {
         return password != null && password.length() > 0 && password.length() <= MAX_PASSWORD_LENGTH
-               && !password.contains("\\r") && !password.contains("\\n");
+               && !password.contains("\r") && !password.contains("\n");
     }
     
     private static boolean validateFilename(String filename) {
@@ -125,7 +125,7 @@ public class Task77 {
     
     private static String sanitizeCommand(String input) {
         if (input == null) return "";
-        return input.replace("\\r", "").replace("\\n", "");
+        return input.replace("\r", "").replace("\n", "");
     }
     
     private static String readResponse(BufferedReader reader, String expectedCode) throws IOException {

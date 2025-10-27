@@ -51,7 +51,7 @@ public class Task78 {
             int index = 0;
             while (index < base64Key.length()) {
                 int end = Math.min(index + 70, base64Key.length());
-                sb.append(base64Key.substring(index, end)).append("\\n");
+                sb.append(base64Key.substring(index, end)).append("\n");
                 index = end;
             }
             
@@ -74,7 +74,7 @@ public class Task78 {
             System.out.println("Success - Key length: " + key1.length() + " characters");
             System.out.println(key1.substring(0, Math.min(200, key1.length())) + "...\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test case 2: 4096-bit key (highly secure)
@@ -84,7 +84,7 @@ public class Task78 {
             System.out.println("Success - Key length: " + key2.length() + " characters");
             System.out.println(key2.substring(0, Math.min(200, key2.length())) + "...\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test case 3: Invalid key size (should fail)
@@ -93,7 +93,7 @@ public class Task78 {
             String key3 = generateRSAPrivateKeyOpenSSH(1024);
             System.out.println("Generated: " + key3.substring(0, 100) + "...\\n");
         } catch (Exception e) {
-            System.out.println("Expected Error: " + e.getMessage() + "\\n");
+            System.out.println("Expected Error: " + e.getMessage() + "\n");
         }
         
         // Test case 4: 3072-bit key
@@ -103,7 +103,7 @@ public class Task78 {
             System.out.println("Success - Key length: " + key4.length() + " characters");
             System.out.println(key4.substring(0, Math.min(200, key4.length())) + "...\\n");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
         
         // Test case 5: Standard 2048-bit with full output
@@ -112,7 +112,7 @@ public class Task78 {
             String key5 = generateRSAPrivateKeyOpenSSH(2048);
             System.out.println("Full key generated:\\n" + key5);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage() + "\\n");
+            System.out.println("Error: " + e.getMessage() + "\n");
         }
     }
 }

@@ -37,14 +37,14 @@ public class Task68 {
                 SearchResult searchResult = results.next();
                 Attributes attributes = searchResult.getAttributes();
                 
-                result.append("DN: ").append(searchResult.getNameInNamespace()).append("\\n");
+                result.append("DN: ").append(searchResult.getNameInNamespace()).append("\n");
                 
                 NamingEnumeration<? extends Attribute> attrs = attributes.getAll();
                 while (attrs.hasMore()) {
                     Attribute attr = attrs.next();
-                    result.append(attr.getID()).append(": ").append(attr.get()).append("\\n");
+                    result.append(attr.getID()).append(": ").append(attr.get()).append("\n");
                 }
-                result.append("\\n");
+                result.append("\n");
             }
             
             ctx.close();

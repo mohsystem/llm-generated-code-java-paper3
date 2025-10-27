@@ -88,7 +88,7 @@ public class Task130 {
         String sanitized = header.replaceAll("[\\\\x00-\\\\x1F\\\\x7F]", "").trim();
         
         // Check for header injection attempts
-        if (sanitized.contains("\\r") || sanitized.contains("\\n")) {
+        if (sanitized.contains("\r") || sanitized.contains("\n")) {
             return null;
         }
         

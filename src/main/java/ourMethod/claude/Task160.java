@@ -78,11 +78,11 @@ public class Task160 {
                 int lineCount = 0;
                 
                 while ((line = reader.readLine()) != null && lineCount < maxLines) {
-                    response.append(line).append("\\n");
+                    response.append(line).append("\n");
                     lineCount++;
                 }
                 
-                return "Response Code: " + responseCode + "\\n" + response.toString();
+                return "Response Code: " + responseCode + "\n" + response.toString();
             } else {
                 return "Error: HTTP response code " + responseCode;
             }

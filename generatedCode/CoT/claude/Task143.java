@@ -43,7 +43,7 @@ public class Task143 {
             for (int num : result) {
                 System.out.print(num + " ");
             }
-            System.out.println("\\n");
+            System.out.println("\n");
         }
     }
 }

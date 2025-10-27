@@ -63,8 +63,8 @@ public class Task37 {
                 case '"': b.append("\""); break;
                 case '\b': b.append("\\b"); break;
                 case '\f': b.append("\\f"); break;
-                case '\n': b.append("\\n"); break;
-                case '\r': b.append("\\r"); break;
+                case '\n': b.append("\n"); break;
+                case '\r': b.append("\r"); break;
                 case '\t': b.append("\\t"); break;
                 default:
                     if (c < 0x20) {

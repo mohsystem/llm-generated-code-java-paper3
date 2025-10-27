@@ -66,7 +66,7 @@ public class Task76 {
                 if (totalRead > MAX_CONTENT_LENGTH) {
                     return "Error: Content exceeds maximum size";
                 }
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
                 
                 // Early extraction if title found
                 if (content.indexOf("</title>") != -1) {

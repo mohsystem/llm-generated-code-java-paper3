@@ -76,7 +76,7 @@ public class Task52 {
             byte[] decrypted1 = decryptData(encrypted1, password1);
             System.out.println("Original: " + text1);
             System.out.println("Decrypted: " + new String(decrypted1));
-            System.out.println("Match: " + text1.equals(new String(decrypted1)) + "\\n");
+            System.out.println("Match: " + text1.equals(new String(decrypted1)) + "\n");
 
             // Test Case 2: Different password
             System.out.println("Test Case 2: Longer text with special characters");
@@ -86,7 +86,7 @@ public class Task52 {
             byte[] decrypted2 = decryptData(encrypted2, password2);
             System.out.println("Original: " + text2);
             System.out.println("Decrypted: " + new String(decrypted2));
-            System.out.println("Match: " + text2.equals(new String(decrypted2)) + "\\n");
+            System.out.println("Match: " + text2.equals(new String(decrypted2)) + "\n");
 
             // Test Case 3: Empty string
             System.out.println("Test Case 3: Empty string");
@@ -96,7 +96,7 @@ public class Task52 {
             byte[] decrypted3 = decryptData(encrypted3, password3);
             System.out.println("Original length: " + text3.length());
             System.out.println("Decrypted length: " + new String(decrypted3).length());
-            System.out.println("Match: " + text3.equals(new String(decrypted3)) + "\\n");
+            System.out.println("Match: " + text3.equals(new String(decrypted3)) + "\n");
 
             // Test Case 4: Numeric data
             System.out.println("Test Case 4: Numeric data");
@@ -106,7 +106,7 @@ public class Task52 {
             byte[] decrypted4 = decryptData(encrypted4, password4);
             System.out.println("Original: " + text4);
             System.out.println("Decrypted: " + new String(decrypted4));
-            System.out.println("Match: " + text4.equals(new String(decrypted4)) + "\\n");
+            System.out.println("Match: " + text4.equals(new String(decrypted4)) + "\n");
 
             // Test Case 5: File encryption/decryption
             System.out.println("Test Case 5: File encryption/decryption");

@@ -74,9 +74,9 @@ public class Task45 {
             for (int i = 0; i < inputs.length; i++) {
                 try {
                     String result = parseAndCalculate(inputs[i]);
-                    results.append("Input ").append(i + 1).append(": ").append(result).append("\\n");
+                    results.append("Input ").append(i + 1).append(": ").append(result).append("\n");
                 } catch (Exception e) {
-                    results.append("Input ").append(i + 1).append(": Error - ").append(e.getMessage()).append("\\n");
+                    results.append("Input ").append(i + 1).append(": Error - ").append(e.getMessage()).append("\n");
                 }
             }
             return results.toString();

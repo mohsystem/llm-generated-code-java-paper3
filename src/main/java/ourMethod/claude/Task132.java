@@ -109,7 +109,7 @@ public class Task132 {
             return;
         }
         
-        String plaintext = String.join("\\n", logs);
+        String plaintext = String.join("\n", logs);
         byte[] encryptedData = encryptData(plaintext.getBytes(StandardCharsets.UTF_8), passphrase);
         
         Path tempFile = Files.createTempFile(baseLogDir, ".tmp", ".enc");

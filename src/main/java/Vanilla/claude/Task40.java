@@ -115,7 +115,7 @@ class Task40 {
         String token2 = generateCSRFToken(session2);
         String result2 = processSettingsUpdate(session2, token2, "alice", 
                                                "alice@example.com", "dark", false);
-        System.out.println(result2 + "\\n");
+        System.out.println(result2 + "\n");
         
         // Test Case 3: Invalid update with wrong CSRF token
         System.out.println("Test Case 3: Invalid update with wrong CSRF token");
@@ -123,7 +123,7 @@ class Task40 {
         generateCSRFToken(session3);
         String result3 = processSettingsUpdate(session3, "invalid_token", "bob", 
                                                "bob@example.com", "light", true);
-        System.out.println(result3 + "\\n");
+        System.out.println(result3 + "\n");
         
         // Test Case 4: Token reuse attempt
         System.out.println("Test Case 4: Token reuse attempt");
@@ -132,7 +132,7 @@ class Task40 {
         processSettingsUpdate(session4, token4, "charlie", "charlie@example.com", "dark", true);
         String result4 = processSettingsUpdate(session4, token4, "charlie_changed", 
                                                "charlie2@example.com", "light", false);
-        System.out.println(result4 + "\\n");
+        System.out.println(result4 + "\n");
         
         // Test Case 5: Multiple users with different tokens
         System.out.println("Test Case 5: Multiple concurrent sessions");

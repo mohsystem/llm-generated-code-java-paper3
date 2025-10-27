@@ -21,7 +21,7 @@ public class Task110 {
             return false;
         }
 
-        if (url.contains(" ") || url.contains("\\n") || url.contains("\\r") || url.contains("\\t")) {
+        if (url.contains(" ") || url.contains("\n") || url.contains("\r") || url.contains("\\t")) {
             return false;
         }
 

@@ -147,7 +147,7 @@ public class Task119 {
             return "";
         }
         
-        if (field.contains(",") || field.contains("\"") || field.contains("\\n")) {
+        if (field.contains(",") || field.contains("\"") || field.contains("\n")) {
             field = "\"" + field.replace("\"", "\"\"") + "\"";
         }
         

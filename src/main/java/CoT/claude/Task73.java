@@ -62,7 +62,7 @@ public class Task73 {
         System.out.println("Admin Password Validation Results:");
         for (int i = 0; i < testPasswords.length; i++) {
             boolean result = isValidAdminPassword(testPasswords[i]);
-            System.out.println("Test " + (i + 1) + ": \"" + testPasswords[i] + "\" -> " + 
+            System.out.println("Test " + (i + 1) + ": \"" + testPasswords[i] + "\" -> " +
                              (result ? "VALID" : "INVALID"));
         }
     }

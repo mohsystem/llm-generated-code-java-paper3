@@ -31,7 +31,7 @@ public class Task39 {
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\\n");
+                    output.append(line).append("\n");
                 }
             }
 

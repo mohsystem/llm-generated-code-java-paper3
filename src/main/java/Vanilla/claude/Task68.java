@@ -36,13 +36,13 @@ public class Task68 {
                 SearchResult searchResult = results.next();
                 Attributes attributes = searchResult.getAttributes();
                 
-                result.append("User found: ").append(searchResult.getNameInNamespace()).append("\\n");
+                result.append("User found: ").append(searchResult.getNameInNamespace()).append("\n");
                 result.append("Attributes:\\n");
                 
                 NamingEnumeration<? extends Attribute> attrs = attributes.getAll();
                 while (attrs.hasMore()) {
                     Attribute attr = attrs.next();
-                    result.append("  ").append(attr.getID()).append(": ").append(attr.get()).append("\\n");
+                    result.append("  ").append(attr.getID()).append(": ").append(attr.get()).append("\n");
                 }
             } else {
                 result.append("User not found");

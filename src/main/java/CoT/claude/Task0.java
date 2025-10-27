@@ -99,7 +99,7 @@ public class Task0 {
                 Path testFile = Paths.get(testDir, "test_file_" + i + ".txt");
                 try (BufferedWriter writer = Files.newBufferedWriter(testFile)) {
                     for (int j = 0; j < 100; j++) {
-                        writer.write("Test data line " + j + " in file " + i + "\\n");
+                        writer.write("Test data line " + j + " in file " + i + "\n");
                     }
                 }
             }

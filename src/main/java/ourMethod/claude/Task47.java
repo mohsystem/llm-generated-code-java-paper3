@@ -101,7 +101,7 @@ public class Task47 {
                 if (totalRead > MAX_CONTENT_LENGTH) {
                     throw new IOException("Content exceeds maximum allowed size");
                 }
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
             }
         } finally {
             connection.disconnect();
@@ -215,7 +215,7 @@ public class Task47 {
             conn = initializeDatabase("test_scraper.db");
             System.out.println("✓ Database initialized successfully\\n");
         } catch (Exception e) {
-            System.err.println("✗ Error: " + e.getMessage() + "\\n");
+            System.err.println("✗ Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 2: Validate URL - valid HTTPS
@@ -223,9 +223,9 @@ public class Task47 {
         try {
             String validUrl = "https://example.com/page";
             String normalized = validateAndNormalizeUrl(validUrl);
-            System.out.println("✓ Valid URL accepted: " + normalized + "\\n");
+            System.out.println("✓ Valid URL accepted: " + normalized + "\n");
         } catch (Exception e) {
-            System.err.println("✗ Error: " + e.getMessage() + "\\n");
+            System.err.println("✗ Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 3: Validate URL - reject HTTP
@@ -235,9 +235,9 @@ public class Task47 {
             validateAndNormalizeUrl(insecureUrl);
             System.out.println("✗ Should have rejected HTTP URL\\n");
         } catch (IllegalArgumentException e) {
-            System.out.println("✓ HTTP URL correctly rejected: " + e.getMessage() + "\\n");
+            System.out.println("✓ HTTP URL correctly rejected: " + e.getMessage() + "\n");
         } catch (Exception e) {
-            System.err.println("✗ Unexpected error: " + e.getMessage() + "\\n");
+            System.err.println("✗ Unexpected error: " + e.getMessage() + "\n");
         }
         
         // Test Case 4: Calculate hash
@@ -245,9 +245,9 @@ public class Task47 {
         try {
             String content = "Sample content for hashing";
             String hash = calculateHash(content);
-            System.out.println("✓ Hash calculated: " + hash + "\\n");
+            System.out.println("✓ Hash calculated: " + hash + "\n");
         } catch (Exception e) {
-            System.err.println("✗ Error: " + e.getMessage() + "\\n");
+            System.err.println("✗ Error: " + e.getMessage() + "\n");
         }
         
         // Test Case 5: Store and retrieve data
@@ -270,7 +270,7 @@ public class Task47 {
                     System.out.println("✗ Data retrieval mismatch\\n");
                 }
             } catch (Exception e) {
-                System.err.println("✗ Error: " + e.getMessage() + "\\n");
+                System.err.println("✗ Error: " + e.getMessage() + "\n");
             } finally {
                 try {
                     if (conn != null) {

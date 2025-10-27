@@ -10,7 +10,7 @@ public class Task70 {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                content.append(line).append("\\n");
+                content.append(line).append("\n");
             }
         } catch (IOException e) {
             return "Error reading file: " + e.getMessage();

@@ -20,7 +20,7 @@ public class Task119 {
         }
 
         // Use \\R to split by any Unicode newline sequence
-        String[] rows = csvData.split("\\R");
+        String[] rows = csvData.split("\r");
         for (String row : rows) {
             // Using -1 limit to include trailing empty strings
             String[] fields = row.split(",", -1);

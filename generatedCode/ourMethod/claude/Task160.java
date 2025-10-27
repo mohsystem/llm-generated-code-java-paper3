@@ -36,7 +36,7 @@ public class Task160 {
                 reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    response.append(line).append("\\n");
+                    response.append(line).append("\n");
                 }
             } else {
                 return "Error: Server returned code " + responseCode;

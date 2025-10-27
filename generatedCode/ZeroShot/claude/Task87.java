@@ -45,9 +45,9 @@ public class Task87 {
                 long duration = endTime - startTime;
                 
                 writer.write("Test case " + (i+1) + ":\\n");
-                writer.write("Array: " + Arrays.toString(testArrays[i]) + "\\n");
-                writer.write("Search value: " + searchValues[i] + "\\n");
-                writer.write("Result index: " + result + "\\n");
+                writer.write("Array: " + Arrays.toString(testArrays[i]) + "\n");
+                writer.write("Search value: " + searchValues[i] + "\n");
+                writer.write("Result index: " + result + "\n");
                 writer.write("Execution time: " + duration + " nanoseconds\\n\\n");
             }
             

@@ -50,11 +50,11 @@ public class Task160 {
                     if (totalBytes > MAX_RESPONSE_SIZE) {
                         return "Error: Response size exceeds limit";
                     }
-                    response.append(line).append("\\n");
+                    response.append(line).append("\n");
                 }
             }
             
-            return "Status: " + responseCode + "\\n" + response.toString();
+            return "Status: " + responseCode + "\n" + response.toString();
             
         } catch (MalformedURLException e) {
             return "Error: Invalid URL format - " + e.getMessage();

@@ -84,6 +84,12 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    dependencies {
+        implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'  // or latest version
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    }
+
 }
 springBoot {
     mainClass = 'gemini.task135.Task135_GEMINI_gemini_1_5_pro_001'

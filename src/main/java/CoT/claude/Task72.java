@@ -78,25 +78,25 @@ public class Task72 {
             String test1 = "Hello, World!";
             String encrypted1 = encryptData(test1, key);
             System.out.println("Test 1 - Input: " + test1);
-            System.out.println("Encrypted: " + encrypted1 + "\\n");
+            System.out.println("Encrypted: " + encrypted1 + "\n");
             
             // Test Case 2: Longer text
             String test2 = "This is a longer message that will span multiple blocks.";
             String encrypted2 = encryptData(test2, key);
             System.out.println("Test 2 - Input: " + test2);
-            System.out.println("Encrypted: " + encrypted2 + "\\n");
+            System.out.println("Encrypted: " + encrypted2 + "\n");
             
             // Test Case 3: Special characters
             String test3 = "Special chars: !@#$%^&*()_+-={}[]|:;<>?,./";
             String encrypted3 = encryptData(test3, key);
             System.out.println("Test 3 - Input: " + test3);
-            System.out.println("Encrypted: " + encrypted3 + "\\n");
+            System.out.println("Encrypted: " + encrypted3 + "\n");
             
             // Test Case 4: Unicode text
             String test4 = "Unicode: 你好世界 🌍";
             String encrypted4 = encryptData(test4, key);
             System.out.println("Test 4 - Input: " + test4);
-            System.out.println("Encrypted: " + encrypted4 + "\\n");
+            System.out.println("Encrypted: " + encrypted4 + "\n");
             
             // Test Case 5: Demonstrating static IV vulnerability
             String test5a = "Same message";

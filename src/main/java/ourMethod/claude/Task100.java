@@ -72,7 +72,7 @@ public class Task100 {
                 
                 while (matcher.find()) {
                     matchCount++;
-                    result.append("Line ").append(lineNumber).append(": ").append(line).append("\\n");
+                    result.append("Line ").append(lineNumber).append(": ").append(line).append("\n");
                     break; // Only report line once even if multiple matches
                 }
             }

@@ -23,9 +23,9 @@ public class Task37 {
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    result.append("User ID: ").append(rs.getInt("id")).append("\\n");
-                    result.append("Username: ").append(rs.getString("username")).append("\\n");
-                    result.append("Email: ").append(rs.getString("email")).append("\\n");
+                    result.append("User ID: ").append(rs.getInt("id")).append("\n");
+                    result.append("Username: ").append(rs.getString("username")).append("\n");
+                    result.append("Email: ").append(rs.getString("email")).append("\n");
                     result.append("Created Date: ").append(rs.getString("created_date"));
                 } else {
                     result.append("User not found");
@@ -83,26 +83,26 @@ public class Task37 {
         // Test Case 1: Valid username
         System.out.println("Test Case 1: Valid username 'john_doe'");
         System.out.println(getUserInfo("john_doe"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         // Test Case 2: Another valid username
         System.out.println("Test Case 2: Valid username 'jane_smith'");
         System.out.println(getUserInfo("jane_smith"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         // Test Case 3: Non-existent username
         System.out.println("Test Case 3: Non-existent username 'unknown_user'");
         System.out.println(getUserInfo("unknown_user"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         // Test Case 4: SQL injection attempt (secured by PreparedStatement)
         System.out.println("Test Case 4: SQL injection attempt");
         System.out.println(getUserInfo("' OR '1'='1"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         // Test Case 5: Empty username
         System.out.println("Test Case 5: Empty username");
         System.out.println(getUserInfo(""));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
     }
 }

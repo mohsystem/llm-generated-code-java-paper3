@@ -90,7 +90,7 @@ public class Task100 {
         System.out.println("Matches: " + results.size());
         for (int i = 0; i < results.size(); i++) {
             String s = results.get(i);
-            String safe = s.replace("\r", "\\r").replace("\n", "\\n");
+            String safe = s.replace("\r", "\r").replace("\n", "\n");
             if (safe.length() > 200) {
                 safe = safe.substring(0, 200) + "...";
             }

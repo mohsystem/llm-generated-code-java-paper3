@@ -10,7 +10,7 @@ public class Task119 {
             return records;
         }
         
-        String[] lines = csvContent.split("\\n");
+        String[] lines = csvContent.split("\n");
         for (String line : lines) {
             List<String> fields = new ArrayList<>();
             StringBuilder field = new StringBuilder();

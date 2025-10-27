@@ -73,7 +73,7 @@ public class Task105 {
             int lineCount = 0;
 
             while ((line = reader.readLine()) != null && lineCount < maxLines) {
-                response.append(line).append("\\n");
+                response.append(line).append("\n");
                 lineCount++;
             }
 
@@ -141,10 +141,10 @@ public class Task105 {
                 int maxLines = 100;
                 int lineCount = 0;
                 while ((line = reader.readLine()) != null && lineCount < maxLines) {
-                    response.append(line).append("\\n");
+                    response.append(line).append("\n");
                     lineCount++;
                 }
-                return "HTTPS connection successful. Response code: " + responseCode + "\\n" + response.toString();
+                return "HTTPS connection successful. Response code: " + responseCode + "\n" + response.toString();
             } else {
                 return "Error: HTTP response code " + responseCode;
             }
@@ -170,21 +170,21 @@ public class Task105 {
         // Test Case 2: Invalid URL (non-HTTPS)
         System.out.println("Test Case 2: Non-HTTPS URL");
         String result2 = establishHttpsConnection("http://www.example.com");
-        System.out.println(result2 + "\\n");
+        System.out.println(result2 + "\n");
 
         // Test Case 3: Empty hostname
         System.out.println("Test Case 3: Empty hostname");
         String result3 = establishSecureConnection("", 443, "GET / HTTP/1.1");
-        System.out.println(result3 + "\\n");
+        System.out.println(result3 + "\n");
 
         // Test Case 4: Invalid port
         System.out.println("Test Case 4: Invalid port");
         String result4 = establishSecureConnection("www.google.com", 99999, "GET / HTTP/1.1");
-        System.out.println(result4 + "\\n");
+        System.out.println(result4 + "\n");
 
         // Test Case 5: Null URL
         System.out.println("Test Case 5: Null URL");
         String result5 = establishHttpsConnection(null);
-        System.out.println(result5 + "\\n");
+        System.out.println(result5 + "\n");
     }
 }

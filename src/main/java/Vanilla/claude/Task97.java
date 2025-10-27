@@ -30,7 +30,7 @@ public class Task97 {
                 Node node = nodeList.item(i);
                 result.append(node.getNodeName()).append(": ").append(node.getTextContent());
                 if (i < nodeList.getLength() - 1) {
-                    result.append("\\n");
+                    result.append("\n");
                 }
             }
             

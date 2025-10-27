@@ -16,7 +16,7 @@ public class Task104 {
         input.getChars(0, copyLength, buffer, 0);
         
         // Ensure null termination
-        buffer[copyLength] = '\\0';
+        buffer[copyLength] = '\0';
         
         return new String(buffer, 0, copyLength);
     }

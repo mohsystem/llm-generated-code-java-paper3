@@ -42,10 +42,10 @@ public class Task37 {
             
             if (rs.next()) {
                 result.append("User found:\\n");
-                result.append("ID: ").append(rs.getInt("id")).append("\\n");
-                result.append("Username: ").append(rs.getString("username")).append("\\n");
-                result.append("Email: ").append(rs.getString("email")).append("\\n");
-                result.append("Full Name: ").append(rs.getString("fullname")).append("\\n");
+                result.append("ID: ").append(rs.getInt("id")).append("\n");
+                result.append("Username: ").append(rs.getString("username")).append("\n");
+                result.append("Email: ").append(rs.getString("email")).append("\n");
+                result.append("Full Name: ").append(rs.getString("fullname")).append("\n");
             } else {
                 result.append("User not found: ").append(username);
             }
@@ -62,19 +62,19 @@ public class Task37 {
         
         System.out.println("Test Case 1:");
         System.out.println(getUserInfo("john_doe"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         System.out.println("Test Case 2:");
         System.out.println(getUserInfo("jane_smith"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         System.out.println("Test Case 3:");
         System.out.println(getUserInfo("alice_brown"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         System.out.println("Test Case 4:");
         System.out.println(getUserInfo("nonexistent_user"));
-        System.out.println("\\n" + "=".repeat(50) + "\\n");
+        System.out.println("\n" + "=".repeat(50) + "\n");
         
         System.out.println("Test Case 5:");
         System.out.println(getUserInfo("charlie_davis"));

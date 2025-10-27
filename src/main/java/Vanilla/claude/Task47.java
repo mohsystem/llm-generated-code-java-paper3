@@ -70,7 +70,7 @@ public class Task47 {
         String line;
         
         while ((line = in.readLine()) != null) {
-            content.append(line).append("\\n");
+            content.append(line).append("\n");
         }
         
         in.close();

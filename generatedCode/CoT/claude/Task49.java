@@ -84,7 +84,7 @@ public class Task49 {
         // Basic input validation
         return input != null && 
                input.length() <= 1000 && 
-               Pattern.matches("^[a-zA-Z0-9\\\\s\\\\{\\\\}\\\\\"\\\\:\\\\,]*$", input);
+               Pattern.matches("^[a-zA-Z0-9\\\\s\\\\{\\\\}\\\\"\\\\:\\\\,]*$", input);
     }
     
     private static void testUserAPI() {

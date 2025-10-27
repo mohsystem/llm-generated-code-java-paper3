@@ -94,7 +94,7 @@ public class Task77 {
         for (String[] testCase : testCases) {
             System.out.println("Testing FTP download with: " + String.join(", ", testCase));
             boolean result = downloadFromFTP(testCase[0], testCase[1], testCase[2], testCase[3]);
-            System.out.println("Result: " + result + "\\n");
+            System.out.println("Result: " + result + "\n");
         }
     }
 }

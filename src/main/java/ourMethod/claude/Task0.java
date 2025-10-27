@@ -91,7 +91,7 @@ public class Task0 {
                     StringBuilder content = new StringBuilder();
                     content.append(MAGIC);
                     content.append(VERSION);
-                    content.append("\\n");
+                    content.append("\n");
                     
                     try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
                         String line;
@@ -99,7 +99,7 @@ public class Task0 {
                             if (line.length() > 10000) {
                                 line = line.substring(0, 10000);
                             }
-                            content.append(line.toUpperCase()).append("\\n");
+                            content.append(line.toUpperCase()).append("\n");
                         }
                     }
                     

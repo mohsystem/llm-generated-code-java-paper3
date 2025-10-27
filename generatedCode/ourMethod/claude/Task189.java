@@ -84,7 +84,7 @@ public class Task189 {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("\\n");
+            System.out.println("\n");
         }
     }
 }

@@ -42,11 +42,11 @@ public class Task68 {
                 Attributes attrs = entry.getAttributes();
                 
                 if (attrs != null) {
-                    result.append("DN: ").append(entry.getNameInNamespace()).append("\\n");
+                    result.append("DN: ").append(entry.getNameInNamespace()).append("\n");
                     NamingEnumeration<? extends Attribute> ae = attrs.getAll();
                     while (ae.hasMore()) {
                         Attribute attr = ae.next();
-                        result.append(attr.getID()).append(": ").append(attr.get()).append("\\n");
+                        result.append(attr.getID()).append(": ").append(attr.get()).append("\n");
                     }
                 }
             }

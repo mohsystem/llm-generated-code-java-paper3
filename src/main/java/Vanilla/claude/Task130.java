@@ -66,10 +66,10 @@ public class Task130 {
     
     private static String formatResponse(int statusCode, String statusText, Map<String, String> headers, String body) {
         StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ").append(statusCode).append(" ").append(statusText).append("\\n");
+        response.append("HTTP/1.1 ").append(statusCode).append(" ").append(statusText).append("\n");
         
         for (Map.Entry<String, String> header : headers.entrySet()) {
-            response.append(header.getKey()).append(": ").append(header.getValue()).append("\\n");
+            response.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
         }
         
         response.append("Content-Type: application/json\\n");
@@ -82,19 +82,19 @@ public class Task130 {
     public static void main(String[] args) {
         System.out.println("Test Case 1: Valid GET request from allowed origin");
         System.out.println(handleAPIRequest("http://localhost:3000", "GET", "Content-Type", "/api/users"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 2: OPTIONS preflight request");
         System.out.println(handleAPIRequest("http://example.com", "OPTIONS", "Content-Type", "/api/data"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 3: Request from disallowed origin");
         System.out.println(handleAPIRequest("http://malicious.com", "GET", "Content-Type", "/api/users"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 4: Invalid HTTP method");
         System.out.println(handleAPIRequest("http://localhost:3000", "TRACE", "Content-Type", "/api/data"));
-        System.out.println("\\n" + "=".repeat(80) + "\\n");
+        System.out.println("\n" + "=".repeat(80) + "\n");
         
         System.out.println("Test Case 5: POST request to valid endpoint");
         System.out.println(handleAPIRequest("https://example.com", "POST", "Content-Type, Authorization", "/api/data"));

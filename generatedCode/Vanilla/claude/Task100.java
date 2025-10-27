@@ -13,7 +13,7 @@ public class Task100 {
             while ((line = reader.readLine()) != null) {
                 Matcher matcher = regexPattern.matcher(line);
                 while (matcher.find()) {
-                    result.append(matcher.group()).append("\\n");
+                    result.append(matcher.group()).append("\n");
                 }
             }
             reader.close();

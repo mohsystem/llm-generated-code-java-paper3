@@ -58,7 +58,7 @@ public class Task106 {
         System.out.println("Original: " + message1);
         System.out.println("Encrypted: " + encrypted1);
         System.out.println("Decrypted: " + decrypted1);
-        System.out.println("Match: " + message1.equals(decrypted1) + "\\n");
+        System.out.println("Match: " + message1.equals(decrypted1) + "\n");
         
         // Test Case 2
         System.out.println("Test Case 2: Longer message");
@@ -69,7 +69,7 @@ public class Task106 {
         System.out.println("Original: " + message2);
         System.out.println("Encrypted: " + encrypted2);
         System.out.println("Decrypted: " + decrypted2);
-        System.out.println("Match: " + message2.equals(decrypted2) + "\\n");
+        System.out.println("Match: " + message2.equals(decrypted2) + "\n");
         
         // Test Case 3
         System.out.println("Test Case 3: Numbers");
@@ -80,7 +80,7 @@ public class Task106 {
         System.out.println("Original: " + message3);
         System.out.println("Encrypted: " + encrypted3);
         System.out.println("Decrypted: " + decrypted3);
-        System.out.println("Match: " + message3.equals(decrypted3) + "\\n");
+        System.out.println("Match: " + message3.equals(decrypted3) + "\n");
         
         // Test Case 4
         System.out.println("Test Case 4: Special characters");
@@ -91,7 +91,7 @@ public class Task106 {
         System.out.println("Original: " + message4);
         System.out.println("Encrypted: " + encrypted4);
         System.out.println("Decrypted: " + decrypted4);
-        System.out.println("Match: " + message4.equals(decrypted4) + "\\n");
+        System.out.println("Match: " + message4.equals(decrypted4) + "\n");
         
         // Test Case 5
         System.out.println("Test Case 5: Single character");
@@ -102,6 +102,6 @@ public class Task106 {
         System.out.println("Original: " + message5);
         System.out.println("Encrypted: " + encrypted5);
         System.out.println("Decrypted: " + decrypted5);
-        System.out.println("Match: " + message5.equals(decrypted5) + "\\n");
+        System.out.println("Match: " + message5.equals(decrypted5) + "\n");
     }
 }

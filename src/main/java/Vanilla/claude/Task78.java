@@ -45,7 +45,7 @@ public class Task78 {
             int lineLength = 70;
             for (int i = 0; i < base64.length(); i += lineLength) {
                 int end = Math.min(i + lineLength, base64.length());
-                result.append(base64.substring(i, end)).append("\\n");
+                result.append(base64.substring(i, end)).append("\n");
             }
             
             result.append("-----END OPENSSH PRIVATE KEY-----");

@@ -74,22 +74,22 @@ public class Task121 {
         // Test Case 1: Upload a file with content
         System.out.println("Test Case 1: Upload text file");
         boolean result1 = uploadFileWithContent("test1.txt", "Hello, this is test file 1!");
-        System.out.println("Result: " + result1 + "\\n");
+        System.out.println("Result: " + result1 + "\n");
 
         // Test Case 2: Upload another file with content
         System.out.println("Test Case 2: Upload document");
         boolean result2 = uploadFileWithContent("document.txt", "This is a sample document with multiple lines.\\nLine 2\\nLine 3");
-        System.out.println("Result: " + result2 + "\\n");
+        System.out.println("Result: " + result2 + "\n");
 
         // Test Case 3: Upload a file with JSON content
         System.out.println("Test Case 3: Upload JSON file");
         boolean result3 = uploadFileWithContent("data.json", "{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}");
-        System.out.println("Result: " + result3 + "\\n");
+        System.out.println("Result: " + result3 + "\n");
 
         // Test Case 4: Upload a file with special characters
         System.out.println("Test Case 4: Upload file with special characters");
         boolean result4 = uploadFileWithContent("special.txt", "Special chars: !@#$%^&*()");
-        System.out.println("Result: " + result4 + "\\n");
+        System.out.println("Result: " + result4 + "\n");
 
         // Test Case 5: List all uploaded files
         System.out.println("Test Case 5: List all uploaded files");

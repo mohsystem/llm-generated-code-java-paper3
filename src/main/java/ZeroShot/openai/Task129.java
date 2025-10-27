@@ -73,7 +73,7 @@ public class Task129 {
             for (String t : tests) {
                 try {
                     String content = fetchFile(base.toString(), t);
-                    System.out.println("FETCH OK [" + t + "]: " + content.replace("\n", "\\n"));
+                    System.out.println("FETCH OK [" + t + "]: " + content.replace("\n", "\n"));
                 } catch (Exception ex) {
                     System.out.println("FETCH FAIL [" + t + "]: " + ex.getMessage());
                 }

@@ -21,7 +21,7 @@ public class Task78 {
             
             // Format as OpenSSH
             return "-----BEGIN RSA PRIVATE KEY-----\\n" +
-                   base64PrivateKey + "\\n" +
+                   base64PrivateKey + "\n" +
                    "-----END RSA PRIVATE KEY-----";
         } catch (Exception e) {
             return "Error generating key: " + e.getMessage();

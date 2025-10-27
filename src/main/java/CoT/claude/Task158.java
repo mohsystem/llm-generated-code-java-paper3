@@ -39,12 +39,12 @@ public class Task158 {
             String line;
             
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\\n");
+                output.append(line).append("\n");
             }
             
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                return "Command executed with exit code: " + exitCode + "\\n" + output.toString();
+                return "Command executed with exit code: " + exitCode + "\n" + output.toString();
             }
             
             return output.toString().trim();

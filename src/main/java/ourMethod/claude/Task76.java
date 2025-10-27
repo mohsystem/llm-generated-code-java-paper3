@@ -69,7 +69,7 @@ public class Task76 {
                     if (totalRead > MAX_CONTENT_LENGTH) {
                         throw new RuntimeException("Content exceeds maximum allowed size");
                     }
-                    content.append(line).append("\\n");
+                    content.append(line).append("\n");
                 }
             }
 

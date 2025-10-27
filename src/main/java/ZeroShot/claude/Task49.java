@@ -103,26 +103,26 @@ class Task49 {
         // Test Case 1: Valid user data
         System.out.println("Test 1 - Valid user:");
         ApiResponse response1 = storeUserData("John Doe", "john@example.com", 25);
-        System.out.println(response1 + "\\n");
+        System.out.println(response1 + "\n");
         
         // Test Case 2: Another valid user
         System.out.println("Test 2 - Another valid user:");
         ApiResponse response2 = storeUserData("Jane Smith", "jane@example.com", 30);
-        System.out.println(response2 + "\\n");
+        System.out.println(response2 + "\n");
         
         // Test Case 3: Duplicate email
         System.out.println("Test 3 - Duplicate email:");
         ApiResponse response3 = storeUserData("John Clone", "john@example.com", 35);
-        System.out.println(response3 + "\\n");
+        System.out.println(response3 + "\n");
         
         // Test Case 4: Invalid email format
         System.out.println("Test 4 - Invalid email:");
         ApiResponse response4 = storeUserData("Invalid User", "notanemail", 28);
-        System.out.println(response4 + "\\n");
+        System.out.println(response4 + "\n");
         
         // Test Case 5: Invalid age
         System.out.println("Test 5 - Invalid age:");
         ApiResponse response5 = storeUserData("Old Person", "old@example.com", 200);
-        System.out.println(response5 + "\\n");
+        System.out.println(response5 + "\n");
     }
 }
