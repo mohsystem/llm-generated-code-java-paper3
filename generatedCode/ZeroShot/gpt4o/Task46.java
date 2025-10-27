@@ -1,2 +1,0 @@
-package ZeroShot.openai;
-// This is a placeholder comment as Java code for database connectivity is extensive and cannot be executed as a single file without a proper database setup. You should use JDBC or any ORM for database operations.

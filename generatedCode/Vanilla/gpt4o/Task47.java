@@ -1,2 +1,0 @@
-package Vanilla.openai;
-// Java code cannot be provided as it requires external libraries for web scraping which are not feasible to execute within a single file. Typically, a library like Jsoup would be used for this task.
